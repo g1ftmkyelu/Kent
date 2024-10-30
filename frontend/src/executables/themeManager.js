@@ -1,60 +1,63 @@
 // themeManager.js
 import { ref, watch } from "vue";
+import { theme } from 'ant-design-vue';
+import { generate } from '@ant-design/colors';
 
-const activeTheme = ref("Dark"); // Change this line to set Dark as default
+const activeTheme = ref("default");
 const customThemes = ref({});
+const antDesignTheme = ref({});
 
 const Light = {
-  text: "#2C3E50",            // Dark text color
-  textLight: "#F9F9F9",      // Light text color
-  textLighter: "#FFFFFF",     // Lighter text color
-  textDark: "#1A1A1A",       // Darker text color for better contrast
-  textDarker: "#000000",      // Black text color
-  cardLight: "#FFFFFF",        // White card background
-  cardDark: "#F0F0F0",        // Slightly off-white card background
-  background: "#dfdede",       // White background
-  primary: "#B8860B",         // Dark yellow color for primary elements
-  secondary: "#B8860B",       // Dark yellow for secondary elements
-  tertiary: "#000000",        // Black for tertiary elements
-  menubg: "#2C3E50",          // Dark background for menus
-  backgroundHover: "#DAA520", // Lighter yellow for hover states
-  webPrimary: "#B8860B",      // Dark yellow for web primary elements
-  webSecondary: "#B8860B",    // Dark yellow for web secondary elements
-  webBackground: "#FFFFFF",    // White for web background
-  webBackgroundDark: "#1A1A1A",// Darker background for web
-  webPrimaryHover: "#DAA520", // Hover color for web primary elements
-  webSecondaryHover: "#F1F1F1",// Light grey for web secondary hover
-  webBackgroundHover: "#F9F9F9", // Light background hover
-  webBackgroundDarkHover: "#222222", // Dark background hover
-};
-
-const Dark = { // Move Dark theme out of premadeThemes for easier access
-  text: "#F9F9F9",
-  textLight: "#FFFFFF",
-  textLighter: "#F0F0F0",
-  textDark: "#E0E0E0",
-  textDarker: "#C7C7C7",
-  cardLight: "#2F2F2F",
-  cardDark: "#222222",
-  background: "#1A1A1A",
-  primary: "#B8860B",
-  secondary: "#B8860B",
+  text: "#2C3E50",
+  textLight: "#F9F9F9",
+  textLighter: "#9c9b9b",
+  textDark: "#1A1A1A",
+  textDarker: "#000000",
+  fill:"#3C2312",
+  cardLight: "#FFFFFF",
+  cardDark: "#F0F0F0",
+  background: "#F5F5F5",
+  primary: "#fcae1c",
+  secondary: "#fcae1c",
   tertiary: "#000000",
-  menubg: "#1F2C3A",
-  backgroundHover: "#DAA520",
-  webPrimary: "#B8860B",
-  webSecondary: "#B8860B",
-  webBackground: "#2F2F2F",
-  webBackgroundDark: "#151515",
-  webPrimaryHover: "#DAA520",
-  webSecondaryHover: "#2795AE",
-  webBackgroundHover: "#1E1E1E",
-  webBackgroundDarkHover: "#0F0F0F",
+  menubg: "#2C3E50",
+  backgroundHover: "#8d5b2f",
+  webPrimary: "#fcae1c",
+  webSecondary: "#fcae1c",
+  webBackground: "#FFFFFF",
+  webBackgroundDark: "#1A1A1A",
+  webPrimaryHover: "#8d5b2f",
+  webSecondaryHover: "#F1F1F1",
+  webBackgroundHover: "#F9F9F9",
+  webBackgroundDarkHover: "#222222",
 };
 
 const premadeThemes = {
   Light: Light,
-  Dark: Dark,
+  Dark: {
+    text: "#F9F9F9",
+    textLight: "#FFFFFF",
+    textLighter: "#F0F0F0",
+    textDark: "#E0E0E0",
+    fill:"#6F421E",
+    textDarker: "#C7C7C7",
+    cardLight: "#2F2F2F",
+    cardDark: "#222222",
+    background: "#222222",
+    primary: "#fcae1c",
+    secondary: "#fcae1c",
+    tertiary: "#000000",
+    menubg: "#1F2C3A",
+    backgroundHover: "#8d5b2f",
+    webPrimary: "#fcae1c",
+    webSecondary: "#fcae1c",
+    webBackground: "#1f1f1f",
+    webBackgroundDark: "#151515",
+    webPrimaryHover: "#8d5b2f",
+    webSecondaryHover: "#2795AE",
+    webBackgroundHover: "#1E1E1E",
+    webBackgroundDarkHover: "#0F0F0F",
+  },
 };
 
 export function useThemeManager() {
@@ -67,11 +70,27 @@ export function useThemeManager() {
     customThemes.value[name] = colors;
   }
 
+  function updateAntDesignTheme(colors) {
+    const primaryColor = colors.primary;
+    const primaryColors = generate(primaryColor);
+
+    antDesignTheme.value = {
+      token: {
+        colorPrimary: primaryColor,
+        colorBgContainer: colors.background,
+        colorText: colors.text,
+        colorTextSecondary: colors.textLight,
+      },
+      algorithm: colors === premadeThemes.Dark ? theme.darkAlgorithm : theme.defaultAlgorithm,
+    };
+  }
+
   function applyTheme(themeName) {
-    let theme = premadeThemes[themeName] || Dark; // Change this line to use Dark as default
+    let theme = premadeThemes[themeName] || customThemes.value[themeName] || Light;
     Object.entries(theme).forEach(([key, value]) => {
       document.documentElement.style.setProperty(`--${key}`, value);
     });
+    updateAntDesignTheme(theme);
   }
 
   function saveThemesToStorage() {
@@ -89,7 +108,7 @@ export function useThemeManager() {
     if (storedActiveTheme) {
       setTheme(storedActiveTheme);
     } else {
-      setTheme("Dark"); // Change this line to set Dark as default
+      setTheme("default");
     }
   }
 
@@ -112,7 +131,7 @@ export function useThemeManager() {
 
   function getThemeColors(themeName) {
     if (themeName === "default") {
-      return Dark; // Change this line to return Dark as default
+      return Light;
     } else if (premadeThemes[themeName]) {
       return premadeThemes[themeName];
     } else {
@@ -135,7 +154,8 @@ export function useThemeManager() {
     removeCustomTheme,
     getThemeNames,
     getThemeColors,
-    Dark, // Change this line to export Dark instead of Light
+    Light,
     premadeThemes,
+    antDesignTheme,
   };
 }

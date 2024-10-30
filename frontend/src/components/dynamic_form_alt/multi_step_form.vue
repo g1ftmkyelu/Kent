@@ -1,42 +1,72 @@
+
+
 <template>
-  <div class="multi-step-form-container">
-    <div class="multi-step-form">
-      <form @submit.prevent="handleSubmit" class="">
-        <StepIndicators :steps="steps" :currentStep="currentStep" />
-        <FormGrid
-          :currentFields="currentFields"
-          :formData="formData"
-          :validationErrors="validationErrors"
-          :initialData="initialData"
-          :schema="schema"
-          @update:formData="updateFormData"
-          @validateField="validateField"
-        />
-        <StepNavigation
-          v-if="steps"
-          :steps="steps"
-          :currentStep="currentStep"
-          @prevStep="prevStep"
-          @nextStep="nextStep"
-        />
-        <input v-else type="submit" value="Submit" />
+  <div class="dynamic-form-container">
+    <div class="dynamic-form">
+      <form @submit.prevent="handleSubmit">
+        <template v-if="mode === 'multistep'">
+          <StepIndicators :steps="stepsWithConfirmation" :currentStep="currentStep" @goToStep="goToStep"
+            class="step-indicators" />
+        </template>
+        <template v-else-if="mode === 'tabbed'">
+          <TabIndicators :tabs="defaultSteps" :currentTab="currentStep" @changeTab="changeTab" />
+        </template>
+
+        <transition name="fade" mode="out-in">
+          <div class="form-content" :key="currentStep">
+            <template v-if="mode === 'default' || currentStep < stepsWithConfirmation.length">
+              <div class="flex justify-content-center">
+                <FormGrid 
+                  :currentFields="mode === 'default' ? schema : currentFields" 
+                  :formData="formData"
+                  :validationErrors="validationErrors" 
+                  :initialData="initialData" 
+                  :schema="schema"
+                  @update:formData="updateFormData" 
+                  @validateField="validateField"
+                  @password-valid="handlePasswordValid" 
+                />
+              </div>
+            </template>
+            <template v-else-if="mode !== 'default' && currentStep === stepsWithConfirmation.length">
+              <ConfirmationStep :formData="formData" :schema="schema" />
+            </template>
+          </div>
+        </transition>
       </form>
+      <template v-if="mode !== 'default'">
+        <StepNavigation 
+          :steps="stepsWithConfirmation" 
+          :currentStep="currentStep" 
+          @prevStep="prevStep"
+          @nextStep="nextStep" 
+          @finish="handleSubmit" 
+          class="step-navigation" 
+        />
+      </template>
+      <template v-else>
+        <button @click="handleSubmit" class="bg-primary py-2 px-3 ml-5">Submit</button>
+      </template>
     </div>
   </div>
 </template>
 
 <script>
 import StepIndicators from './step_indicators.vue';
+import TabIndicators from './tab_indicators.vue';
 import FormGrid from './form_grid.vue';
 import StepNavigation from './step_navigation.vue';
-import * as Yup from 'yup'; // Import Yup for validation
+import ConfirmationStep from './confirmation_step.vue';
+import * as Yup from 'yup';
 
 export default {
   name: 'DynamicForm',
   components: {
     StepIndicators,
+    TabIndicators,
     FormGrid,
-    StepNavigation
+    StepNavigation,
+    ConfirmationStep,
   },
   props: {
     schema: {
@@ -48,8 +78,14 @@ export default {
       default: () => ({})
     },
     steps: {
-      type: [Object],
-      required: false
+      type: Array,
+      required: false,
+      default: () => []
+    },
+    mode: {
+      type: String,
+      default: 'default',
+      validator: (value) => ['default', 'multistep', 'tabbed'].includes(value)
     }
   },
   data() {
@@ -60,28 +96,89 @@ export default {
         return errors;
       }, {}),
       currentStep: 0,
-      isCurrentStepValid: true
+      isCurrentStepValid: true,
     };
+  },
+  mounted(){
+    console.log(this.mode)
   },
   computed: {
     currentFields() {
-      if (this.steps) {
-        const currentStep = this.steps[this.currentStep];
-        return this.schema.filter((field) => currentStep.fields.includes(field.name));
-      } else {
+      if (this.mode === 'default') {
         return this.schema;
+      } else {
+        const currentStep = this.stepsWithConfirmation[this.currentStep];
+        return this.schema.filter((field) => currentStep.fields.includes(field.name));
       }
     },
-    // Create Yup validation schema based on the form schema prop
     validationSchema() {
       const schemaShape = {};
       this.schema.forEach(field => {
         if (field.validation) {
-          schemaShape[field.name] = field.validation; // Use Yup validation for each field
+          schemaShape[field.name] = field.validation;
         }
       });
-      return Yup.object().shape(schemaShape); // Return Yup schema object
-    }
+      return Yup.object().shape(schemaShape);
+    },
+    defaultSteps() {
+      if (this.steps && this.steps.length > 0) {
+        return this.steps;
+      }
+
+      const defaultSteps = [];
+      let currentStepFields = [];
+
+      const isolatedTypes = ['email', 'password', 'image', 'video', 'audio', 'document', 'richtext'];
+      this.schema.forEach(field => {
+        const isIsolatedField = isolatedTypes.includes(field.type) ||
+          field.type.endsWith('[]') ||
+          ['image', 'video', 'audio', 'document'].some(type => field.type.startsWith(type));
+
+        if (isIsolatedField) {
+          if (currentStepFields.length > 0) {
+            defaultSteps.push({
+              name: `Step ${defaultSteps.length + 1}`,
+              fields: currentStepFields
+            });
+            currentStepFields = [];
+          }
+          defaultSteps.push({
+            name: `${field.type.charAt(0).toUpperCase() + field.type.slice(1)} Step`,
+            fields: [field.name]
+          });
+        } else {
+          currentStepFields.push(field.name);
+          if (field.type === 'richtext' || this.isFileType(field.type)) {
+            defaultSteps.push({
+              name: `Step ${defaultSteps.length + 1}`,
+              fields: [...currentStepFields, field.name]
+            });
+            currentStepFields = [];
+          } else if (currentStepFields.length === 3) {
+            defaultSteps.push({
+              name: `Step ${defaultSteps.length + 1}`,
+              fields: currentStepFields
+            });
+            currentStepFields = [];
+          }
+        }
+      });
+
+      if (currentStepFields.length > 0) {
+        defaultSteps.push({
+          name: `Step ${defaultSteps.length + 1}`,
+          fields: currentStepFields
+        });
+      }
+
+      return defaultSteps;
+    },
+    stepsWithConfirmation() {
+      if (this.mode === 'default') {
+        return [{ name: 'All Fields', fields: this.schema.map(field => field.name) }];
+      }
+      return this.defaultSteps;
+    },
   },
   methods: {
     createFormData() {
@@ -141,6 +238,7 @@ export default {
         case 'ref':
         case 'radio':
         case 'select':
+        case 'file':
           return '';
         case 'number':
           return 0;
@@ -154,22 +252,23 @@ export default {
     },
     updateFormData({ name, value }) {
       this.formData = { ...this.formData, [name]: value };
+      this.validateField(name);
     },
     validateField(name) {
       const field = this.schema.find((field) => field.name === name);
       if (field && field.validation) {
         try {
-          field.validation.validateSync(this.formData[name]); // Yup sync validation
-          delete this.validationErrors[name]; // Clear error if validation passes
+          field.validation.validateSync(this.formData[name]);
+          delete this.validationErrors[name];
         } catch (error) {
-          this.validationErrors[name] = error.message; // Set error message from Yup
+          this.validationErrors[name] = error.message;
         }
       }
     },
     validateForm() {
       this.schema.forEach((field) => {
         if (field.validation) {
-          this.validateField(field.name); // Validate each field using Yup
+          this.validateField(field.name);
         }
       });
     },
@@ -179,7 +278,7 @@ export default {
         console.log('Form Submitted', this.formData);
         this.$emit('submit', this.formData);
       } else {
-        console.log('Form has validation errors', this.formData);
+        console.log('Form has validation errors', this.validationErrors);
       }
     },
     prevStep() {
@@ -188,16 +287,22 @@ export default {
       }
     },
     nextStep() {
-      if (this.currentStep < this.steps.length - 1) {
+      if (this.currentStep < this.stepsWithConfirmation.length - 1) {
         this.validateCurrentStep();
         if (this.isCurrentStepValid) {
           this.currentStep++;
         }
       }
     },
+    changeTab(index) {
+      this.currentStep = index;
+    },
+    goToStep(index) {
+      this.currentStep = index;
+    },
     validateCurrentStep() {
       this.isCurrentStepValid = true;
-      const currentStep = this.steps[this.currentStep];
+      const currentStep = this.stepsWithConfirmation[this.currentStep];
       const fieldsInCurrentStep = this.schema.filter((field) =>
         currentStep.fields.includes(field.name)
       );
@@ -209,83 +314,86 @@ export default {
           }
         }
       });
-    }
+    },
+    handlePasswordValid() {
+      if (this.mode !== 'default') {
+        this.nextStep();
+      }
+    },
+    isFileType(type) {
+      return ['image', 'video', 'audio', 'document'].some(fileType =>
+        type === fileType || type === `${fileType} array` || type.startsWith(fileType)
+      );
+    },
   }
 };
 </script>
 
-
-
 <style scoped>
-
-.multi-step-form-container {
+.dynamic-form-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  padding: 15px;
 }
 
-.multi-step-form {
-
-  margin: 3%;
-  padding: 2rem;
-  background-color: #fff;
-  border-radius: 0.5rem;
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-}
-
-
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: bold;
-  color: #333;
-  transition: color 0.3s ease;
-}
-
-
-
-input[type='submit'] {
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  background-color: var(--secondary);
-  color: white;
-  border: none;
-  border-radius: 0.375rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-input[type='submit']:hover {
-  background-color: var(--primary);
-}
-
-.modern-input {
+.dynamic-form {
+  background-color: var(--webBackground);
   width: 100%;
-  padding: 0.75rem;
-  font-size: 1rem;
-  border: 2px solid #ccc;
-  border-radius: 0.375rem;
-  transition:
-    border-color 0.3s ease,
-    box-shadow 0.3s ease;
+  max-width: 800px;
+
+  box-sizing: border-box;
 }
 
-.modern-input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
-  outline: none;
+.form-content {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
-.modern-input::placeholder {
-  color: #888;
-  transition: color 0.3s ease;
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.modern-input:focus::placeholder {
-  color: #aaa;
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 
+@media (max-width: 768px) {
+  .dynamic-form-container {
+    align-items: flex-start;
+    padding: 0;
+  }
 
+  .dynamic-form {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-content {
+    padding: 10px;
+    flex-grow: 1;
+    overflow-y: auto;
+  }
+
+  .step-navigation {
+    margin-top: auto;
+    padding-top: 15px;
+  }
+}
 </style>

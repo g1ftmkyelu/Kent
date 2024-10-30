@@ -1,18 +1,25 @@
 const { sendMail } = require("../../helpers/Emailer");
 const axios = require("axios");
 const stripe = require("stripe")(process.env.PRIVATE_STRIPE_KEY);
+const mongoose=require("mongoose")
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const mongoose = require("mongoose");
 const admin = require("firebase-admin");
 const serviceAccount = require("./server-services-50a49-firebase-adminsdk-p1vyi-746c01c04d.json");
+const paypal = require('@paypal/checkout-server-sdk');
+
+const environment = new paypal.core.SandboxEnvironment(
+  process.env.PAYPAL_CLIENT_ID,
+  process.env.PAYPAL_CLIENT_SECRET
+);
+const client = new paypal.core.PayPalHttpClient(environment);
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
 exports.getResources = async (req, res) => {
   const resourceModel = req.resourceModel;
-
   try {
     const {
       returnFields,
@@ -21,17 +28,46 @@ exports.getResources = async (req, res) => {
       sortBy,
       order,
       filter,
+      idFilters,
+      search, // New search parameter
     } = req.query;
 
     let filterQuery = {};
     let selectFields = "";
-    let sortOrder = 1; // Default sort order is ascending
+    let sortOrder = 1;
 
     // Construct filter query based on the filter object
     if (filter) {
       for (const [key, value] of Object.entries(filter)) {
         filterQuery[key] = value;
       }
+    }
+
+    // Handle ID filters
+    if (idFilters) {
+      for (const [key, value] of Object.entries(idFilters)) {
+        if (typeof value === 'string' && mongoose.Types.ObjectId.isValid(value)) {
+          filterQuery[key] = new mongoose.Types.ObjectId(value);
+        } else if (Array.isArray(value)) {
+          filterQuery[key] = {
+            $in: value
+              .filter(id => mongoose.Types.ObjectId.isValid(id))
+              .map(id => new mongoose.Types.ObjectId(id))
+          };
+        }
+      }
+    }
+
+    // Add search functionality
+    if (search) {
+      filterQuery.$or = []; // Use $or to search across all fields
+      const searchableFields = await resourceModel.schema.paths; // Get all field names in the model
+
+      Object.keys(searchableFields).forEach((field) => {
+        if (field !== '_id' && searchableFields[field].instance === 'String') { // Check for string fields only
+          filterQuery.$or.push({ [field]: { $regex: search, $options: 'i' } }); // Case-insensitive search
+        }
+      });
     }
 
     if (returnFields) {
@@ -72,8 +108,10 @@ exports.getResources = async (req, res) => {
 
     // Map the "_id" field to "id" in the response
     const modifiedResources = resources.map((resource) => {
-      resource.id = resource._id;
-      delete resource._id;
+      if (resource._id) {
+        resource.id = resource._id.toString();
+        delete resource._id;
+      }
       return resource;
     });
 
@@ -98,6 +136,7 @@ exports.getResources = async (req, res) => {
       .json({ error: "An error occurred while fetching resources" });
   }
 };
+
 
 exports.getMyResourceById = async (req, res) => {
   const resourceModel = req.resourceModel;
@@ -647,35 +686,6 @@ exports.forecast = async (req, res) => {
   }
 };
 
-exports.pay = async (req, res) => {
-  try {
-    const service = req.body;
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price_data: {
-            currency: "mwk",
-            product_data: {
-              name: service.name,
-              images: [service.image],
-            },
-            unit_amount: service.amount * 100,
-          },
-          quantity: 1,
-        },
-      ],
-      mode: "payment",
-      success_url: `https://akuka.vercel.app`,
-      cancel_url: `https://akuka.vercel.app`,
-    });
-
-    return res.status(200).json({ checkout_url: session.url });
-  } catch (e) {
-    console.log(e);
-    res.status(500).json({ message: "An error occurred", error: e.message });
-  }
-};
 
 exports.handleStripeWebhook = async (req, res) => {
   const sig = req.headers["stripe-signature"];
@@ -796,7 +806,7 @@ exports.register = async (req, res) => {
     console.error(error.message);
     res
       .status(500)
-      .json({ error: "An error occurred while registering the user(s)" });
+      .json({ error: error.message });
   }
 };
 
@@ -811,6 +821,7 @@ exports.getProfile = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 exports.sendEmail = async (req, res) => {
   try {
@@ -833,8 +844,6 @@ exports.sendEmail = async (req, res) => {
     res.status(500).json({ error: "An error occurred while sending email" });
   }
 };
-
-
 
 exports.addFCMToken = async (req, res) => {
   const Model = req.resourceModel;
@@ -895,7 +904,8 @@ exports.getUserFCMTokens = async (req, res) => {
   }
 };
 
-exports.sendPushNotification =async (req, res) => {
+exports.sendPushNotification = async (req, res) => {
+  const Model = req.resourceModel; // Get the dynamic model
   const { title, body, icon, tokens } = req.body;
 
   if (!Array.isArray(tokens) || tokens.length === 0) {
@@ -918,6 +928,10 @@ exports.sendPushNotification =async (req, res) => {
     admin.messaging().send({ ...message, token })
       .catch(error => {
         console.error(`Failed to send message to token ${token}:`, error);
+        if (error.code === 'messaging/registration-token-not-registered') {
+          // Token is expired or invalid, remove it from the user's tokens
+          removeExpiredToken(Model, token);
+        }
         return { error: error.code, errorMessage: error.message, token };
       })
   );
@@ -946,6 +960,20 @@ exports.sendPushNotification =async (req, res) => {
     });
   }
 };
+
+// Function to remove expired tokens
+async function removeExpiredToken(Model, token) {
+  try {
+    await Model.updateMany(
+      { fcmTokens: token },
+      { $pull: { fcmTokens: token } }
+    );
+    console.log(`Removed expired token: ${token}`);
+  } catch (error) {
+    console.error(`Error removing expired token ${token}:`, error);
+  }
+}
+
 exports.sendWebPushNotification = async (req, res) => {
   // This registration token comes from the client FCM SDKs.
 
@@ -987,35 +1015,209 @@ exports.sendWebPushNotification = async (req, res) => {
     });
 };
 
-exports.socialLogin = async (req, res) => {
-  const resourceModel = req.resourceModel;
+exports.checkAndUpdateFCMToken = async (req, res) => {
+  const Model = req.resourceModel;
   try {
-    const { idToken } = req.body;
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
-    const { email, name, picture } = decodedToken;
+    const { userId, currentToken, newToken } = req.body;
 
-    // Check if the user already exists
-    let user = await resourceModel.findOne({ email });
-
-    if (!user) {
-      // If the user doesn't exist, create a new one
-      user = await resourceModel.create({
-        email,
-        fullname: name,
-        undefined: picture, // Profile picture
-        password: await bcrypt.hash(Math.random().toString(36).slice(-8), 10), // Generate a random password
-        // Set other required fields with default values
-      });
+    if (!userId || !currentToken || !newToken) {
+      return res.status(400).json({ error: "Missing required parameters" });
     }
 
-    const accessToken = jwt.sign(user.email, process.env.ACCESS_TOKEN_SECRET);
-    res.status(200).json({
-      message: "Social login successful",
-      accessToken: accessToken,
-      user: user,
-    });
+    const user = await Model.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Check if the current token exists in the user's tokens
+    const tokenIndex = user.fcmTokens.indexOf(currentToken);
+
+    if (tokenIndex === -1) {
+      // If the current token doesn't exist, add the new token
+      user.fcmTokens.push(newToken);
+    } else {
+      // If the current token exists, replace it with the new token
+      user.fcmTokens[tokenIndex] = newToken;
+    }
+
+    await user.save();
+
+    res.status(200).json({ message: "FCM token updated successfully", user });
   } catch (error) {
-    console.error("Error during social login:", error);
-    res.status(500).json({ error: "An error occurred during social login" });
+    console.error("Error checking and updating FCM token:", error);
+    res.status(500).json({ error: "An error occurred while updating FCM token" });
+  }
+};
+
+
+exports.pay = async (req, res) => {
+  try {
+    const { paymentMethod, items, amount, currency, description, metadata } = req.body;
+
+    if (paymentMethod === 'stripe') {
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: items,
+        mode: "payment",
+        success_url: metadata.successUrl,
+        cancel_url: metadata.cancelUrl,
+        metadata: metadata
+      });
+      return res.status(200).json({ checkout_url: session.url });
+    }else if (paymentMethod === 'paypal') {
+      // Create PayPal order
+      const request = new paypal.orders.OrdersCreateRequest();
+      
+      request.requestBody({
+        intent: "CAPTURE",
+        purchase_units: [{
+          reference_id: Date.now().toString(), // Unique reference ID
+          amount: {
+            currency_code: "USD",
+            value: amount.toFixed(2)
+          },
+          description: description
+        }],
+        application_context: {
+          return_url: metadata.successUrl,
+          cancel_url: metadata.cancelUrl,
+          user_action: "PAY_NOW",
+          shipping_preference: "NO_SHIPPING"
+        }
+      });
+
+      // Execute the request
+      const response = await client.execute(request);
+
+      // Find the approval URL
+      const approvalLink = response.result.links.find(link => link.rel === "approve");
+      
+      if (!approvalLink) {
+        throw new Error("PayPal approval URL not found in response");
+      }
+
+      return res.status(200).json({ 
+        checkout_url: approvalLink.href,
+        orderId: response.result.id
+      });
+    }
+    else {
+      return res.status(400).json({ error: 'Invalid payment method' });
+    }
+  } catch (error) {
+    console.error('Payment processing error:', error);
+    res.status(500).json({ 
+      message: "Payment processing failed", 
+      error: error.message 
+    });
+  }
+};
+
+exports.handleStripeWebhook = async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body, // This is now the raw body
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
+  } catch (err) {
+    console.log(`Webhook Error: ${err.message}`);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  // Log all incoming events
+  console.log('Received Stripe event:', event.type);
+  console.log('Event data:', JSON.stringify(event.data, null, 2));
+
+  // Handle the event
+  switch (event.type) {
+    case 'checkout.session.completed':
+      const session = event.data.object;
+      await this.handleCheckoutSessionCompleted(session);
+      break;
+    // ... handle other events
+    default:
+      console.log(`Unhandled event type ${event.type}`);
+  }
+
+  res.json({ received: true });
+};
+
+exports.handleCheckoutSessionCompleted = async (session) => {
+  try {
+    console.log('Successful payment. Session metadata:', session.metadata);
+
+    let paymentIntentDetails = null;
+    let invoiceLink = null;
+
+    // Retrieve payment intent details
+    if (session.payment_intent) {
+      const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent);
+      paymentIntentDetails = {
+        id: paymentIntent.id,
+        amount: paymentIntent.amount,
+        currency: paymentIntent.currency
+      };
+
+      // Try to retrieve the invoice
+      try {
+        const invoices = await stripe.invoices.list({
+          payment_intent: paymentIntent.id
+        });
+
+        if (invoices.data.length > 0) {
+          invoiceLink = invoices.data[0].hosted_invoice_url;
+        }
+      } catch (invoiceError) {
+        console.log('Error retrieving invoice:', invoiceError);
+      }
+    }
+
+    // Get the line items (products being paid for)
+    const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+
+    // Combine all the information
+    const paymentDetails = {
+      // Payment information
+      amount: session.amount_total / 100, // Convert from cents to whole currency units
+      currency: session.currency,
+      paymentStatus: session.payment_status,
+      paymentMethod: session.payment_method_types[0], // Assuming the first payment method was used
+
+      // Time of purchase
+      purchaseTime: new Date(session.created * 1000).toISOString(), // Convert UNIX timestamp to ISO string
+
+      // Invoice link
+      invoiceLink: invoiceLink,
+
+      // Items being paid for
+      items: lineItems.data.map(item => ({
+        name: item.description,
+        quantity: item.quantity,
+        amount: item.amount_total / 100 // Convert from cents to whole currency units
+      })),
+
+      // Additional details
+      sessionId: session.id,
+      paymentIntentId: paymentIntentDetails ? paymentIntentDetails.id : null,
+
+      // Include any other metadata
+      metadata: session.metadata  
+    };
+
+    console.log('Detailed Payment Information:', JSON.stringify(paymentDetails, null, 2));
+
+    // Here you can add logic to save the payment details to your database
+
+    await axios.post(`https://picms.onrender.com/api/v1/payments`, paymentDetails);
+    console.log("Payment details saved to database");
+
+  } catch (error) {
+    console.error('Error handling checkout session completion:', error);
+    // You might want to implement some error handling or retry logic here
   }
 };

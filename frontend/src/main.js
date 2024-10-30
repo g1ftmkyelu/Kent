@@ -1,5 +1,6 @@
-import 'ant-design-vue/dist/reset.css';
+
 import { createApp } from 'vue';
+import 'ant-design-vue/dist/reset.css';
 import App from './App.vue';
 import store from './stores';
 import router from '@/router/index'
@@ -20,13 +21,16 @@ import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import 'vue3-carousel/dist/carousel.css';
 import VCalendar from 'v-calendar'
 import '@fortawesome/fontawesome-free/css/all.css'
+import VueTelInput from 'vue3-tel-input'
+import 'vue3-tel-input/dist/vue3-tel-input.css'
 
 
 const app = createApp(App)
 app.use(store);
 app.use(VueSweetalert2);
 app.use(VueHtmlToPaper);
-app.use(VueApexCharts)
+app.use(VueApexCharts);
+app.use(VueTelInput);
 app.use(GridLayout)
 app.use(Antd);
 app.use(MasonryWall);

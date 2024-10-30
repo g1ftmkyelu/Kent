@@ -2,12 +2,11 @@
   <div class="field-display">
     <component 
       :is="getFieldComponent(field.type || fallbackType)" 
-      v-if="getFieldComponent(field.type || fallbackType)" 
+      v-if="field.type || fallbackType" 
       :field="field" 
       :value="value"
       :isAvatar="field.isAvatar"
     />
-    <p v-else>Unsupported field type: {{ field.type || fallbackType }}</p>
   </div>
 </template>
 
@@ -27,6 +26,7 @@ import DateField from './fields/dateField.vue';
 import CheckField from './fields/checkfield.vue';
 import PasswordField from './fields/password.vue';
 import action_dispatcher from '../action_dispatcher.vue';
+import price_field from './fields/price_field.vue';
 
 export default {
   name: 'DynamicFieldRenderer',
@@ -46,6 +46,7 @@ export default {
     CheckField,
     PasswordField,
     action_dispatcher,
+    price_field
   },
   props: {
     field: {
@@ -65,6 +66,7 @@ export default {
       const fieldComponents = {
         number: 'TextField',
         text: 'TextField',
+        status:'TextField',
         icon: 'IconField',
         richtext: 'RichTextField',
         image: 'ImageField',
@@ -79,6 +81,7 @@ export default {
         check: 'CheckField',
         password: 'PasswordField',
         action: 'action_dispatcher',
+        price:'TextField'
       };
       return fieldComponents[fieldType] || null;
     },

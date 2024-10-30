@@ -1,16 +1,16 @@
 <template>
-
+  <div>
     <label :for="name">{{ title }}</label>
     <input
       type="number"
       :id="name"
       :name="name"
-      v-model="localValue"
+      :value="value"
       @input="updateValue"
       :required="required"
       class="form-control modern-input"
     />
-
+  </div>
 </template>
 
 <style scoped>
@@ -68,26 +68,12 @@ export default {
     required: {
       type: Boolean,
       default: false
-    },
-    initialData: {
-      type: Number,
-      default: 0
-    }
-  },
-  data() {
-    return {
-      localValue: this.value !== undefined ? this.value : this.initialData
-    }
-  },
-  watch: {
-    value(newValue) {
-      this.localValue = newValue
     }
   },
   methods: {
     updateValue(event) {
-      this.$emit('update:value', event.target.value)
+      this.$emit('update:value', event.target.value);
     }
   }
-}
+};
 </script>

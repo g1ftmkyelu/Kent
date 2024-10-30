@@ -1,15 +1,8 @@
 <template>
   <div class="form-grid">
     <div v-for="field in currentFields" :key="field.name" class="form-group">
-      <component
-        :is="getComponentForField(field)"
-        v-bind="field"
-        :title="field.label"
-        :type="field.type"
-        :value="formData[field.name]"
-        @update:value="updateFormData(field.name, $event)"
-        @blur="validateField(field.name)"
-      />
+      <component :is="getComponentForField(field)" v-bind="field" :title="field.title" :value="formData[field.name]"
+        :field="field" @update:value="updateFormData(field.name, $event)" @blur="validateField(field.name)" />
       <span v-if="validationErrors[field.name]" class="error-message">
         {{ validationErrors[field.name] }}&nbsp;<i class="fa-solid fa-circle-exclamation"></i>
       </span>
@@ -31,7 +24,12 @@ import TextareaInput from './inputs/text_area_input.vue'
 import ColorInput from './inputs/color_input.vue'
 import TimeInput from './inputs/time_input.vue'
 import SelectInput from './inputs/select_input.vue'
-
+import RefSelectInput from './inputs/ref_input.vue'
+import DateTimeInput from './inputs/date_time_input.vue'
+import PasswordInput from './inputs/password_input.vue'
+import TelephoneInput from './inputs/vue_tel_input.vue'
+import icon_input from './inputs/icon_input.vue'
+import price_input from './inputs/price_input.vue'
 
 export default {
   name: 'DynamicForm',
@@ -48,7 +46,13 @@ export default {
     TextareaInput,
     ColorInput,
     TimeInput,
-    SelectInput
+    SelectInput,
+    RefSelectInput,
+    DateTimeInput,
+    PasswordInput,
+    TelephoneInput,
+    icon_input,
+    price_input
   },
   props: {
     currentFields: Array,
@@ -63,14 +67,20 @@ export default {
         case 'text':
         case 'email':
         case 'tel':
-        case 'date':
-        case 'password':
           return 'TextInput'
         case 'number':
           return 'NumberInput'
         case 'range':
           return 'RangeInput'
         case 'file':
+        case 'image':
+        case 'video':
+        case 'audio':
+        case 'document':
+        case 'image array':
+        case 'video array':
+        case 'audio array':
+        case 'document array':
           return 'FileInput'
         case 'object':
           return 'ObjectInput'
@@ -79,74 +89,59 @@ export default {
         case 'tags':
           return 'TagsInput'
         case 'checkbox':
+        case 'check':
           return 'CheckboxInput'
         case 'radio':
           return 'RadioInput'
         case 'textarea':
+        case 'richtext':
           return 'TextareaInput'
         case 'color':
           return 'ColorInput'
         case 'time':
           return 'TimeInput'
         case 'select':
+        case 'status':
           return 'SelectInput'
+        case 'ref':
+          return 'RefSelectInput'
+        case 'password':
+          return 'PasswordInput'
+        case 'icon':
+          return 'icon_input'
+        case 'datetime':
+        case 'date':
+        case 'time':
+          return 'DateTimeInput'
         default:
           return 'TextInput'
       }
     },
     updateFormData(name, value) {
-      this.$emit('update:formData', { name, value })
+      this.$emit('update:formData', { name, value });
     },
     validateField(name) {
       this.$emit('validateField', name)
     }
-  }
+  },
+  emits: ['update:formData', 'validateField', 'password-valid']
 }
 </script>
 
 <style scoped>
-/* Styles for form grid */
 .form-grid {
   display: grid;
-  grid-auto-flow: dense;
-  gap: 10px;
-  grid-gap: 10px;
-  margin: 1rem;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  width: 100%;
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
-  margin-left: 1rem;
-  margin-right: 1rem;
+  width: 100%;
 }
 
 .error-message {
   color: red;
   font-size: 0.875rem;
-}
-
-/* Responsive grid layout */
-@media (min-width: 1200px) {
-  .form-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@media (min-width: 992px) and (max-width: 1199px) {
-  .form-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (min-width: 768px) and (max-width: 991px) {
-  .form-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 767px) {
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
 }
 </style>

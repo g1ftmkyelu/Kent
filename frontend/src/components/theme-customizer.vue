@@ -1,8 +1,8 @@
 <template>
-  <div class="text-secondary">
+  <div class="text-text">
     <i 
       @click="toggleTheme" 
-      :class="isDarkMode ? 'fas fa-sun' : 'fas fa-moon'"
+      :class="isDarkMode ? 'pi pi-sun' : 'pi pi-moon'"
     >
     
   </i>

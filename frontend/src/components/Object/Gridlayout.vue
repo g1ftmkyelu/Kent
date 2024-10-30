@@ -1,30 +1,22 @@
 <template>
-  <grid-layout
-    :layout="transformedLayout"
-    :col-num="columns"
-    :row-height="44"
-    :is-draggable="false"
-    :is-resizable="false"
-    :vertical-compact="true"
-    :use-css-transforms="true"
-  >
-    <grid-item v-for="item in transformedLayout" :key="item.i" :x="item.x" :y="item.y" :w="item.w" :h="item.h" :i="item.i">
-      <div class="grid-item-content" :style="getItemStyle(item)">
+  <div class="flex-container" :style="containerStyle">
+    <div
+      v-for="item in transformedLayout"
+      :key="item.i"
+      class="flex-item"
+      :style="getItemStyle(item)"
+    >
+      <div class="flex-item-content" :style="getContentStyle(item)">
         <slot :name="item.name" />
       </div>
-    </grid-item>
-  </grid-layout>
+    </div>
+  </div>
 </template>
 
 <script>
 import { computed } from 'vue';
-import { GridLayout, GridItem } from 'vue3-grid-layout-next';
 
 export default {
-  components: {
-    GridLayout,
-    GridItem,
-  },
   props: {
     rows: {
       type: Number,
@@ -38,8 +30,27 @@ export default {
       type: Array,
       required: true,
     },
+    rowHeight: {
+      type: Number,
+      default: 44,
+    },
+    gap: {
+      type: String,
+      default: '5px',
+    },
   },
   setup(props) {
+    const containerStyle = computed(() => ({
+      display: 'flex',
+      flexWrap: 'wrap',
+      position: 'relative',
+      height: `calc(${props.rows * props.rowHeight}px + ${(props.rows - 1) * parseInt(props.gap)}px)`,
+      width: '100%',
+      boxSizing: 'border-box',
+      padding: props.gap,
+      overflow: 'hidden'
+    }));
+
     const transformedLayout = computed(() => {
       return props.layout.map((item, index) => ({
         x: item.colStart - 1,
@@ -48,12 +59,38 @@ export default {
         h: item.rowSpan,
         i: index.toString(),
         name: item.name,
-        alignment: item.alignment || 'top-left', // Default alignment
+        alignment: item.alignment || 'top-left',
       }));
     });
 
     const getItemStyle = (item) => {
-      const style = {};
+      const columnWidth = 100 / props.columns;
+      const gapValue = parseInt(props.gap);
+      
+      return {
+        position: 'absolute',
+        left: `calc(${item.x * columnWidth}%)`,
+        top: `${item.y * (props.rowHeight + gapValue)}px`,
+        width: `calc(${item.w * columnWidth}% - ${gapValue}px)`,
+        height: `${(item.h * props.rowHeight) + ((item.h - 1) * gapValue)}px`,
+        backgroundColor: '',
+        borderRadius: '4px',
+        boxSizing: 'border-box',
+        maxWidth: '100%',
+        maxHeight: '100%'
+      };
+    };
+
+    const getContentStyle = (item) => {
+      const style = {
+        height: '100%',
+        width: '100%',
+        display: 'flex',
+        boxSizing: 'border-box',
+        maxWidth: '100%',
+        maxHeight: '100%'
+      };
+
       switch (item.alignment) {
         case 'top-left':
           style.justifyContent = 'flex-start';
@@ -99,23 +136,51 @@ export default {
     };
 
     return {
+      containerStyle,
       transformedLayout,
       getItemStyle,
+      getContentStyle,
     };
   },
 };
 </script>
 
-<style>
-.vue-grid-item {
-  background-color: transparent !important;
-  border: transparent !important;
-  border-radius: 4px !important;
-}
-.grid-item-content {
-  height: 100%;
+<style scoped>
+.flex-container {
+  position: relative;
   width: 100%;
+  overflow: hidden;
+}
+
+.flex-item {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
   box-sizing: border-box;
-  display: flex;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.flex-item-content {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.image-container {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  max-width: 100%;
+  max-height: 100%;
 }
 </style>

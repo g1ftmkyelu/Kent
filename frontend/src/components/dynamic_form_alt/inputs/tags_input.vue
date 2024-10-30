@@ -3,18 +3,21 @@
     <label :for="name">{{ title }}</label>
     <div class="tags-input">
       <div class="tags">
-        <span v-for="(tag, index) in value" :key="index" class="tag">
+        <a-tag
+          v-for="(tag, index) in value"
+          :key="index"
+          closable
+          @close="removeTag(index)"
+        >
           {{ tag }}
-          <span class="remove-tag" @click="removeTag(index)">&times;</span>
-        </span>
+        </a-tag>
       </div>
-      <input
-        type="text"
-        class="form-control modern-input"
+      <a-input
+        class="modern-input"
         :id="name"
         :name="name"
         v-model="newTag"
-        @keydown.enter.prevent="addTag"
+        @pressEnter="addTag"
         placeholder="Add a tag..."
       />
     </div>
@@ -47,6 +50,11 @@ export default {
       newTag: ''
     };
   },
+  created() {
+    if (this.initialData.length) {
+      this.$emit('update:value', this.initialData);
+    }
+  },
   methods: {
     addTag() {
       if (this.newTag.trim() !== '') {
@@ -77,20 +85,9 @@ export default {
   margin-right: 10px;
 }
 
-.tag {
-  background-color: #f0f0f0;
-  color: #333;
-  padding: 5px 10px;
-  margin-right: 5px;
-  margin-bottom: 5px;
-  border-radius: 3px;
-  display: flex;
-  align-items: center;
-}
-
-.remove-tag {
-  margin-left: 5px;
-  cursor: pointer;
-  font-weight: bold;
+.modern-input {
+  width: auto;
+  flex-grow: 1;
+  margin-top: 5px;
 }
 </style>

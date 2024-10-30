@@ -1,7 +1,7 @@
 <template>
     <div class="widget-wrapper">
-      <div class="header">
-        <h3>{{ title }}</h3>
+      <div class="header mx-2 mb-2">
+        <h3 class="text-xl font-semibold">{{ title }}</h3>
         <action_dispatcher :resource="{
               actions:[
                 {
@@ -48,13 +48,13 @@
     border-radius: 8px;
     width: 100%;
     height: 100%;
+    margin: 0;
   }
   
   .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
   }
   
   .see-more {

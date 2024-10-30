@@ -28,7 +28,7 @@ const {
   removeFCMToken,
   getUserFCMTokens,
   sendPushNotification,
-  socialLogin
+  checkAndUpdateFCMToken // Add this new import
 } = require("./genericController");
 
 const router = express.Router();
@@ -66,7 +66,6 @@ function setupDynamicRoutes(resource) {
   router.post('/sendEmail', sendEmail);
   router.post('/sendWebPushNotification', sendWebPushNotification);
   router.post(`/api/v1/pay`, pay);
-  router.post('/api/v1/stripe-webhook', express.raw({type: 'application/json'}), handleStripeWebhook);
   
   // PUT and PATCH routes
   router.put(`/api/v1/${endpoint}/:id`, updateResources);
@@ -86,9 +85,9 @@ function setupDynamicRoutes(resource) {
   router.delete(`/api/v1/fcm/${endpoint}/token`, removeFCMToken);
   router.get(`/api/v1/fcm/${endpoint}/tokens/:userId`, getUserFCMTokens);
   router.post(`/api/v1/fcm/${endpoint}/notify`, sendPushNotification);
-
-  // Add this new route
-  router.post(`/api/v1/${endpoint}/social-login`, socialLogin);
+  
+  // New route for checking and updating FCM token
+  router.post(`/api/v1/fcm/${endpoint}/check-update-token`, checkAndUpdateFCMToken);
 
   return router;
 }

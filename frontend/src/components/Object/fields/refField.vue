@@ -60,7 +60,5 @@ export default {
   width: 100%;
 }
 .ref-label {
-  font-weight: bold;
-  font-size: 0.6rem;
 }
 </style>

@@ -1,13 +1,9 @@
 import axios from "axios";
 import Swal from "sweetalert2";
-import { getSystemConfig } from "./getSystemConfig";
-import { useRouter } from "vue-router";
 import store from "../stores";
 import { effects } from "./effects";
 import { helpers } from "./helpers";
-const Config = getSystemConfig();
-
-const router = useRouter();
+import { toast } from "vue3-toastify";
 
 const resourceFunctions = [
   {
@@ -130,7 +126,8 @@ const resourceFunctions = [
     icon: "fa fa-eye",
     key: "goToView",
     value: async (payload) => {
-      const { resource, path, id, router, mode, fullResource } = payload;
+      const { resource, path, id, route, mode, fullResource } = payload;
+
       let url;
       console.log(mode, "nde render mode");
 
@@ -140,12 +137,11 @@ const resourceFunctions = [
         if (fullResource.isPortal) {
           url = `/${fullResource.portalDefinition.name}?myParam=${id}`;
         } else {
-          url = `/dashboard/${path}/${id}/view`;
+          url = `/${route}/${path}/${id}/view`;
         }
       }
 
-      // Using vue-router's programmatic navigation
-      router.push(url); // Use `router.replace(url)` if you want to replace the current route in history
+      window.location = url;
     },
   },
   {
@@ -153,22 +149,30 @@ const resourceFunctions = [
     icon: "fa fa-edit",
     key: "goToEdit",
     value: async (payload) => {
-      const { resource, path, id, router } = payload;
-      const url = `/dashboard/${path}/${id}/edit`;
-
-      // Using vue-router's programmatic navigation
+      const { resource, path, id, route, router, mode, fullResource } = payload;
+     const url = `/${route}/${path}/${id}/edit`;
       router.push(url);
     },
   },
   {
-    name:"navigateToAdd",
-    icon:"fa fa-plus",
-    key:"navigateToAdd",
-    value:async(payload)=>{
-      const {resource,path,router}=payload
-      const url=`/dashboard/${path}/item/add`
-      router.push(url)
-    }
+    name: "navigateToAdd",
+    icon: "fa fa-plus",
+    key: "goToProductView",
+    value: async (payload) => {
+      const { resource, path, id, route, router, mode, fullResource } = payload;
+      const url = `/home/product/${id}`;
+      window.location.href=url
+    },
+  },
+  {
+    name: "navigateToProduct",
+    icon: "fa fa-plus",
+    key: "goToProductView",
+    value: async (payload) => {
+      const { resource, path, router } = payload;
+      const url = `/dashboard/${path}/item/add`;
+      router.replace(url);
+    },
   },
   {
     name: "invoice",
@@ -506,6 +510,154 @@ const resourceFunctions = [
       const { data } = payload;
       const { modalType, modalData } = data;
       await store.dispatch("modal/showModal", { modalType, modalData });
+    },
+  },
+  {
+    name: "close",
+    icon: "fa fa-times",
+    key: "close",
+    value: async (payload) => {
+      await store.dispatch("modal/hideModal");
+    },
+  },
+
+  {
+    name: "filter",
+    icon: "fa fa-filter",
+    key: "filter",
+    value: async (payload) => {
+      // This would typically open a modal or drawer with filter options
+      const { data } = payload;
+      const modalType = data.productFilterModal.dataType;
+      const modalData = data.productFilterModal.modalData;
+      await store.dispatch("modal/showModal", { modalType, modalData });
+    },
+  },
+  {
+    name: "sort",
+    icon: "fa fa-sort",
+    key: "sort",
+    value: async (payload) => {
+      // This would typically open a modal or drawer with sorting options
+      // For now, we'll just show an alert
+      const { data } = payload;
+      const modalType = data.productSortModal.dataType;
+      const modalData = data.productSortModal.modalData;
+      await store.dispatch("modal/showModal", { modalType, modalData });
+    },
+  },
+
+  {
+    name: "exportCatalog",
+    icon: "fa fa-download",
+    key: "exportCatalog",
+    value: async (payload) => {
+      try {
+        // This would typically trigger a download of the product catalog
+        // For demonstration, we'll just show a success message
+        await Swal.fire({
+          title: "Export Catalog",
+          text: "Catalog exported successfully",
+          icon: "success",
+        });
+      } catch (error) {
+        console.error("Error exporting catalog:", error);
+        await Swal.fire({
+          title: "Error",
+          text: "Failed to export catalog",
+          icon: "error",
+        });
+      }
+    },
+  },
+  {
+    name: "addToCart",
+    icon: "fa fa-shopping-cart",
+    key: "addToCart",
+    value: async (payload) => {
+      try {
+        const { id } = payload;
+        // This would typically add the product to the cart in your backend
+        // For now, we'll just show a success message
+        await Swal.fire({
+          title: "Added to Cart",
+          text: `Product ${id} added to cart successfully`,
+          icon: "success",
+          timer: 1500,
+        });
+      } catch (error) {
+        console.error("Error adding to cart:", error);
+        await Swal.fire({
+          title: "Error",
+          text: "Failed to add product to cart",
+          icon: "error",
+        });
+      }
+    },
+  },
+  {
+    name: "bookmark",
+    icon: "fa fa-bookmark",
+    key: "bookmark",
+    value: async (payload) => {
+      try {
+        const { id, data } = payload;
+        // This would typically bookmark the product in your backend
+        // For now, we'll just show a success message
+        toast.success(`${data.productName} bookmarked successfully`);
+      } catch (error) {
+        console.error("Error bookmarking product:", error);
+        toast.error("Failed to bookmark product");
+      }
+    },
+  },
+  {
+    name: "dontRecommendProduct",
+    icon: "pi pi-times-circle",
+    key: "dontRecommendProduct",
+    value: async (payload) => {
+      try {
+        const { id } = payload;
+        // This would typically update user preferences in your backend
+        // For now, we'll just show a success message
+        await Swal.fire({
+          title: "Preference Updated",
+          text: `Product ${id} will not be recommended in the future`,
+          icon: "success",
+          timer: 1500,
+        });
+      } catch (error) {
+        console.error("Error updating product recommendation:", error);
+        await Swal.fire({
+          title: "Error",
+          text: "Failed to update product recommendation",
+          icon: "error",
+        });
+      }
+    },
+  },
+  {
+    name: "report",
+    icon: "fa fa-flag",
+    key: "report",
+    value: async (payload) => {
+      try {
+        const { id } = payload;
+        // This would typically open a modal for reporting the product
+        // For now, we'll just show a success message
+        await Swal.fire({
+          title: "Report Product",
+          text: `Thank you for reporting product ${id}. We will review it shortly.`,
+          icon: "info",
+        });
+      } catch (error) {
+        console.error("Error reporting product:", error);
+        await Swal.fire({
+          title: "Error",
+          text: "Failed to report product",
+          icon: "error",
+        });
+      }
     },
   },
 ];

@@ -47,14 +47,14 @@
                   ]" class="w-full p-2.5" />
               </div>
               <input :placeholder="`please enter ${field.title}`" v-else v-model="formData[field.name]" type="text"
-                class="w-[16rem] px-3 py-2 rounded-md" />
+                class="w-[16rem] px-3 py-2 bg-cardDark border border-textLighter rounded-md" />
               <p v-if="validationErrors[field.name]" class="mt-1 text-sm validation-error">{{
                 validationErrors[field.name] }} <i class="fa fa-warning"></i></p>
             </div>
             <div class="flex-1 basis-32 min-w-[8rem]" v-else-if="field.type === 'email'">
               <label class="block mb-2">{{ field.title }}</label>
               <input :placeholder="`please enter ${field.title}`" v-model="formData[field.name]" type="email"
-                class="w-[16rem] px-3 py-2 rounded-md" />
+                class="w-[16rem] px-3 py-2 rounded-md bg-cardDark border border-textLighter" />
               <p v-if="validationErrors[field.name]" class="mt-1 text-sm validation-error">{{
                 validationErrors[field.name] }} <i class="fa fa-warning"></i></p>
             </div>
@@ -65,7 +65,7 @@
             <div class="flex-1 basis-32 min-w-[8rem]" v-else-if="field.type === 'password'">
               <label class="block mb-2">{{ ` ${field.title}` }} </label>
               <input :placeholder="`please enter ${field.title}`" v-model="formData[field.name]" type="password"
-                class="w-[16rem] px-3 py-2 rounded-md" />
+                class="w-[16rem] px-3 py-2 rounded-md bg-cardDark border border-textLighter" />
 
               <p v-if="validationErrors[field.name]" class="mt-1 text-sm validation-error">{{
                 validationErrors[field.name] }} <i class="fa fa-warning"></i></p>
@@ -73,21 +73,21 @@
             <div class="flex-1 basis-32 min-w-[8rem]" v-else-if="field.type === 'phone'">
               <label class="block mb-2">{{ field.title }}</label>
               <input :placeholder="`please enter ${field.title}`" v-model="formData[field.name]" type="tel"
-                class="w-[16rem] px-3 py-2 rounded-md" />
+                class="w-[16rem] px-3 py-2 rounded-md bg-cardDark border border-textLighter" />
               <p v-if="validationErrors[field.name]" class="mt-1 text-sm validation-error">{{
                 validationErrors[field.name] }} <i class="fa fa-warning"></i></p>
             </div>
             <div class="flex-1 basis-32 min-w-[8rem]" v-else-if="field.type === 'number'">
               <label class="block mb-2">{{ field.title }}</label>
               <input :placeholder="`please enter ${field.title}`" v-model="formData[field.name]" type="number"
-                class="w-[16rem] px-3 py-2 rounded-md" />
+                class="w-[16rem] px-3 py-2 rounded-md bg-cardDark border border-textLighter" />
               <p v-if="validationErrors[field.name]" class="mt-1 text-sm validation-error">{{
                 validationErrors[field.name] }} <i class="fa fa-warning"></i></p>
             </div>
             <div class="flex-1 basis-32 min-w-[8rem]" v-else-if="field.type === 'decimal'">
               <label class="block mb-2">{{ field.title }}</label>
               <input :placeholder="`please enter ${field.title}`" v-model="formData[field.name]" type="number"
-                step="0.01" class="w-[16rem] px-3 py-2 rounded-md" />
+                step="0.01" class="w-[16rem] px-3 py-2 rounded-md bg-cardDark border border-textLighter" />
               <p v-if="validationErrors[field.name]" class="mt-1 text-sm validation-error">{{
                 validationErrors[field.name] }} <i class="fa fa-warning"></i></p>
             </div>
@@ -95,27 +95,27 @@
               <label class="block mb-2">{{ field.title }}</label>
               <input :placeholder="`please enter ${field.title}`" :value="formatIsoDate(formData[field.name])"
                 @input="updateDate(field.name, $event.target.value)" type="date"
-                class="w-[16rem] px-3 py-2 rounded-md" />
+                class="w-[16rem] px-3 py-2 rounded-md bg-cardDark border border-textLighter" />
               <p v-if="validationErrors[field.name]" class="mt-1 text-sm validation-error">{{ field.name }} is
                 required<i class="fa fa-warning"></i></p>
             </div>
             <div class="flex-1 basis-32 min-w-[8rem]" v-else-if="field.type === 'datetime'">
               <label class="block mb-2">{{ field.title }}</label>
               <input :placeholder="`please enter ${field.title}`" v-model="formData[field.name]" type="datetime-local"
-                class="w-[16rem] px-3 py-2 rounded-md" />
+                class="w-[16rem] px-3 py-2 rounded-md bg-cardDark border border-textLighter" />
               <p v-if="validationErrors[field.name]" class="mt-1 text-sm validation-error">{{ field.name }} is
                 required<i class="fa fa-warning"></i></p>
             </div>
             <div class="flex-1 basis-32 min-w-[8rem]" v-else-if="field.type === 'time'">
               <label class="block mb-2">{{ field.title }}</label>
               <input :placeholder="`please enter ${field.title}`" v-model="formData[field.name]" type="time"
-                class="w-[16rem] px-3 py-2 rounded-md" />
+                class="w-[16rem] px-3 py-2 rounded-md bg-cardDark border border-textLighter" />
               <p v-if="validationErrors[field.name]" class="mt-1 text-sm validation-error">{{
                 validationErrors[field.name] }} <i class="fa fa-warning"></i></p>
             </div>
             <div v-if="field.type === 'ref'" class="flex-1 basis-32 min-w-[8rem]">
               <label class="block mb-2">Select {{ field.title }}</label>
-              <select v-model="formData[field.name]" class="w-full px-3 py-2 rounded-md">
+              <select v-model="formData[field.name]" class="w-full px-3 py-2 rounded-md bg-cardDark border border-textLighter">
                 <option v-for="option in refOptions[field.name]" :key="option.id" :value="option.id">
                   {{ option.name }}
                 </option>
@@ -123,7 +123,7 @@
               <p v-if="validationErrors[field.name]" class="mt-1 text-sm validation-error">{{
                 validationErrors[field.name] }} <i class="fa fa-warning"></i></p>
             </div>
-            <div class="flex-1 basis-32 min-w-[8rem]" v-else-if="field.type === 'select'">
+            <div class="flex-1 basis-32 min-w-[8rem]" v-else-if="field.type === 'select' || field.type === 'status'">
               <label class="block mb-2">Select {{ field.title }}</label>
               <select v-model="formData[field.name]" class="w-[16rem] px-3 py-2 rounded-md">
                 <option v-for="option in field.options" :key="option.value" :value="option.value">

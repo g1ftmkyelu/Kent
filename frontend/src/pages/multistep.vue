@@ -124,11 +124,3 @@
   }
   </script>
   
-  <style scoped>
-  h1 {
-    text-align: center;
-    color: #333;
-    margin-bottom: 2rem;
-  }
-  </style>
-  

@@ -307,7 +307,7 @@
   });
   </script>
   
-  <style>
+  <style scoped>
   .inventory-management {
     height: 100vh;
   }

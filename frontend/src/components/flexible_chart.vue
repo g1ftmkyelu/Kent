@@ -1,126 +1,119 @@
 <template>
-    <div>
-        <DataFetcher :resource="resource" :requestType="requestType" :params="params">
-            <template v-slot="{ data, error }">
-                <div v-if="error">Error: {{ error.message }}</div>
-                <apexchart v-else :type="chartType" :options="chartOptions" :series="transformData(data)"></apexchart>
-            </template>
-        </DataFetcher>
+    <div class="card mt-7">
+      <apexchart 
+        :type="chartType" 
+        :options="chartOptions" 
+        :series="processedSeries"
+      ></apexchart>
     </div>
-</template>
-
-<script>
-import { defineComponent, computed } from 'vue';
-import VueApexCharts from 'vue3-apexcharts';
-import data_fetcher from './data_fetcher.vue';
-
-export default defineComponent({
+  </template>
+  
+  <script>
+  import { defineComponent, computed } from 'vue';
+  import VueApexCharts from 'vue3-apexcharts';
+  
+  export default defineComponent({
     name: 'FlexibleChart',
     components: {
-        apexchart: VueApexCharts,
-        DataFetcher: data_fetcher,
+      apexchart: VueApexCharts,
     },
     props: {
-        resource: {
-            type: String,
-            required: true,
-        },
-        requestType: {
-            type: String,
-            required: true,
-        },
-        params: {
-            type: Object,
-            default: () => ({}),
-        },
-        chartType: {
-            type: String,
-            default: 'line',
-            validator: (value) => ['line', 'bar', 'pie', 'donut', 'scatter', 'area', 'radar', 'heatmap'].includes(value),
-        },
-        chartTitle: {
-            type: String,
-            default: '',
-        },
-        xAxisTitle: {
-            type: String,
-            default: '',
-        },
-        yAxisTitle: {
-            type: String,
-            default: '',
-        },
-        dataLabels: {
-            type: Boolean,
-            default: false,
-        },
-        colors: {
-            type: Array,
-            default: () => [],
-        },
+      chartType: {
+        type: String,
+        default: 'line',
+        validator: (value) => [
+          'line', 
+          'bar', 
+          'pie', 
+          'donut', 
+          'scatter', 
+          'area', 
+          'radar', 
+          'heatmap'
+        ].includes(value),
+      },
+      series: {
+        type: Array,
+        required: true,
+        // Expects format: [{ name: 'Series1', data: [{x: 1, y: 2}, ...] }]
+        // Or for pie/donut: [{ name: 'Series1', data: 23 }, ...]
+      },
+      chartTitle: {
+        type: String,
+        default: '',
+      },
+      xAxisTitle: {
+        type: String,
+        default: '',
+      },
+      yAxisTitle: {
+        type: String,
+        default: '',
+      },
+      dataLabels: {
+        type: Boolean,
+        default: false,
+      },
+      colors: {
+        type: Array,
+        default: () => [],
+      },
+      height: {
+        type: [String, Number],
+        default: 'auto'
+      },
+      stacked: {
+        type: Boolean,
+        default: false
+      },
+      horizontal: {
+        type: Boolean,
+        default: false
+      }
     },
     setup(props) {
-        const chartOptions = computed(() => ({
-            chart: {
-                type: props.chartType,
-            },
-            title: {
-                text: props.chartTitle,
-                align: 'center',
-            },
-            xaxis: {
-                title: {
-                    text: props.xAxisTitle,
-                },
-            },
-            yaxis: {
-                title: {
-                    text: props.yAxisTitle,
-                },
-            },
-            dataLabels: {
-                enabled: props.dataLabels,
-            },
-            colors: props.colors.length > 0 ? props.colors : undefined,
-        }));
-
-        const transformData = (data) => {
-            if (!data) return [];
-
-            switch (props.requestType) {
-                case 'fieldOccurrences':
-                    return [{
-                        name: 'Occurrences',
-                        data: Object.entries(data).map(([key, value]) => ({ x: key, y: value })),
-                    }];
-                case 'timeSeriesAnalysis':
-                    return [{
-                        name: props.yAxisTitle || 'Value',
-                        data: data.map(item => ({ x: new Date(item.date), y: item.value })),
-                    }];
-                case 'calculate':
-                    // For single value results like sum, average, etc.
-                    return [{
-                        name: props.chartTitle || 'Value',
-                        data: [{ x: props.chartTitle || 'Value', y: data }],
-                    }];
-                default:
-                    // For general data, assuming it's an array of objects
-                    if (Array.isArray(data)) {
-                        const keys = Object.keys(data[0] || {}).filter(key => typeof data[0][key] === 'number');
-                        return keys.map(key => ({
-                            name: key,
-                            data: data.map((item, index) => ({ x: index, y: item[key] })),
-                        }));
-                    }
-                    return [];
-            }
-        };
-
-        return {
-            chartOptions,
-            transformData,
-        };
+      const processedSeries = computed(() => {
+        if (['pie', 'donut'].includes(props.chartType)) {
+          return props.series.map(item => item.data);
+        }
+        return props.series;
+      });
+  
+      const chartOptions = computed(() => ({
+        chart: {
+          type: props.chartType,
+          height: props.height,
+          stacked: props.stacked,
+        },
+        title: {
+          text: props.chartTitle,
+          align: 'center',
+        },
+        xaxis: {
+          title: {
+            text: props.xAxisTitle,
+          },
+        },
+        yaxis: {
+          title: {
+            text: props.yAxisTitle,
+          },
+        },
+        plotOptions: {
+          bar: {
+            horizontal: props.horizontal,
+          },
+        },
+        dataLabels: {
+          enabled: props.dataLabels,
+        },
+        colors: props.colors.length > 0 ? props.colors : undefined,
+      }));
+  
+      return {
+        chartOptions,
+        processedSeries,
+      };
     },
-});
-</script>
+  });
+  </script>

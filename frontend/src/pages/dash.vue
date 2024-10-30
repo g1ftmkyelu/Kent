@@ -7,8 +7,8 @@
   </template>
   
   <script>
-  import GridLayout from '../components/GridLayout.vue';
-  import dashboard_widget_renderer from '../components/dashboard_widgets/dashboard_widget_renderer.vue';
+  import GridLayout from '@/components/GridLayout.vue';
+  import dashboard_widget_renderer from '@/components/dashboard_widgets/dashboard_widget_renderer.vue';
   export default {
     components: {
       GridLayout,
@@ -34,7 +34,7 @@
                 { label: 'Average Order Value', value: '$217', icon: 'fas fa-tags', color: '#6c757d' },
                 { label: 'Customer Satisfaction', value: '4.8/5', icon: 'fas fa-smile', color: '#20c997' }
               ],
-              columns: 4,
+              columns: 2,
               gap: '1rem',
               cardBackground: '#f8f9fa'
             }

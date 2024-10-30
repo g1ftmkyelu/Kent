@@ -1,17 +1,13 @@
 <template>
-
-    <label :for="name">{{ title }}</label>
-    <input
-      :type="type"
-      :id="name"
-      :name="name"
-      v-model="internalValue"
-      @input="updateValue"
-      :required="required"
-      :placeholder="`Enter ${title}...`"
-      class="form-control modern-input"
-    />
-
+  <a-input
+    :id="name"
+    :name="name"
+    :value="value"
+    @input="updateValue"
+    :required="required"
+    :placeholder="`Enter ${title}...`"
+    class="text"
+  />
 </template>
 
 <script>
@@ -37,34 +33,12 @@ export default {
     required: {
       type: Boolean,
       default: false
-    },
-    initialData: {
-      type: [String, Number],
-      default: ''
-    }
-  },
-  data() {
-    return {
-      internalValue: this.value || this.initialData
-    };
-  },
-  created() {
-    if (this.initialData) {
-      this.internalValue = this.initialData;
-    }
-  },
-  watch: {
-    value(newValue) {
-      this.internalValue = newValue;
     }
   },
   methods: {
     updateValue(event) {
-      this.internalValue = event.target.value;
-      this.$emit('update:value', this.internalValue);
+      this.$emit('update:value', event.target.value);
     }
   }
 };
 </script>
-
-

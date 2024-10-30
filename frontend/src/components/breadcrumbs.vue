@@ -1,9 +1,9 @@
 <template>
-  <nav v-if="!hideBreadcrumbs" aria-label="breadcrumb" class="flex pt-2 px-5">
-    <ol class="flex">
-      <li class="breadcrumb-item ml-5">
+  <nav v-if="!hideBreadcrumbs" aria-label="breadcrumb" class="breadcrumb-container">
+    <ol class="breadcrumb-list">
+      <li class="breadcrumb-item home-icon">
         <router-link to="/" class="hover:text-primary">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
           </svg>
         </router-link>
@@ -12,17 +12,17 @@
         v-for="(crumb, index) in breadcrumbs" 
         :key="crumb.path"
         class="breadcrumb-item"
-        :class="{ 'pointer-events-none': index === breadcrumbs.length - 1 }"
+        :class="{ 'active': index === breadcrumbs.length - 1 }"
       >
-        <div class="flex items-center">
-          <router-link 
-            :to="crumb.path"
-            class="ml-3"
-            :class="index === breadcrumbs.length - 1 ? 'text-gray-500' : 'hover:text-primary'"
-          >
-            {{ crumb.name }}
-          </router-link>
-        </div>
+        <router-link 
+          :to="crumb.path"
+          class="breadcrumb-link"
+          :class="index === breadcrumbs.length - 1 ? 'text-gray-500 cursor-default' : 'hover:text-primary'"
+          :aria-current="index === breadcrumbs.length - 1 ? 'page' : null"
+        >
+          {{ crumb.name }}
+        </router-link>
+        <span v-if="index < breadcrumbs.length - 1" class="breadcrumb-separator">/</span>
       </li>
     </ol>
   </nav>
@@ -37,15 +37,11 @@ export default {
   setup() {
     const route = useRoute();
     const breadcrumbs = ref([]);
-    const hideBreadcrumbs = ref(false); // Track whether to hide breadcrumbs
+    const hideBreadcrumbs = ref(false);
 
     const updateBreadcrumbs = () => {
       const pathArray = route.path.split('/').filter(i => i);
-      
-      // Check if the second segment is 'chat' to hide breadcrumbs
       hideBreadcrumbs.value = pathArray[1] === 'chat';
-
-      // Filter out 'add' and 'edit' from the breadcrumbs
       breadcrumbs.value = pathArray
         .map((path, index) => {
           const to = '/' + pathArray.slice(0, index + 1).join('/');
@@ -68,39 +64,45 @@ export default {
 </script>
 
 <style scoped>
+.breadcrumb-container {
+  display: flex;
+  padding: 1rem 1rem;
+}
+
+.breadcrumb-list {
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.home-icon {
+  margin-right: 8px;
+}
+
 .breadcrumb-item {
-  display: inline-flex; /* Layout style */
-  align-items: center; /* Layout style */
+  display: flex;
+  align-items: center;
 }
 
-.breadcrumb-item:not(:last-child)::after {
-  content: '';
-  display: block; /* Layout style */
-  width: 0; /* Layout style */
-  height: 0; /* Layout style */
-  border-top: 13px solid transparent; /* Layout style */
-  border-bottom: 13px solid transparent; /* Layout style */
-  border-left: 13px solid gray; /* Layout style */
-  margin-left: 2px; /* Layout style */
+.breadcrumb-link {
+  text-decoration: none;
+  font-weight: 500;
 }
 
-.breadcrumb-item:last-child::after {
-  content: none;
+.breadcrumb-link:hover {
+  text-decoration: underline;
 }
 
-.breadcrumb-item > div {
-  padding-top: 1rem; /* Layout style */
-  padding-bottom: 1rem; /* Layout style */
-  padding-left: 0.75rem; /* Layout style */
-  padding-right: 0.75rem; /* Layout style */
+.breadcrumb-separator {
+  margin: 0 0.5rem;
+  color: #6b7280; /* Tailwind's gray-500 */
 }
 
-.breadcrumb-item:last-child > div {
-  /* No additional styles needed */
-}
-
-.breadcrumb-item:not(:first-child) > div {
-  margin-left: -13px; /* Layout style */
-  padding-left: 1.25rem; /* Layout style */
+.breadcrumb-item.active .breadcrumb-link {
+  color: #6b7280; /* Tailwind's gray-500 */
+  cursor: default;
+  pointer-events: none;
 }
 </style>

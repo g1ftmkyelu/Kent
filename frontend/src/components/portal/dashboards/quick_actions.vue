@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-full my-6"> 
     <div class="flex justify-between items-center">
-      <h2 class="heading">{{ translationKeys.QuickActions }}</h2>
+      <h2 class="text-2xl font-bold">{{ translationKeys.QuickActions }}</h2>
       <action_dispatcher :resource="{
             actions:[
               {
@@ -19,23 +19,9 @@
        
         <router-link :to="`/dashboard/${action.path}`" class="block group">
           <span class="flex p-0 m-0 justify-between w-full">
-    
-            <action_dispatcher :resource="{
-              actions:[
-                {
-                  name:'ArchiveAction',
-                  icon:'fa fa-archive',
-                  label:'Archive'               
-                },
-                {
-                  name: 'FavoriteAction',
-                  icon: 'pi pi-star',
-                  label: 'Favorite',
-                }
-              ]
-            }" :item="{}" />
+
           </span>
-          <div class="pb-6 flex items-center justify-between">
+          <div class=" text-text flex items-center justify-between">
             <div class="flex items-center">
               <i :class="action.icon + ' p-2 mr-4'"></i>
               <span>{{ action.label }}</span>

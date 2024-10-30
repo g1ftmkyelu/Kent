@@ -1,5 +1,7 @@
 <template>
-  <div class="loader" ref="loader"></div>
+  <div class="loader-container">
+    <div class="blob"></div>
+  </div>
 </template>
 
 <script>
@@ -13,12 +15,9 @@ export default {
   methods: {
     startLoading() {
       this.originalTitle = document.title;
-      this.dots = ['•', '••', '•••', '••••', '•••••'];  // Simulate a moving dot or loader
-      this.currentDotIndex = 0;
       this.loadingInterval = setInterval(() => {
-        document.title = this.dots[this.currentDotIndex];
-        this.currentDotIndex = (this.currentDotIndex + 1) % this.dots.length;  // Cycle through the dots
-      }, 500);  // Update every 500ms for smooth animation
+        document.title = 'Loading' + '.'.repeat((Date.now() / 500) % 4);
+      }, 500);
     },
     stopLoading() {
       clearInterval(this.loadingInterval);
@@ -28,16 +27,40 @@ export default {
 }
 </script>
 
-
 <style scoped>
-.loader {
-  font-weight: bold;
-  font-family: sans-serif;
-  font-size: 30px;
-  animation: l1 1s linear infinite alternate;
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
 }
-.loader:before {
-  content: "Loading...";
+
+.blob {
+  background: rgba(var(--primary), 0.7);
+  border-radius: 50%;
+  margin: 10px;
+  height: 60px;
+  width: 60px;
+  box-shadow: 0 0 0 0 rgba(var(--primary), 1);
+  transform: scale(1);
+  animation: pulse 2s infinite;
 }
-@keyframes l1 {to{opacity: 0}}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(var(--primary), 0.7);
+  }
+  
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(var(--primary), 0);
+  }
+  
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(var(--primary), 0);
+  }
+}
 </style>

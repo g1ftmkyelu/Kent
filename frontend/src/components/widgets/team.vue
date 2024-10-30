@@ -1,8 +1,8 @@
 <template>
-  <section class="py-24 bg-cardLight">
+  <section class="py-24 bg-gradient-to-b from-gray-50 to-white">
     <div class="container mx-auto px-4">
       <h2 class="text-4xl font-bold text-center mb-16 text-gray-800 relative">
-        <span class="mb-4 inline-block text-text">{{ props.title }}</span>
+        <span class="mb-4 inline-block">{{ props.title }}</span>
         <span class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-secondary rounded-full"></span>
       </h2>
       <div class="flex flex-wrap justify-center gap-12">
@@ -13,14 +13,14 @@
           :class="{'animate-fade-in-up': true}"
           :style="`animation-delay: ${index * 150}ms`"
         >
-          <div class="bg-cardDark rounded-xl shadow-lg p-8 hover:shadow-2xl transition duration-300">
+          <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition duration-300">
             <img
               :src="member.imageUrl"
               :alt="member.name"
               class="w-48 h-48 rounded-full mx-auto mb-6 object-cover shadow-md transition duration-300 transform hover:scale-105"
             />
-            <h3 class="text-2xl font-semibold mb-2 text-secondary">{{ member.name }}</h3>
-            <p class="text-text mb-6">{{ member.position }}</p>
+            <h3 class="text-2xl font-semibold mb-2 text-gray-800">{{ member.name }}</h3>
+            <p class="text-gray-600 mb-6">{{ member.position }}</p>
             <div class="flex justify-center">
               
                <a v-for="link in member.socialLinks"

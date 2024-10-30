@@ -49,15 +49,11 @@ export default {
 }
 
 .fill-container {
-  width: 400px;
-  height: 50px;
-  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  background-color: var(--primary);
 }
 
-.avatar-container {
-  width: 40px;
-  height: 40px;
-  object-fit: cover;
-  border-radius: 50%;
-}
+
 </style>

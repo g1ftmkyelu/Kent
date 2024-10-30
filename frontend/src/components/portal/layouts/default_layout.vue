@@ -10,7 +10,9 @@ import Swal from 'sweetalert2';
 import breadcrumbs from '../../breadcrumbs.vue';
 import LanguageSelector from '../../language_selector.vue';
 import themeCustomizer from '../../theme-customizer.vue'
-
+import { CloseOutlined, MailOutlined, UserOutlined, SettingOutlined, LogoutOutlined, MenuOutlined } from '@ant-design/icons-vue';
+import notification_dropdown from './notification_dropdown.vue';
+import ResourseSearchbar from '../../widgets/ResourseSearchbar.vue';
 const sidebarState = ref(localStorage.getItem('sidebarState') || 'full');
 const sidebarOpen = computed(() => sidebarState.value !== 'hidden');
 const sidebarMinified = computed(() => sidebarState.value === 'minimized');
@@ -41,7 +43,9 @@ const menuItems = computed(() => {
 });
 
 // Add this to your props or compute it based on the current route
+const windowWidth = ref(window.innerWidth);
 
+const isMobile = computed(() => windowWidth.value < 1024);
 
 
 const toggleSidebar = () => {
@@ -65,7 +69,8 @@ const toggleSidebarMinified = () => {
 };
 
 const handleResize = () => {
-  if (window.innerWidth >= 1024) {
+  windowWidth.value = window.innerWidth;
+  if (windowWidth.value >= 1024) {
     if (sidebarState.value === 'hidden') {
       sidebarState.value = 'full';
     }
@@ -76,7 +81,7 @@ const handleResize = () => {
 };
 
 const isActive = (path) => {
-  return route.path.includes(path);
+  return route.path === path;
 };
 
 const toggleMenuGroup = (name) => {
@@ -169,10 +174,16 @@ onMounted(async () => {
   if (!localStorage.getItem("userName")) {
     router.push("/");
   }
-});
+
+
+
+}
+
+
+);
 
 onBeforeUnmount(() => {
-  window.removeEventListener("resize", handleResize);
+  window.removeEventListener('resize', handleResize);
 });
 
 watch(() => route.path, (path) => {
@@ -187,46 +198,48 @@ watch(() => route.path, (path) => {
   <div class="flex h-screen text-text">
     <!-- Sidebar -->
     <div :class="[
-      'bg-cardLight text-textLighter h-screen flex flex-col transition-all duration-300 border-r border-cardDark',
+      'bg-cardLight text-textLighter h-screen flex flex-col transition-all duration-300 border-r-[1.5px] border-textLighter',
       'fixed lg:static',
       sidebarOpen ? (sidebarMinified ? 'w-16' : 'w-64') : 'w-0',
       'z-10 overflow-visible',
     ]">
       <template v-if="sidebarOpen">
         <!-- Sidebar Header -->
-        <div class="p-4 flex items-center justify-between border-b border-cardDark">
+        <div class="p-4 flex items-center justify-between">
           <div class="w-full flex justify-center" v-if="!sidebarMinified">
             <Logo />
           </div>
           <button @click="toggleSidebarMinified"
-            class="text-textLighter text-xs focus:outline-none hover:text-gray-400 transition duration-300 lg:block hidden">
-            <i :class="sidebarMinified ? 'fas fa-chevron-right' : 'fas fa-chevron-left'"></i>
+            class="bg-primary text-textLighter font-extrabold text-lg mt-5 px-4 py-1 ml-5 rounded-xl border-2 border-textLighter focus:outline-none  transition duration-300 lg:block hidden">
+            <i :class="sidebarMinified ? 'pi pi-align-left' : 'pi pi-arrow-left'"></i>
           </button>
           <button @click="toggleSidebar"
-            class="text-textLighter text-xs focus:outline-none hover:text-gray-400 transition duration-300 lg:hidden">
+            class="bg-primary text-textLighter font-extrabold text-lg mt-4 px-4 py-1 absolute ml-52 rounded-xl border-2 border-textLighter focus:outline-none transition duration-300 lg:hidden">
             <i class="fas fa-times"></i>
           </button>
         </div>
         <!-- Sidebar Links -->
-        <nav class="flex-1 py-4 text-sm">
-          <ul class="space-y-2">
+        <nav class="flex-1 p-4 text-sm font-sans">
+          <a-skeleton v-if="isLoading" active :paragraph="{ rows: 6 }" />
+          <ul v-else>
             <!-- Home link -->
             <RouterLink :to="{
               path: `/${portalName}`,
               query: {
                 myParam: myQueryParam,
               }
-            }" class="block">
+            }" class="block text-text text-base font-medium common-text">
               <li :class="[
-                'flex items-center px-4 py-2 rounded-md hover:bg-secondary hover:text-textLight transition duration-300',
+                'flex items-center p-2 text-text rounded-md hover:bg-cardDark hover:text-text transition duration-300',
                 {
-                  'bg-primary text-textLight': isActive(`/${portalName}`),
+                  'text-primary': isActive(`/${portalName}`),
                 },
               ]">
-                <i class="pi pi-home text-lg" :class="sidebarMinified ? 'mr-0' : 'mr-3'"></i>
-                <span v-if="!sidebarMinified">{{ translationKeys.Home }}</span>
+                <i class="pi pi-home text-base" :class="sidebarMinified ? 'mr-0' : 'mr-3'"></i>
+                <span v-if="!sidebarMinified" class="font-medium common-text">{{ translationKeys.Home }}</span>
               </li>
             </RouterLink>
+
 
             <!-- Dynamic Menu Items -->
             <template v-for="(group, groupName) in menuItems.reduce((acc, item) => {
@@ -247,15 +260,15 @@ watch(() => route.path, (path) => {
                     query: {
                       myParam: myQueryParam,
                     },
-                  }" class="block">
+                  }" class="block text-text text-base font-medium common-text">
                     <li :class="[
-                      'flex items-center px-4 py-2 rounded-md hover:bg-secondary hover:text-textLight transition duration-300',
+                      'flex items-center text-text p-2 rounded-md hover:bg-cardDark hover:text-text transition duration-300',
                       {
-                        'bg-primary text-textLight': isActive(`/${portalName}/${item.path}`),
+                        'text-primary': isActive(`/${portalName}/${item.path}`),
                       },
                     ]">
-                      <i :class="[item.icon, 'text-lg', sidebarMinified ? 'mr-0' : 'mr-3']"></i>
-                      <span v-if="!sidebarMinified">{{ item.label }}</span>
+                      <i :class="[item.icon, 'text-base mr-3']"></i>
+                      <span v-if="!sidebarMinified" class="font-medium common-text">&nbsp;{{ item.label }}</span>
                     </li>
                   </RouterLink>
                 </template>
@@ -266,90 +279,101 @@ watch(() => route.path, (path) => {
                 <li @click="toggleMenuGroup(groupName)"
                   @mouseenter="hoveredMenuGroup = groupName; hoveredSubmenu = true" @mouseleave="hoveredSubmenu = false"
                   :class="[
-                    'flex items-center px-4 py-2 rounded-md text-secondary font-bold cursor-pointer transition duration-300 relative',
-                    { 'bg-backgroundHover': isMenuGroupOpen(groupName) },
+                    'flex items-center p-2 rounded-md text-text  cursor-pointer transition duration-300 relative',
+                    'bg-opacity-20 font-semibold',
+                    {
+                      'text-primary': !isMenuGroupOpen(groupName) && group.some(item => isActive(`/${portalName}/${item.path}`))
+                    }
                   ]">
-                  <i :class="[group[0].menuGroupIcon, 'text-lg', sidebarMinified ? 'mr-0' : 'mr-3']"></i>
-                  <span v-if="!sidebarMinified">{{ groupName }}</span>
+                  <i
+                    :class="[sidebarMinified ? `mr-0 ${group[0].menuGroupIcon}` : `mr-3 ${group[0].menuGroupIcon}`, 'text-lg']"></i>
+                  <span v-if="!sidebarMinified" class="common-text">{{ groupName }}</span>
                   <i v-if="!sidebarMinified" :class="[
-                    'fas ml-auto',
-                    isMenuGroupOpen(groupName) ? 'fa-chevron-down' : 'fa-chevron-right',
+                    'fas ml-auto text-text transition-transform duration-300',
+                    isMenuGroupOpen(groupName) ? 'fa-chevron-down transform rotate-180' : 'fa-chevron-right',
                   ]"></i>
 
                   <!-- Dropdown for minimized sidebar -->
-                  <div v-if="sidebarMinified && hoveredMenuGroup === groupName && hoveredSubmenu"
-                    class="absolute left-full top-0 bg-menubg shadow-lg rounded-md py-2 ml-1 z-50"
-                    style="min-width: 200px; max-height: calc(100vh - 4rem); overflow-y: auto;">
-                    <ul class="space-y-1">
-                      <template v-for="item in group" :key="item.name">
-                        <RouterLink :to="{
-                          path: `/${portalName}/${item.path}`,
-                          query: {
-                            myParam: myQueryParam,
-                          },
-                        }" class="block">
-                          <li :class="[
-                            'flex items-center px-4 py-2 hover:bg-secondary hover:text-textLight transition duration-300 z-50',
-                            {
-                              'bg-primary text-textLight': isActive(`/${portalName}/${item.path}`),
+                  <transition name="scale" mode="out-in">
+                    <div v-if="sidebarMinified && hoveredMenuGroup === groupName && hoveredSubmenu"
+                      class="absolute left-full top-0 bg-cardLight border border-textLighter shadow-lg rounded-md p-2 ml-1 z-50"
+                      style="min-width: 200px; max-height: calc(100vh - 4rem); overflow-y: auto;">
+                      <ul class="text-sm">
+                        <template v-for="item in group" :key="item.name">
+                          <RouterLink :to="{
+                            path: `/${portalName}/${item.path}`,
+                            query: {
+                              myParam: myQueryParam,
                             },
-                          ]">
-                            <i :class="[item.icon, 'text-lg mr-3']"></i>
-                            <span>{{ item.label }}</span>
-                          </li>
-                        </RouterLink>
-                      </template>
-                    </ul>
-                  </div>
+                          }" class="block text-text text-base font-medium common-text">
+                            <li :class="[
+                              'flex text-text items-center p-2 rounded-md hover:bg-cardDark hover:text-text transition duration-300 z-50',
+                              {
+                                'text-primary': isActive(`/${portalName}/${item.path}`),
+                              },
+                            ]">
+                              <i :class="[item.icon, 'text-base']"></i>
+                              <span class="font-medium common-text">&nbsp;{{ item.label }}</span>
+                            </li>
+                          </RouterLink>
+                        </template>
+                      </ul>
+                    </div>
+                  </transition>
                 </li>
 
                 <!-- Expanded view for grouped links -->
-                <ul v-if="isMenuGroupOpen(groupName) && !sidebarMinified" class="ml-4 mt-1 space-y-1">
-                  <template v-for="item in group" :key="item.name">
-                    <RouterLink :to="`/${portalName}/${item.path}`" class="block">
-                      <li :class="[
-                        'flex items-center px-4 py-2 rounded-md hover:bg-secondary hover:text-textLight transition duration-300',
-                        {
-                          'bg-primary text-textLight': isActive(`/${portalName}/${item.path}`),
-                        },
-                      ]">
-                        <i :class="[item.icon, 'text-lg mr-3']"></i>
-                        <span>{{ item.label }}</span>
-                      </li>
-                    </RouterLink>
+                <transition-group name="list" tag="ul">
+                  <template v-if="isMenuGroupOpen(groupName) && !sidebarMinified">
+                    <li v-for="item in group" :key="item.name">
+                      <RouterLink :to="`/${portalName}/${item.path}`" class="block text-text font-medium common-text">
+                        <div :class="[
+                          'flex items-center p-2 text-text rounded-md hover:bg-cardDark hover:text-text transition duration-300',
+                          {
+                            'text-primary': isActive(`/${portalName}/${item.path}`),
+                            'pl-8': !sidebarMinified,
+                          },
+                        ]">
+
+                          <span class="font-medium common-text">&nbsp;{{ item.label }}</span>
+                        </div>
+                      </RouterLink>
+                    </li>
                   </template>
-                </ul>
+                </transition-group>
               </template>
             </template>
           </ul>
         </nav>
+
       </template>
     </div>
     <!-- Main content area -->
-    <div class="flex-1 flex flex-col w-[100vw] overflow-x-hidden">
+    <div class="flex-1 flex flex-col w-[100vw] overflow-x-scroll">
       <!-- Top Bar -->
-      <div class="bg-cardLight text-black p-4 flex items-center justify-between border-b border-cardDark">
+      <a-layout-header
+        class="bg-cardLight text-black p-2 flex items-center justify-between border-b-[1.5px] border-textLighter">
         <div class="flex items-center">
-          <button @click="toggleSidebar" v-if="!sidebarOpen"
-            class="text-black focus:outline-none hover:text-gray-400 transition duration-300">
-            <i class="fa fa-bars text-xl"></i>
-          </button>
-          <div v-if="sidebarMinified || !sidebarOpen" class="ml-5">
-            <Logo />
+          <a-button v-if="!sidebarOpen" type="text" @click="toggleSidebar"
+            class="text-text hover:text-primary transition duration-300">
+            <template #icon>
+              <MenuOutlined />
+            </template>
+          </a-button>
+          <div  class="h-5 ml-8 mt-0">
+            <ResourseSearchbar/>
           </div>
         </div>
-        <div class="flex items-center space-x-4">
+        <div class="flex items-center pl-1 mt-3 space-x-4">
           <themeCustomizer />
+          <notification_dropdown />
           <LanguageSelector />
-          <span @click="openProfileDrawer"
-            class="text-secondary cursor-pointer focus:outline-none hover:text-gray-400 transition duration-300">
-            <i class="pi pi-user text-xl"></i>
-          </span>
+          <a-avatar :src="avatarUrl" :size="34" @click="openProfileDrawer"
+            class="cursor-pointer hover:opacity-80 transition duration-300" />
         </div>
-      </div>
-
+      </a-layout-header>
       <!-- Main Content -->
-      <div class="flex-1 shadow-inner bg-background overflow-y-auto transition-all duration-300">
+      <div class=" flex-1 shadow-inner bg-background overflow-y-auto transition-all duration-300">
         <transition name="slide-fade" mode="out-in">
           <div>
             <breadcrumbs />
@@ -358,152 +382,87 @@ watch(() => route.path, (path) => {
         </transition>
       </div>
 
-      <!-- Profile Drawer with Overlay -->
-      <transition name="fade">
-        <div v-if="profileDrawerOpen" class="fixed inset-0 bg-black bg-opacity-50 z-40" @click="closeProfileDrawer">
-        </div>
-      </transition>
       <transition name="slide-fade">
-        <div v-if="profileDrawerOpen"
-          class="fixed inset-y-0 right-0 w-80 bg-cardLight text-textLighter shadow-xl z-50 overflow-y-auto border-l border-cardDark">
-          <div class="p-6">
-            <div class="flex justify-between items-center mb-6">
-              <h2 class="text-2xl font-bold text-text">{{ translationKeys.Profile }}</h2>
-              <button @click="closeProfileDrawer" class="text-textLighter hover:text-text transition duration-300">
-                <i class="fas fa-times"></i>
-              </button>
+        <a-drawer v-model:visible="profileDrawerOpen" :closable="false" placement="right" :width="450"
+          class="profile-drawer border-l border-textLighter">
+          <div class="profile-content">
+            <div class="profile-header">
+              <h2 class="text-lg font-semibold">{{ translationKeys.Profile }}</h2>
+              <a-button type="text" @click="closeProfileDrawer">
+                <template #icon>
+                  <CloseOutlined />
+                </template>
+              </a-button>
             </div>
-            <div class="mb-6">
-              <img :src="avatarUrl" alt="Profile" class="w-32 h-32 rounded-full mx-auto mb-4">
-              <h3 class="text-xl font-semibold text-center">{{ user?.fullname }}</h3>
-            </div>
+
+            <a-avatar :src="avatarUrl" :size="64" class="mb-4" />
+            <h3 class="text-base font-medium">{{ user?.fullname }}</h3>
+            <p class="text-sm text-gray-500 mb-6">{{ user?.role }}</p>
+
+            <a-divider />
+
             <div class="mb-4">
-              <p class="text-gray-600">{{ translationKeys.Email }}: {{ user?.email }}</p>
-              <p class="text-gray-600">{{ translationKeys.Role }}: {{ user?.role }}</p>
+              <h4 class="text-sm font-medium mb-2">{{ translationKeys.ContactInfo }}</h4>
+              <p class="text-sm">
+                <MailOutlined class="mr-2" />{{ user?.email }}
+              </p>
             </div>
-            <div class="flex justify-between">
-              <RouterLink class="w-full" :to="`${portalName}/profile`">
-                <button
-                  class="w-full bg-secondary text-white px-4 py-2 rounded hover:bg-green-600 transition duration-300">
-                  <i class="fas fa-cog mr-2"></i>
+
+            <div class="mb-4">
+              <h4 class="text-sm font-medium mb-2">{{ translationKeys.AccountDetails }}</h4>
+              <p class="text-sm">
+                <UserOutlined class="mr-2" />{{ translationKeys.Role }}: {{ user?.role }}
+              </p>
+            </div>
+
+            <a-divider />
+
+            <div class="profile-actions">
+              <RouterLink :to="`/${portalName}/profile`">
+                <a-button secondary block class="mb-2">
+                  <template #icon>
+                    <SettingOutlined />
+                  </template>
                   {{ translationKeys.Settings }}
-                </button>
+                </a-button>
               </RouterLink>
-              <div class="mx-2"></div>
-              <button @click="logout"
-                class="w-full bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition duration-300">
-                <i class="fas fa-sign-out-alt mr-2"></i>
+              <a-button danger block @click="logout">
+                <template #icon>
+                  <LogoutOutlined />
+                </template>
                 {{ translationKeys.Logout }}
-              </button>
+              </a-button>
             </div>
           </div>
-        </div>
+        </a-drawer>
       </transition>
     </div>
+    <!-- Overlay for mobile -->
+    <div v-if="sidebarOpen && isMobile" class="fixed inset-0 bg-black bg-opacity-50 " @click="toggleSidebar">
+    </div>
+
   </div>
 </template>
 
 <style scoped>
-.sidebar {
-  transition: width 0.3s ease;
-}
-
-.absolute {
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.absolute:hover {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.slide-fade-enter-active {
-  animation: slideFadeEnter 0.5s ease both;
-}
-
-.slide-fade-leave-active {
-  animation: slideFadeLeave 0.5s ease both;
-}
-
-@keyframes slideFadeEnter {
-  0% {
-    opacity: 0;
-    transform: translateX(100%);
-  }
-
-  100% {
-    opacity: 1;
-    transform: translateX(0);
+.profile-drawer {
+  .ant-drawer-body {
+    padding: 0;
   }
 }
 
-@keyframes slideFadeLeave {
-  0% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translateX(100%);
-  }
+.profile-content {
+  padding: 24px;
 }
 
-.slide-fade-enter-active,
-.slide-fade-leave-active {
-  transition: all 0.3s ease;
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
 }
 
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-  transform: translateX(100%);
-  opacity: 0;
-}
-
-.submenu-enter-active,
-.submenu-leave-active {
-  transition: opacity 0.3s, transform 0.3s;
-}
-
-.submenu-enter-from,
-.submenu-leave-to {
-  opacity: 0;
-  transform: translateX(-10px);
-}
-
-@media (min-width: 1024px) {
-  .sidebar {
-    transform: translateX(0) !important;
-  }
-}
-
-@media (max-width: 1023px) {
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    z-index: 50;
-  }
-
-  .sidebar-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 40;
-  }
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
+.profile-actions {
+  margin-top: 24px;
 }
 </style>

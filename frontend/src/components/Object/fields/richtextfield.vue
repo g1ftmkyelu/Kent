@@ -1,7 +1,6 @@
 <template>
   <div class="rich-text-field-display">
     <div v-html="truncatedValue"></div>
-  
   </div>
 </template>
 
@@ -15,24 +14,25 @@ export default {
     },
     value: {
       type: String,
-      required: true,
+      required: false, // Changed to false to allow undefined values
     },
   },
   data() {
     return {
-      maxLength: 60,
+      maxLength: 50,
       showFullText: false,
     };
   },
   computed: {
     truncatedValue() {
-      if (this.showFullText || this.value.length <= this.maxLength) {
-        return this.value;
+      const safeValue = this.value || ''; // Handle undefined value
+      if (this.showFullText || safeValue.length <= this.maxLength) {
+        return safeValue;
       }
-      return this.value.slice(0, this.maxLength) + '...';
+      return safeValue.slice(0, this.maxLength) + '...';
     },
     isTextTruncated() {
-      return this.value.length > this.maxLength;
+      return (this.value || '').length > this.maxLength; // Handle undefined value
     },
     seeMoreText() {
       return this.showFullText ? 'See less' : 'See more';
@@ -55,6 +55,5 @@ export default {
 
 .rich-text-field-display {
   overflow: auto;
-  font-size: 1rem;
 }
 </style>

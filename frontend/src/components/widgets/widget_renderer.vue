@@ -27,6 +27,9 @@
   import Market from './market.vue';
   import HeroCarousel from './hero_carousel.vue';
   import FeaturedProducts from './featured_products.vue';
+  import Market_place from '../portal/render_modes/shop/market_place.vue';
+  import product from '../portal/render_modes/shop/product.vue';
+  import footer from './footer.vue';
   
   const props = defineProps({
     widgets: {
@@ -52,6 +55,9 @@
     market: markRaw(Market),
     'hero-carousel': markRaw(HeroCarousel),
     'featured-products': markRaw(FeaturedProducts),
+    'search':markRaw(Market_place),
+    'product':markRaw(product),
+    'footer':markRaw(footer),
   };
   
   const getComponent = (type) => {

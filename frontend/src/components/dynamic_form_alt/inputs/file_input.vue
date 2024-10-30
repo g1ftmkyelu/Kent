@@ -1,32 +1,72 @@
 <template>
-  <div class="form-group file-input">
-    <label :for="name" class="file-input__label">{{ title }}</label>
-    <div class="file-input__wrapper">
-      <input
-        type="file"
-        :id="name"
-        :name="name"
-        @change="updateValue"
-        :accept="accept"
-        class="file-input__control"
-        multiple
+  <div class="mb-4">
+    <a-form-item :label="title" :name="name">
+      <a-upload
+        :accept="acceptTypes"
+        :multiple="isArrayType"
+        :fileList="antdFiles"
+        :beforeUpload="beforeUpload"
+        :showUploadList="false"
+        :customRequest="handleCustomRequest"
+        @remove="handleRemove"
+        :onChange="handleChange"
+        class="upload-wrapper"
+      >
+        <a-button icon="upload">
+          {{ translationKeys.Browse }}
+        </a-button>
+      </a-upload>
+      
+      <a-button 
+        v-if="files.length && !isUploading" 
+        type="primary" 
+        @click="uploadFiles"
+        class="mt-4"
+      >
+        Upload to Firebase
+      </a-button>
+
+      <a-progress 
+        v-if="isUploading" 
+        :percent="uploadProgress" 
+        status="active" 
+        class="mt-4"
       />
-      <label :for="name" class="file-input__button">Browse</label>
-      <span class="file-input__text" v-if="files.length">
-        {{ files.map(file => file.name).join(', ') }}
-      </span>
-      <span class="file-input__placeholder" v-else>No files chosen</span>
-    </div>
-    <div class="preview-container">
-      <div v-for="(file, index) in files" :key="index" class="preview-item">
-        <img v-if="isImage(file)" :src="getPreviewUrl(file)" alt="Preview" class="preview-image" />
-        <span v-else class="preview-filename">{{ file.name }}</span>
-      </div>
-    </div>
+
+      <a-row :gutter="[16, 16]" class="mt-4">
+        <a-col :span="12" :sm="8" :md="6" v-for="(file, index) in displayFiles" :key="index">
+          <a-card hoverable class="h-full">
+            <template #cover>
+              <a-spin :spinning="!file.previewLoaded">
+                <img v-if="isImage(file)"
+                     :src="getPreviewUrl(file)"
+                     alt="Preview" 
+                     class="w-full h-32 object-cover"
+                     @load="file.previewLoaded = true"
+                     @error="file.previewLoaded = true" />
+                <video v-else-if="isVideo(file)" :src="getPreviewUrl(file)" controls class="w-full h-32 object-cover"></video>
+                <audio v-else-if="isAudio(file)" :src="getPreviewUrl(file)" controls class="w-full mt-2"></audio>
+                <div v-else class="w-full h-32 flex items-center justify-center p-2 text-center break-words">
+                  {{ file.name }}
+                </div>
+              </a-spin>
+            </template>
+            <template #actions>
+              <a-button type="danger" shape="circle" icon="delete" @click="removeFile(index)" />
+            </template>
+          </a-card>
+        </a-col>
+      </a-row>
+    </a-form-item>
   </div>
 </template>
 
 <script>
+import { translationKeys } from '@/executables/translation';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/storage';
+import { message } from 'ant-design-vue';
+
 export default {
   name: 'FileInput',
   props: {
@@ -38,9 +78,10 @@ export default {
       type: String,
       required: true
     },
-    accept: {
+    type: {
       type: String,
-      required: true
+      required: true,
+      validator: (value) => ['image', 'video', 'audio', 'document', 'image array', 'video array', 'audio array', 'document array'].includes(value)
     },
     initialData: {
       type: [String, File, Array],
@@ -49,94 +90,175 @@ export default {
   },
   data() {
     return {
-      files: []
+      files: [],
+      initialFiles: [],
+      translationKeys: translationKeys,
+      isUploading: false,
+      uploadProgress: 0,
     };
   },
+  computed: {
+    isArrayType() {
+      return this.type.includes('array');
+    },
+    acceptTypes() {
+      switch (this.type.replace(' array', '')) {
+        case 'image':
+          return 'image/*';
+        case 'video':
+          return 'video/*';
+        case 'audio':
+          return 'audio/*';
+        case 'document':
+          return '.doc,.docx,.pdf,.txt';
+        default:
+          return '';
+      }
+    },
+    antdFiles() {
+      return this.files.map((file, index) => ({
+        uid: -index,
+        name: file.name,
+        status: 'done',
+        url: file.url,
+      }));
+    },
+    displayFiles() {
+      return [...this.initialFiles, ...this.files];
+    }
+  },
+  mounted() {
+    this.initializeFiles();
+  },
   methods: {
-    updateValue(event) {
-      this.files = Array.from(event.target.files);
-      this.$emit('update:value', this.files);
+    initializeFiles() {
+      if (this.initialData) {
+        if (Array.isArray(this.initialData)) {
+          this.initialFiles = this.initialData.map(url => ({
+            name: this.getFileNameFromUrl(url),
+            url: url,
+            previewLoaded: false
+          }));
+        } else if (typeof this.initialData === 'string') {
+          this.initialFiles = [{
+            name: this.getFileNameFromUrl(this.initialData),
+            url: this.initialData,
+            previewLoaded: false
+          }];
+        }
+      }
+    },
+    getFileNameFromUrl(url) {
+      return url.split('/').pop();
+    },
+    beforeUpload(file) {
+      const localFile = {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        url: URL.createObjectURL(file),
+        originalFile: file,
+        previewLoaded: false
+      };
+      
+      if (this.isArrayType) {
+        this.files.push(localFile);
+      } else {
+        this.files = [localFile];
+      }
+      
+      return false;
+    },
+    async uploadFiles() {
+      this.isUploading = true;
+      this.uploadProgress = 0;
+      
+      const totalSize = this.files.reduce((sum, file) => sum + file.size, 0);
+      let uploadedSize = 0;
+
+      try {
+        const uploadedFiles = await Promise.all(this.files.map(async file => {
+          const uploadedFile = await this.uploadToFirebase(file.originalFile, (progress) => {
+            uploadedSize += progress;
+            this.uploadProgress = Math.round((uploadedSize / totalSize) * 100);
+          });
+          return { ...file, ...uploadedFile };
+        }));
+        
+        this.files = uploadedFiles;
+        const uploadedUrls = this.files.map(f => f.url);
+        const allUrls = [...this.initialFiles.map(f => f.url), ...uploadedUrls];
+        this.$emit('update:value', this.isArrayType ? allUrls : allUrls[allUrls.length - 1]);
+
+        console.log('Uploaded Firebase URLs:', uploadedUrls);
+        message.success(`Successfully uploaded ${this.files.length} file${this.files.length > 1 ? 's' : ''} to Firebase`);
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        message.error('Failed to upload file(s). Please try again.');
+      } finally {
+        this.isUploading = false;
+        this.uploadProgress = 100;
+      }
+    },
+    async uploadToFirebase(file, onProgress) {
+      const storageRef = firebase.storage().ref();
+      const fileRef = storageRef.child(`${this.type.replace(' array', '')}/${file.name}`);
+      
+      const uploadTask = fileRef.put(file);
+
+      uploadTask.on('state_changed', (snapshot) => {
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        onProgress(progress);
+      }, (error) => {
+        console.error('Upload error:', error);
+        message.error('Upload failed. Please try again.');
+      });
+
+      return new Promise((resolve, reject) => {
+        uploadTask.then(() => {
+          fileRef.getDownloadURL().then((url) => {
+            resolve({ url });
+          }).catch(reject);
+        }).catch(reject);
+      });
+    },
+    removeFile(index) {
+      this.files.splice(index, 1);
+      this.$emit('update:value', this.isArrayType ? this.files.map(f => f.url) : null);
+    },
+    handleCustomRequest({ file, onSuccess, onError }) {
+      this.beforeUpload(file);
+      // Simulate a successful upload
+      setTimeout(() => {
+        onSuccess(file);
+      }, 1000);
+    },
+    handleChange(info) {
+      if (info.file.status === 'done') {
+        message.success(`${info.file.name} file uploaded successfully`);
+      } else if (info.file.status === 'error') {
+        message.error(`${info.file.name} file upload failed.`);
+      }
     },
     isImage(file) {
-      return file && file.type.startsWith('image/');
+      return file.type.startsWith('image/') || (file.name && file.name.match(/\.(jpg|jpeg|png|gif)$/i));
+    },
+    isVideo(file) {
+      return file.type.startsWith('video/') || (file.name && file.name.match(/\.(mp4|webm|ogg)$/i));
+    },
+    isAudio(file) {
+      return file.type.startsWith('audio/') || (file.name && file.name.match(/\.(mp3|wav|ogg)$/i));
     },
     getPreviewUrl(file) {
-      return URL.createObjectURL(file);
-    }
+      return file.url || (file.originalFile && URL.createObjectURL(file.originalFile));
+    },
   }
 };
 </script>
 
 <style scoped>
-.file-input {
-  margin-bottom: 20px;
-}
-
-.file-input__label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.file-input__wrapper {
+.upload-wrapper {
   display: flex;
   align-items: center;
-}
-
-.file-input__control {
-  display: none;
-}
-
-.file-input__button {
-  display: inline-block;
-  padding: 10px 20px;
-  color: #fff;
-  background-color: #007bff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  margin-right: 10px;
-}
-
-.file-input__button:hover {
-  background-color: #0056b3;
-}
-
-.file-input__text,
-.file-input__placeholder {
-  font-size: 14px;
-  color: #666;
-}
-
-.preview-container {
-  display: flex;
-  flex-wrap: wrap;
-  margin-top: 10px;
-  border-top: 1px solid #ddd;
-  padding-top: 10px;
-}
-
-.preview-item {
-  position: relative;
-  margin-right: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.preview-image {
-  max-width: 100px;
-  max-height: 100px;
-  object-fit: cover;
-}
-
-.preview-filename {
-  padding: 5px;
-  font-size: 14px;
-  color: #333;
-  text-align: center;
-  background-color: #f9f9f9;
 }
 </style>

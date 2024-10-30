@@ -1,8 +1,8 @@
 <template>
     <div class="phone-number-field">
-      <a-typography-text>
+    
         <a :href="`tel:${value}`">{{ formattedPhoneNumber }}</a>
-      </a-typography-text>
+
     </div>
   </template>
   
@@ -42,5 +42,6 @@
   <style scoped>
   .phone-number-field {
     width: 100%;
+    font-size: 0.2rem;
   }
   </style>

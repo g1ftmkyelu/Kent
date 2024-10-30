@@ -21,11 +21,40 @@ exports.generateMongooseSchemas = (entities) => {
             _id: true,
           }),
         ];
+      } else if (field.type === "prices") {
+        schemaFields[field.name] = {
+          amount: {
+            type: mongoose.Schema.Types.Decimal128,
+            required: field.required,
+            default: 0,
+            min: field.min || 0,
+            max: field.max || Number.MAX_VALUE,
+          },
+          currency: {
+            type: String,
+            required: field.required,
+            enum: [
+              "MWK",
+              "USD",
+              "EUR",
+              "GBP",
+              "JPY",
+              "CAD",
+              "AUD",
+              "CHF",
+              "CNY",
+              "INR",
+              "BRL",
+            ],
+            default: field.defaultCurrency || "USD",
+          },
+        };
       } else {
         schemaFields[field.name] = { type: getFieldMongooseType(field.type) };
 
         switch (field.type) {
           case "number":
+          case "price":
           case "decimal":
             schemaFields[field.name].min = field.min || Number.MIN_VALUE;
             schemaFields[field.name].max = field.max || Number.MAX_VALUE;
@@ -109,10 +138,40 @@ function generateNestedSchema(nestedSchema) {
   const nestedFields = {};
 
   for (const field of nestedSchema) {
-    nestedFields[field.name] = { type: getFieldMongooseType(field.type) };
+    if (field.type === "prices") {
+      nestedFields[field.name] = {
+        amount: {
+          type: mongoose.Schema.Types.Decimal128,
+          required: field.required,
+          default: 0,
+          min: field.min || 0,
+          max: field.max || Number.MAX_VALUE,
+        },
+        currency: {
+          type: String,
+          required: field.required,
+          enum: [
+            "MWK",
+            "USD",
+            "EUR",
+            "GBP",
+            "JPY",
+            "CAD",
+            "AUD",
+            "CHF",
+            "CNY",
+            "INR",
+            "BRL",
+          ],
+          default: field.defaultCurrency || "USD",
+        },
+      };
+    } else {
+      nestedFields[field.name] = { type: getFieldMongooseType(field.type) };
 
-    if (field.required) {
-      nestedFields[field.name].required = true;
+      if (field.required) {
+        nestedFields[field.name].required = true;
+      }
     }
   }
 
@@ -126,6 +185,7 @@ function getFieldMongooseType(fieldType) {
     case "richtext":
       return String;
     case "number":
+    case "price":
       return Number;
     case "decimal":
       return mongoose.Schema.Types.Decimal128;
@@ -167,6 +227,32 @@ function getFieldMongooseType(fieldType) {
     case "tags":
     case "image array":
       return [String];
+    case "prices":
+      return {
+        amount: {
+          type: mongoose.Schema.Types.Decimal128,
+          required: true,
+          default: 0,
+        },
+        currency: {
+          type: String,
+          required: true,
+          enum: [
+            "MWK",
+            "USD",
+            "EUR",
+            "GBP",
+            "JPY",
+            "CAD",
+            "AUD",
+            "CHF",
+            "CNY",
+            "INR",
+            "BRL",
+          ],
+          default: "MWK",
+        },
+      };
     default:
       return mongoose.Schema.Types.Mixed; // Default to mixed type
   }

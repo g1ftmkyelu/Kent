@@ -26,24 +26,38 @@ export default {
       type: Array,
       required: true,
     },
+    rowHeight: {
+      type: String,
+      default: 'minmax(min-content, auto)' // This helps with dynamic sizing
+    },
+    gap: {
+      type: String,
+      default: '10px'
+    }
   },
+
   computed: {
     gridStyle() {
       return {
         display: 'grid',
-        gridTemplateRows: `repeat(${this.rows}, 1fr)`,
+        gridTemplateRows: `repeat(${this.rows}, ${this.rowHeight})`,
         gridTemplateColumns: `repeat(${this.columns}, 1fr)`,
-        gap: '10px', // Optional: Adjust the gap between items
+        gap: this.gap,
+        minHeight: '0', // Prevents unnecessary expansion
+        width: '100%',
       };
     },
   },
+
   methods: {
     getItemStyle(item) {
       return {
         gridRow: `${item.rowStart} / span ${item.rowSpan}`,
         gridColumn: `${item.colStart} / span ${item.colSpan}`,
-        padding: '10px', // Optional: Padding inside each grid item
+        padding: '10px',
         boxSizing: 'border-box',
+        minHeight: '0', // Prevents unnecessary expansion
+        overflow: 'auto', // Handles overflow content
       };
     },
   },
@@ -52,17 +66,29 @@ export default {
 
 <style scoped>
 .grid-layout {
-  width: auto;
+  width: 100%;
   height: auto;
-  padding: auto;
+  margin: 2px;
+  min-height: 0; /* Prevents unnecessary expansion */
 }
 
 .grid-item {
-  overflow: auto;
-  border:0;
+  min-height: 0; /* Prevents unnecessary expansion */
+  height: 100%;
 }
 
-.grid-item:hover {
+/* Mobile responsiveness */
+@media screen and (max-width: 768px) {
+  .grid-layout {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto !important;
+    gap: 10px !important;
+  }
 
+  .grid-item {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+  }
 }
 </style>

@@ -1,8 +1,8 @@
 <template>
   <div class="quick-stats-section">
-    <h2 class="heading">{{ translationKeys.QuickStats }}</h2>
+    <h2 class="text-2xl font-bold">{{ translationKeys.QuickStats }}</h2>
     <div v-if="loading" class="text-center">
-      <Sf_loader />
+      <a-skeleton active />
     </div>
     <div v-else-if="error" class="text-center text-red-500">
       {{ error }}
@@ -15,23 +15,19 @@
   </div>
 </template>
 
-
 <script>
-import { defineComponent, ref, onMounted, defineProps } from 'vue';
+import { defineComponent, ref, onMounted } from 'vue';
 import axios from 'axios';
-import Highcharts from 'highcharts';
 import HighchartsVue from 'highcharts-vue';
+import { Skeleton } from 'ant-design-vue';  // Import Skeleton from Ant Design
 import { translationKeys } from '@/executables/translation';
 import { getFilteredResources } from "../../../executables/accessControl";
-import Sf_loader from '../../u_i/sf_loader.vue';
-
-
 
 export default defineComponent({
   name: 'QuickStatsSection',
   components: {
     highcharts: HighchartsVue.Chart,
-    Sf_loader
+    'a-skeleton': Skeleton  // Register the Skeleton component from Ant Design
   },
   data() {
     return {
@@ -43,7 +39,6 @@ export default defineComponent({
     const charts = ref([]);
     const loading = ref(true);
     const error = ref(null);
-
 
     const fetchData = async (resource) => {
       try {
@@ -68,18 +63,18 @@ export default defineComponent({
         options: {
           chart: {
             type,
-            backgroundColor: backgroundColor // Use the background color from CSS variables
+            backgroundColor: backgroundColor
           },
           title: {
             text: title,
             style: {
-              color: textColor // Use text color from CSS variables
+              color: textColor
             }
           },
           series: [{
             data
           }],
-          colors: [primaryColor, secondaryColor], // Apply the color array from CSS variables
+          colors: [primaryColor, secondaryColor],
           plotOptions: {
             pie: {
               allowPointSelect: true,
@@ -88,7 +83,7 @@ export default defineComponent({
                 enabled: true,
                 format: '<b>{point.name}</b>: {point.percentage:.1f} %',
                 style: {
-                  color: textColor // Use text color for labels
+                  color: textColor
                 }
               }
             },
@@ -96,13 +91,12 @@ export default defineComponent({
               dataLabels: { enabled: true },
               showInLegend: true,
               colorByPoint: true,
-              colors: [primaryColor, secondaryColor, backgroundHoverColor], // Use colors from CSS variables
+              colors: [primaryColor, secondaryColor, backgroundHoverColor],
             }
           }
         }
       };
     };
-
 
     const findStatusFields = (schema, prefix = '') => {
       let statusFields = [];
@@ -125,7 +119,6 @@ export default defineComponent({
       return statusFields;
     };
 
-
     const getNestedValue = (obj, path) => {
       const parts = path.split('.');
       let current = obj;
@@ -141,7 +134,6 @@ export default defineComponent({
     };
 
     const processResource = async (resource) => {
-      // Check if the resource has a schema
       if (!resource.schema || !Array.isArray(resource.schema)) {
         console.log(`Skipping resource ${resource.name} as it doesn't have a valid schema.`);
         return;
@@ -189,7 +181,6 @@ export default defineComponent({
         const roleId = localStorage.getItem("role");
         Resources.value = await getFilteredResources(roleId);
         for (const resource of Resources.value) {
-          // Only process resources with a schema
           if (resource.schema && Array.isArray(resource.schema)) {
             await processResource(resource);
           } else {

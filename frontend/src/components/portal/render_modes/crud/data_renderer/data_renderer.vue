@@ -1,13 +1,7 @@
 <template>
-  <div v-if="!resource.tabs" class="w-[100%] card lg:w-[82.5vw]">
+  <div v-if="!resource.tabs" class='w-[95vw] lg:m-0 lg:w-[100%] card rounded-lg px-6 sm:p-8 lg:px-10' >
     <div class="px-6 sm:p-8 lg:px-10">
-      <div class="flex items-center justify-between">
-        <button
-          class="mt-2 p-2 flex justify-center items-center mb-4"
-          v-print="'#report'">
-          <i class="fas fa-print"></i>
-        </button>
-    
+      <div class="flex items-center justify-between">    
       </div>
       <div id="report">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -50,7 +44,11 @@
               </div>
               <!-- Image Array -->
               <div v-else-if="field.type === 'image array'" class="w-full">
-                <Atomicgallery :images="formData[field.name]" />
+                <a-carousel :autoplay="true">
+                  <a-carousel-item v-for="(image, index) in formData[field.name]" :key="index">
+                    <img :src="image" :alt="field.title" class="w-full h-auto object-cover" />
+                  </a-carousel-item>
+                </a-carousel>
               </div>
               <!-- Radio -->
               <div v-else-if="field.type === 'radio'">
@@ -94,6 +92,9 @@
               </div>
               <!-- Range -->
               <div v-else-if="field.type === 'range'">
+                <p>{{ formData[field.name] }}</p>
+              </div>
+              <div v-else-if="field.type === 'status'">
                 <p>{{ formData[field.name] }}</p>
               </div>
               <!-- Tags -->
@@ -153,13 +154,13 @@
 import { getFilteredResources } from "../../../../../executables/accessControl";
 import refOptionsService from "../../../../../executables/refOptionsService"
 import print from "vue3-print-nb";
-import Atomicgallery from "../../gallery/atomic_gallery.vue";
+import { Carousel as ACarousel } from 'ant-design-vue';
 import ResourceRenderer from "../../../../portal/resource_renderer.vue"
 import resource_tabs from "./resource_tabs.vue";
 export default {
 directives: { print },
 name: "app",
-components: { Atomicgallery, ResourceRenderer, resource_tabs },
+components: { ACarousel, ResourceRenderer, resource_tabs },
 props: {
   resource: {
     type: Object,

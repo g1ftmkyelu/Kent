@@ -1,4 +1,6 @@
 import { translationKeys } from '@/executables/translation';
+import { render } from 'lightgallery/vue';
+import * as Yup from "yup";
 
 export const system_settings = [
   {
@@ -8,6 +10,49 @@ export const system_settings = [
     resourceGroup: translationKeys.SystemSettings || "System",
     label: translationKeys.Notifications||"Notifications",
     renderMode: "notifications",
+  },
+  {
+    name: "system-logs",
+    path: "system-logs",
+    icon: "pi pi-file",
+    label: translationKeys.SystemLogs || "System Logs",
+    menuGroup: translationKeys.Security || "Security",
+    menuGroupIcon: "pi pi-shield",
+    renderMode: "crud",
+    schema: [
+
+      {
+        name: "action",
+        title: translationKeys.Action || "Action",
+        type: "text",
+        validation: Yup.string().required("Action is required"),
+      },
+      {
+        name: "user",
+        title: translationKeys.User || "User",
+        type: "text",
+        validation: Yup.string().required("User is required"),
+      },
+      {
+        name: "status",
+        title: translationKeys.Status || "Status",
+        type: "status",
+        options: [
+          { label: "Success", value: "Success", color: "#28a745" },
+          { label: "Failure", value: "Failure", color: "#dc3545" }
+        ],
+        validation: Yup.string().required("Status is required"),
+      }
+    ],
+    layout: {
+      rows: 1,
+      columns: 3,
+      fields: {
+        action: { rowStart: 1, colStart: 2, rowSpan: 1, colSpan: 1 },
+        user: { rowStart: 1, colStart: 3, rowSpan: 1, colSpan: 1 },
+        status: { rowStart: 1, colStart: 1, rowSpan: 1, colSpan: 2 }
+      }
+    }
   },
   {
     name: "company-config",

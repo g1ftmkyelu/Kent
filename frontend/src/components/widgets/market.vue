@@ -1,287 +1,293 @@
 <template>
-  <div class="market-container mt-8 mx-3">
-    <h1 class="heading">Market</h1>
+  <div class="container mx-auto">
+    <!-- Main Grid Container -->
+    <div class="grid grid-cols-1 gap-6">
+      <!-- Categories - Full Width -->
+      <div class="w-full">
+        <DataGroup :resource="categoryResource" display-mode="carousel" :Layout="resource.layout"
+          :show-pagination="true" :show-header="true" header-title="Categories" :show-more-link="false"
+          more-link-text="View All" pagination-mode="none" :max-display-items="6" sort-field="" sort-order="asc"
+          @more-click="handleMoreClick" :carousel-items-to-show="3" @fetch-success="handleFetchSuccess"
+          @fetch-error="handleFetchError" @page-change="handlePageChange" @page-size-change="handlePageSizeChange" />
+      </div>
 
+      <!-- New Arrivals - Full Width -->
+      <div class="w-full">
+        <DataGroup :resource="resource" display-mode="carousel" :Layout="resource.layout" :show-pagination="true"
+          :show-header="true" header-title="New Arrivals" :show-more-link="false" more-link-text="View All"
+          pagination-mode="none" :max-display-items="5" sort-field="" sort-order="asc" @more-click="handleMoreClick"
+          :carousel-items-to-show="3" @fetch-success="handleFetchSuccess" @fetch-error="handleFetchError"
+          @page-change="handlePageChange" @page-size-change="handlePageSizeChange" />
+      </div>
 
+      <!-- Trending and Latest Section -->
+      <div class="grid grid-cols-1 md:grid-cols-6 gap-6">
+        <!-- Trending Section - 3/4 Width -->
+        <div class="md:col-span-4">
+          <DataGroup :resource="productPrimeResource" display-mode="list" :Layout="productPrimeResource.layout"
+            :show-pagination="true" :show-header="true" header-title="Trending" :show-more-link="false"
+            more-link-text="View All" :max-display-items="7" sort-field="" sort-order="desc" pagination-mode="none"
+            @more-click="handleMoreClick" @fetch-success="handleFetchSuccess" @fetch-error="handleFetchError"
+            @page-change="handlePageChange" @page-size-change="handlePageSizeChange" />
+        </div>
 
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="heading">New Arrivals</h2>
-      <action_dispatcher :resource="marketActions" :item="{}" :orientation="'icons'" />
+        <!-- Latest Section - 1/4 Width -->
+        <div class="md:col-span-2">
+          <DataGroup :resource="resource" display-mode="list" :Layout="resource.layout" :show-pagination="true"
+            :show-header="true" header-title="Latest" :show-more-link="false" more-link-text="View All"
+            :max-display-items="24" sort-field="" sort-order="asc" @more-click="handleMoreClick" pagination-mode="none"
+            @fetch-success="handleFetchSuccess" @fetch-error="handleFetchError" @page-change="handlePageChange"
+            @page-size-change="handlePageSizeChange" />
+        </div>
+      </div>
     </div>
-
-    <data_fetcher resource="products" :params="fetchParams">
-      <template v-slot="{ data, error, pagination }">
-        <div v-if="error">Error: {{ error.message }}</div>
-        <div v-else-if="data" class="w-full carousel-container">
-          <Carousel :autoplay="3000" :items-to-show="4" :items-to-scroll="1" :wrap-around="true" :breakpoints="carouselBreakpoints">
-            <Slide v-for="product in data" :key="product.id">
-              <div class="card mx-2">
-                <ResourceRenderer :resource="productResource" :displayData="product" :layout="miniProductLayout"
-                  :showHeading="false" :payload="product" />
-              </div>
-            </Slide>
-          </Carousel>
-          <div class="carousel-fade-left"></div>
-          <div class="carousel-fade-right"></div>
-        </div>
-      </template>
-    </data_fetcher>
-
-
-
-   
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="heading">All Products</h2>
-      <action_dispatcher :resource="marketActions" :item="{}" :orientation="'icons'" />
-    </div>
-    <data_fetcher resource="products" :params="fetchParams">
-      <template v-slot="{ data, error, pagination }">
-        <div v-if="error">Error: {{ error.message }}</div>
-        <div v-else-if="data" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-4 md:gap-x-4 md:gap-y-10">
-          <div class="card" v-for="product in data" :key="product.id">
-            <ResourceRenderer :resource="productResource" :displayData="product" :layout="productLayout"
-              :showHeading="false" :payload="product" />
-          </div>
-        </div>
-        <div v-if="pagination" class="mt-4">
-          <!-- Add pagination controls here if needed -->
-        </div>
-      </template>
-    </data_fetcher>
-
   </div>
+
+
+  <!--
+  
+    <DataGroup
+    :resource="resource"
+    display-mode="grid"
+    :show-pagination="true"
+    :show-header="true"
+    header-title="Products"
+    :show-more-link="false"
+    more-link-text="View All"
+    :max-display-items="12"
+    :preset-filters="{
+      status: 'active',
+      category: ['electronics', 'books'],
+      : { $gte: 100, $lte: 1000 }
+    }"
+    :preset-id-filters="{
+      manufacturerId: '507f1f77bcf86cd799439011',
+      categoryIds: ['507f1f77bcf86cd799439012', '507f1f77bcf86cd799439013']
+    }"
+    search-query="laptop"
+    sort-field=""
+    sort-order="asc"
+    @more-click="handleMoreClick"
+    @fetch-success="handleFetchSuccess"
+    @fetch-error="handleFetchError"
+    @page-change="handlePageChange"
+    @page-size-change="handlePageSizeChange"
+  />
+  -->
 </template>
 
+
+
 <script>
-import ResourceRenderer from '../../components/Object/objectrenderer.vue';
-import action_dispatcher from '../../components/action_dispatcher.vue';
-import data_fetcher from '../../components/data_fetcher.vue';
+import { handleError, ref } from 'vue';
+import DynamicCrud from '@/components/Object/DynamicCrud.vue';
 import { e_commerce_management_system } from '../../modules/e_commerce_system/system';
-import { Carousel, Slide } from 'vue3-carousel'
-import 'vue3-carousel/dist/carousel.css'
+import DataGroup from '../../components/Object/DataGroup.vue';
+import { translationKeys } from "@/executables/translation";
+import * as Yup from "yup";
+
+
 export default {
-  name: 'Market',
   components: {
-    ResourceRenderer,
-    action_dispatcher,
-    data_fetcher,
-    Carousel,
-    Slide
+    DynamicCrud,
+    DataGroup
   },
-  data() {
-    return {
-      productResource: e_commerce_management_system.find(resource => resource.name === 'products'),
-      fetchParams: {
-        page: 1,
-        limit: 10,
-        sortBy: 'productName',
-        order: 'asc'
-      },
-      miniProductLayout: {
-        rows: 4,
-        columns: 4,
-        fields: {
-          images: { rowStart: 1, rowSpan: 3, colStart: 1, colSpan: 4 },
-          productName: { rowStart: 3, rowSpan: 1, colStart: 1, colSpan: 4 },
-          price: { rowStart: 4, rowSpan: 1, colStart: 1, colSpan: 2 },
-          category: { rowStart: 4, rowSpan: 1, colStart: 3, colSpan: 2 },
-        },
-        actions: [
+  setup() {
+    const resource = ref(e_commerce_management_system.find(r => r.name === 'products'))
+    const productPrimeResource = ref(
+      {
+        name: "products",
+        path: "products",
+        icon: "pi pi-box",
+        label: translationKeys.Products || "Products",
+        resourceGroup: translationKeys.ECommerceSystem || "e-commerce",
+        schema: [
           {
-            name: 'mini_product_actions',
-            rowStart: 1,
-            rowSpan: 1,
-            colStart: 4,
-            colSpan: 1,
-            actions: [
-              { name: 'addToCart', icon: 'fa fa-shopping-cart', label: 'Add to Cart' },
-              { name: 'goToView', icon: 'fa fa-eye', label: 'View Details' },
-              { name: 'bookmark', icon: 'fa fa-bookmark', label: 'Bookmark' },
-            ],
-            orientation: 'dropdown',
-            style: 'position: absolute; top: 0.5rem; right: 0.5rem; z-index: 10;'
-          }
-        ]
-      },
-      productLayout: {
-        rows: 5,
-        columns: 6,
-        fields: {
-          images: { rowStart: 1, rowSpan: 5, colStart: 1, colSpan: 3 },
-          productName: { rowStart: 1, rowSpan: 1, colStart: 4, colSpan: 2 },
-          price: { rowStart: 2, rowSpan: 1, colStart: 4, colSpan: 1 },
-          category: { rowStart: 2, rowSpan: 1, colStart: 5, colSpan: 2 },
-          description: { rowStart: 3, rowSpan: 2, colStart: 4, colSpan: 3 },
-        },
-        actions: [
-          {
-            name: 'product_secondary_actions',
-            rowStart: 1,
-            rowSpan: 1,
-            colStart: 6,
-            colSpan: 1,
-            alignment: 'top-right',
-            actions: [
-              { name: 'bookmark', icon: 'fa fa-bookmark', label: 'Bookmark' },
-              { name: 'dontRecommendProduct', icon: 'pi pi-times-circle', label: 'Don\'t Recommend' },
-              { name: 'report', icon: 'fa fa-flag', label: 'Report' },
-            ],
-            orientation: 'dropdown',
-            style: 'position: absolute; top: 0.5rem; right: 0.5rem; z-index: 10;'
+            name: "images",
+            title: translationKeys.Image || "Images",
+            type: "image array",
+            validation: Yup.array().of(Yup.string().nullable()), // Added validation
           },
           {
-            name: 'product_main_actions',
-            rowStart: 5,
-            rowSpan: 1,
-            colStart: 4,
-            colSpan: 3,
-            alignment: 'bottom-left',
-            actions: [
-              { name: 'addToCart', icon: 'fa fa-shopping-cart', label: 'Add to Cart' },
-              { name: 'goToView', icon: 'fa fa-eye', label: 'View Details' },
-            ],
-            orientation: 'buttons'
-          }
-        ]
-      },
-      marketActions: {
-        actions: [
+            name: "productName",
+            title: translationKeys.ProductName || "Product Name",
+            type: "text",
+            validation: Yup.string().required("Product Name is required."),
+          },
+
           {
-            name: 'filter',
-            icon: 'fa fa-filter',
-            label: 'Filter Products',
+            name: "category",
+            title: translationKeys.Category || "Category",
+            type: "ref",
+            resource: "categories",
+            field: "categoryName",
+            validation: Yup.string().required("Category is required."),
           },
           {
-            name: 'sort',
-            icon: 'fa fa-sort',
-            label: 'Sort Products',
+            name: "price",
+            title: "price",
+            type: "price",
+            validation: Yup.string().required("Price is required."),
           },
+
           {
-            name: 'exportCatalog',
-            icon: 'fa fa-download',
-            label: 'Export Catalog',
-          }
+            name: "description",
+            title: translationKeys.Description || "Description",
+            type: "richtext",
+            validation: Yup.string().required("Description is required."),
+          },
+
         ],
+        renderMode: "crud",
+        layout:{
+  rows: 5,
+  columns: 9,
+  fields: {
+    // Main image section
+    images: {
+      rowStart: 1,
+      rowSpan: 5,
+      colStart: 1,
+      colSpan: 4
+    },
+    // Product info sections
+    productName: {
+      rowStart: 2,
+      rowSpan: 1,
+      colStart: 5,
+      colSpan: 5
+    },
+    price: {
+      rowStart: 3,
+      rowSpan: 1,
+      colStart: 5,
+      colSpan: 3
+    },
+    category: {
+      rowStart: 3,
+      rowSpan: 1,
+      colStart: 8,
+      colSpan: 2
+    },
+    mainActions: {
+      rowStart: 4,
+      rowSpan: 1,
+      colStart: 5,
+      colSpan: 5
+    }
+  },
+  actions: [
+    {
+      // Secondary actions dropdown
+      name: 'product_secondary_actions',
+      rowStart: 1,
+      rowSpan: 1,
+      colStart: 9,
+      colSpan: 1,
+      alignment: 'top-right',
+      actions: [
+        { name: 'bookmark', icon: 'fa fa-bookmark', label: 'Bookmark' },
+        { name: 'dontRecommendProduct', icon: 'pi pi-times-circle', label: 'Don\'t Recommend' },
+        { name: 'report', icon: 'fa fa-flag', label: 'Report' }
+      ],
+      orientation: 'dropdown',
+      style: 'position: absolute; top: 0.5rem; right: 0.5rem; z-index: 10;'
+    },
+    {
+      // Main action buttons
+      name: 'product_main_actions',
+      rowStart: 4,
+      rowSpan: 1,
+      colStart: 5,
+      colSpan: 5,
+      alignment: 'bottom-right',
+      actions: [
+        { name: 'addToCart', icon: 'fa fa-shopping-cart', label: 'Add' }
+      ],
+      orientation: 'buttons'
+    }
+  ]
+}
       },
-      carouselBreakpoints: {
-        700: {
-          itemsToShow: 2.5,
-          snapAlign: 'center',
-        },
-        1024: {
-          itemsToShow: 3.5,
-          snapAlign: 'start',
-        },
-      },
+    );
+
+
+    const categoryResource = ref(
+      {
+        name: "categories",
+        path: "categories",
+        icon: "pi pi-tag",
+        label: translationKeys.Categories || "Categories",
+        resourceGroup: translationKeys.ECommerceSystem || "e-commerce",
+        schema: [
+          {
+            name: "image",
+            title: translationKeys.Image || "Image",
+            type: "image",
+            validation: Yup.string().required("Image is required."),
+          },
+          {
+            name: "icon",
+            title: translationKeys.Icon || "Icon",
+            type: "icon",
+            validation: Yup.string().nullable(), // Added validation
+          },
+          {
+            name: "categoryName",
+            title: translationKeys.CategoryName || "Category Name",
+            type: "text",
+            validation: Yup.string().required("Category Name is required."),
+          },
+          {
+            name: "description",
+            title: translationKeys.Description || "Description",
+            type: "richtext",
+            validation: Yup.string().required("Description is required."),
+          },
+        ],
+        renderMode: "crud",
+        layout: {
+  rows: 7,
+  columns: 1,
+  fields: {
+    // Main image positioned at the top
+    image: {
+      rowStart: 1,
+      colStart: 1,
+      rowSpan: 6,
+      colSpan: 1,
+      alignment: 'center'
+    },
+    // Category name below the image
+    categoryName: {
+      rowStart: 7,
+      colStart: 1,
+      rowSpan: 1,
+      colSpan: 1,
+      alignment: 'center'
+    }
+  }
+}
+
+
+      }
+    )
+
+
+
+    return {
+      resource,
+      categoryResource,
+      productPrimeResource
+
     };
   },
   methods: {
-    // Add methods to handle pagination, filtering, sorting, etc.
+    handleMoreClick() { },
+    handleFetchSuccess() { },
+    handleFetchError() { },
+    handlePageChange() { },
+    handlePageSizeChange() { }
   }
 };
 </script>
-
-<style scoped>
-.market-container {
-  padding: 20px;
-}
-
-.card {
-  border-radius: 8px;
-}
-
-.heading {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-}
-
-.carousel-container {
-
-}
-
-:deep(.carousel__slide) {
-  padding: 5px;
-}
-
-:deep(.carousel__viewport) {
-  padding-left: 0;
-  padding-right: 0;
-}
-
-.carousel-fade-left,
-.carousel-fade-right {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 150px;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.carousel-fade-left {
-  left: 0;
-  background: linear-gradient(to right, var(--background) 0%, transparent 100%);
-}
-
-.carousel-fade-right {
-  right: 0;
-  background: linear-gradient(to left, var(--background) 0%, transparent 100%);
-}
-
-@media (max-width: 640px) {
-  .market-container {
-    padding: 10px;
-  }
-}
-
-/* Add these styles for the mini product layout */
-.mini-product {
-  position: relative;
-  overflow: hidden;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.mini-product:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-.mini-product .images {
-  height: 150px;
-  object-fit: cover;
-}
-
-.mini-product .productName {
-  font-weight: bold;
-  font-size: 1rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding: 0.5rem;
-}
-
-.mini-product .price {
-  font-weight: bold;
-  color: #4a5568;
-  padding: 0.5rem;
-}
-
-.mini-product .category {
-  color: #718096;
-  font-size: 0.875rem;
-  padding: 0.5rem;
-  text-align: right;
-}
-
-.mini-product .action_dispatcher {
-  opacity: 0.8;
-  transition: opacity 0.3s ease;
-}
-
-.mini-product:hover .action_dispatcher {
-  opacity: 1;
-}
-</style>

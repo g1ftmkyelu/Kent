@@ -10,23 +10,42 @@
       <div v-else>
 
         <div class=" sm:w-full w-[18.7rem]" v-if="mode === 'add'">
-          <h2 class="heading"> add {{ resource.label }}</h2>
+          <span class="mt-2 p-2 w-9 flex cursor-pointer text-primary items-center mb-4" @click="this.$router.go(-1)">
+                <i class="pi pi-arrow-left common-text"></i>&nbsp;BACK
+          </span>
           <DynamicForm :resource="resource" :initial-data="initialData" :is-adding="true" />
         </div>
 
         <div class=" sm:w-full w-[18.7rem]" v-else-if="mode === 'edit'">
-          <h2 class="heading"> edit {{ resource.label }}</h2>
+          <div class="flex w-full justify-between">
+              <span class="mt-2 p-2 flex justify-between cursor-pointer text-primary items-center mb-4" @click="this.$router.go(-1)">
+                <i class="pi pi-arrow-left common-text"></i>&nbsp;BACK
+              </span>
+              <span class="mt-2 p-2 flex justify-between items-center mb-4">
+              </span>
+            </div>
           <DynamicForm :resource="resource" :initial-data="inventoryItem" :is-adding="false" redirect-to="prev" />
         </div>
 
         <div v-else-if="mode === 'object'">
-          <ObjectRenderer/>
+          <ObjectRenderer />
         </div>
 
-        <div  v-else class="item-details sm:w-full w-[18.7rem]">
-          <div class="flex items-center justify-between">
-            <h2 class="heading">view {{ resource.label }}</h2>
-            <action_dispatcher :resource="resource" :item="inventoryItem" orientation="modal" />
+        <div v-else class="item-details sm:w-full w-[18.7rem]">
+          <div class="flex flex-row-reverse items-center justify-between">
+            <div class="mb-3 flex justify-between items-center">
+              <!--cardLight
+              <action_dispatcher :resource="resource" :item="inventoryItem" orientation="icons" />              
+              -->
+            </div>
+            <div class="flex w-full justify-between">
+              <span class="mt-2 p-2 flex justify-between cursor-pointer text-primary items-center mb-4" @click="this.$router.go(-1)">
+                <i class="pi pi-arrow-left common-text"></i>&nbsp;BACK
+              </span>
+              <span class="mt-2 p-2 flex justify-between items-center mb-4" v-print="'#report'">
+                <i class="pi pi-print"></i>
+              </span>
+            </div>
           </div>
           <DataRenderer :resource="resource" :initial-data="inventoryItem" :currentID="id" />
         </div>
@@ -43,7 +62,7 @@ import DataRenderer from "./data_renderer/data_renderer.vue";
 import { Resources } from "../../../../data/resources";
 import { getDefaultValuesFromSchema } from "../../../../executables/getDefaultValues";
 import action_dispatcher from "../../../action_dispatcher.vue";
-
+import print from "vue3-print-nb";
 
 export default {
   components: {
@@ -53,13 +72,14 @@ export default {
     DataRenderer,
     action_dispatcher
   },
+  directives: { print },
   data() {
     return {
       actionLoading: false,
       inventoryItem: {},
       loading: false,
       id: this.$route.params.id,
-      mode: "", 
+      mode: "",
       resourceName: "",
       resource: {},
       initialData: {},

@@ -3,6 +3,7 @@
         <LoaderAlt />
     </div>
     <div v-else class="container mt-5 p-6">
+        
         <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
             <h2 class="heading">
                 {{ translationKeys.UpdateProfile }}

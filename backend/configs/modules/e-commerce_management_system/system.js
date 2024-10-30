@@ -36,12 +36,6 @@ exports.e_commerce_management_system = [
         type: "text",
       },
       {
-        name: "shop",
-        type: "ref",
-        resource: "shops",
-        field: "shopName",
-      },
-      {
         name: "category",
         type: "ref",
         resource: "categories",
@@ -54,6 +48,7 @@ exports.e_commerce_management_system = [
       {
         name: "price",
         type: "number",
+
       },
       {
         name: "materials",
@@ -173,50 +168,7 @@ exports.e_commerce_management_system = [
       },
     ],
   },
-  {
-    name: "tags",
-    path: "tags",
-    schema: [
-      {
-        name: "icon",
-        type: "icon"},
-      {
-        name: "tagName",
-        type: "text",
-      },
-    ],
-  },
-  {
-    name: "shoppingSessions",
-    path: "shopping-sessions",
-    schema: [
-      {
-        name: "sessionId",
-        type: "text",
-      },
-      {
-        name: "user",
-        type: "ref",
-        resource: "users",
-        field: "fullname",
-      },
-      {
-        name: "startDate",
-        type: "date",
-      },
-      {
-        name: "endDate",
-        type: "date",
-      },
-      {
-        name: "orders", 
-        type: "tags",
-        tagsInputType: "refs",
-        resource: "orders",
-        field: "orderNumber",
-      }
-    ],
-  },
+
   {
     name: "payments",
     path: "payments",
@@ -261,6 +213,10 @@ exports.e_commerce_management_system = [
     name: "paymentMethods",
     path: "payment-methods",
     schema: [
+      {
+        name: "icon",
+        type:"icon"
+      },
       {
         name: "methodName",
         type: "text",

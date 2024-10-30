@@ -13,7 +13,7 @@
       <div v-if="loading">Loading...</div>
       <div v-else-if="error">Error: {{ error.message }}</div>
       <div v-else>
-        <Crud :objectFilters="objectFilters" :resource="resource" :resources="data" />
+        <Crud :resource="resource"/>
 
       </div>
 
@@ -22,7 +22,7 @@
   <Singleton v-else-if="resource.renderMode === 'singleton'" :resource="resource" />
   <Chat v-else-if="resource.renderMode === 'chat'" />
   <Table_view v-else-if="resource.renderMode === 'table'" />
-  <Dashboard v-else-if="resource.renderMode === 'dashboard'" />
+  <dashboard_renderer v-else-if="resource.renderMode === 'dashboard'" :resource="resource" />
   <WebPage v-else-if="resource.renderMode === 'webpage'" :resource="resource" />
   <market v-else-if="resource.renderMode === 'market'" :resource="resource" />
   <notifications v-else-if="resource.renderMode === 'notifications'" :resource="resource" />
@@ -45,6 +45,7 @@ import breadcrumbs from "../breadcrumbs.vue";
 import data_fetcher from "../data_fetcher.vue";
 import Table_view from "./render_modes/crud/table_view.vue";
 import notifications from "./render_modes/notifications/notifications.vue";
+import dashboard_renderer from "./dashboards/dashboard_renderer.vue";
 
 export default {
   components: {
@@ -59,6 +60,7 @@ export default {
     data_fetcher,
     Table_view,
     notifications,
+    dashboard_renderer
   },
   mounted() {
     // Scroll to the top when component is mounted
@@ -96,6 +98,7 @@ export default {
       type: Boolean,
       required: false,
     },
+
   },
   computed: {
     computedFilters() {

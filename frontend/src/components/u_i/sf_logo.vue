@@ -8,7 +8,7 @@ import axios from "axios";
   <Loader v-if="loading"/>
   <RouterLink v-else to="/dashboard">
     <div>
-      <img class="h-16" :src="logo" />
+      <img class="w-28" :src="logo" />
     </div>
   </RouterLink>
 </template>

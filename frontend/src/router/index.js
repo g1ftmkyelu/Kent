@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 
-//imported components
-import Dashboard from "@/components/portal/dashboards/dashboard.vue";
+//imported components 
+import Dashboard from "../components/portal/dashboards/dashboard_renderer.vue";
 import LayoutRenderer from "@/components/portal/layouts/layout_renderer.vue";
 import ResourceDetails from "@/components/portal/render_modes/crud/resource_details.vue";
 import ResourceRender from "@/components/portal/resource_renderer.vue";
@@ -19,7 +19,7 @@ import { systemConfig } from "../data/system.config";
 import Login from "@/pages/auth_pages/login/login.vue";
 import NotFound from "@/pages/error_pages/not_found.vue";
 import Stage from "@/pages/Stage.vue";
-
+import product from "../components/portal/render_modes/shop/product.vue";
 
 const routes = [
   {
@@ -32,6 +32,7 @@ const routes = [
     name:"register",
     component: register
   },
+
   {
     path:"/terms-and-conditions",
     name:"terms-and-conditions",
@@ -61,6 +62,15 @@ const routes = [
         path: "",
         name: `${portal.name}Default`,
         component: Dashboard,
+        props: (route) => ({
+          dashboardType:portal.dashboardType
+        })
+      },
+      {
+        path: `product/:id`,
+        name: `${portal.name}-product`,
+        component: product,
+        props: true
       },
       // Resource Detail Route
       ...portal.resources.map((resource) => ({

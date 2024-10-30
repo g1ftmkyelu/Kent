@@ -6,7 +6,7 @@
         sub-title="Sorry, the page you visited does not exist."
       >
         <template #extra>
-          <a-button type="primary" @click="goHome">Back to Home</a-button>
+          <button class="border border-primary text-primary py-1 hover:cursor-pointer hover:-translate-y-0.5 transition px-4 rounded-md" @click="goHome">Back to Home</button>
         </template>
       </a-result>
     </div>
@@ -36,7 +36,7 @@
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: var(--backgroundHover);
+    background-color: var(--background);
   }
   </style>
   

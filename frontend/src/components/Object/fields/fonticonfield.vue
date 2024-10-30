@@ -1,5 +1,5 @@
 <template>
-  <div class="font-icon-field-display">
+  <div class="font-icon-field-display text-text">
     <i :class="value" style="font-size: 24px;"></i>
   </div>
 </template>

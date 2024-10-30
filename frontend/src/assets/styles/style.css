@@ -3,35 +3,57 @@
 @tailwind components;
 
 :root {
-  /* Dark theme colors */
-  --text: #E0E0E0;
-  --textLight: #F5F5F5;
-  --textLighter: #FFFFFF;
-  --textDark: #B0B0B0;
-  --textDarker: #808080;
-  --cardLight: #2A2A2A;
-  --cardDark: #1E1E1E;
-  --background: #121212;
-  --primary: #FFD700;
-  --secondary: #FFA500;
-  --tertiary: #C0C0C0;
-  --menubg: #1A1A1A;
-  --backgroundHover: #2C2C2C;
-  --webPrimary: #FFD700;
-  --webSecondary: #FFA500;
-  --webBackground: #1E1E1E;
-  --webBackgroundDark: #0A0A0A;
-  --webPrimaryHover: #FFF700;
-  --webSecondaryHover: #FFB700;
-  --webBackgroundHover: #2A2A2A;
-  --webBackgroundDarkHover: #151515;
+  --text: #2c3e50; /* Dark text color */
+  --textLight: #ecf0f1; /* Light text color */
+  --textLighter: #a8a8a8; /* Lighter text color */
+  --textDark: #1a1a1a; /* Darker text color for better contrast */
+  --textDarker: #000000; /* Black text color */
+  --fill:#3C2312;
+
+  --cardLight: #ffffff; /* White card background */
+  --cardDark: #f9f9f9; /* Slightly off-white card background */
+
+  --background: #222222; /* White background */
+
+  --primary: #fcae1c; /* Orange color for primary elements */
+  --secondary: #fcae1c; /* White for secondary elements */
+  --tertiary: #000000; /* Black for tertiary elements */
+
+  --menubg: #2c3e50; /* Dark background for menus (can be adjusted) */
+  --vv: #222222;
+  --backgroundHover: #8d5b2f; /* Lighter orange for hover states */
+
+  --webPrimary: #fcae1c; /* Orange for web primary elements */
+  --webSecondary: #fcae1c; /* White for web secondary elements */
+  --webBackground: #ffffff; /* White for web background */
+  --webBackgroundDark: #1a1a1a; /* Darker background for web */
+
+  --webPrimaryHover: #8d5b2f; /* Hover color for web primary elements */
+  --webSecondaryHover: #f1f1f1; /* Light grey for web secondary hover */
+
+  --webBackgroundHover: #f9f9f9; /* Light background hover */
+  --webBackgroundDarkHover: #2c3e50; /* Dark background hover */
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Poppins", sans-serif;
+}
+
+.ant-card-body{
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.vvv{
+  z-index: 9999;
+}
+
+.common-text {
+  font-size: 16px; /* Set your desired font size */
+  font-weight: 500; /* Set your desired font weight */
 }
 
 body {
@@ -39,33 +61,6 @@ body {
   overflow-y: scroll;
   color: var(--text);
   line-height: 1.8;
-}
-
-.heading {
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: var(--primary);
-  text-transform: capitalize;
-  letter-spacing: 0.5px;
-  margin-bottom: 25px;
-  text-align: left;
-  position: relative;
-  padding-left: 20px;
-  border-left: none;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.heading::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 10px;
-  height: 10px;
-  background-color: var(--tertiary);
-  border-radius: 50%;
 }
 
 @media (max-width: 768px) {
@@ -233,28 +228,10 @@ body {
   }
 }
 
-.admin-side-bar {
-  transition: width 0.3s ease-in-out, transform 0.3s ease-in-out;
+.side-bar {
   overflow-x: hidden;
   overflow-y: scroll;
-  width: 300px;
-  height: 100vh;
-  background-color: var(--menubg);
-  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.1);
-}
-
-.admin-side-bar a {
-  color: var(--textLight);
-  text-decoration: none;
-  padding: 14px 22px;
-  display: flex;
-  align-items: center;
-  transition: all 0.3s ease;
-  font-size: 0.95rem;
-  font-weight: 400;
-  border-left: none;
-  border-radius: 0 25px 25px 0;
-  margin: 5px 0;
+  border-right: 0.04px solid var(--textLighter);
 }
 
 .admin-side-bar a:hover {
@@ -318,57 +295,24 @@ a:hover {
   transform: translateY(-2px);
 }
 
-.card {
+.card,
+.grid-item-b {
   background-color: var(--cardLight);
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
   padding: 30px;
-  margin-bottom: 30px;
+  margin-bottom: 6px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   border: none;
   overflow: auto;
+  border: 1.5px solid var(--textLighter);
 }
 
-.card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
-}
-
-button {
-  background-color: var(--primary);
-  color: var(--textLighter)!important;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 25px;
+.card:hover,
+.grid-item-b:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
+  transition: all 0.3s ease;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  font-size: 0.9rem;
-}
-
-button:hover {
-  background-color: var(--backgroundHover);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-}
-
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="number"],
-input[type="date"],
-input[type="tel"],
-textarea {
-  width: 100%;
-  padding: 14px;
-  margin-bottom: 22px;
-  border: 2px solid var(--cardDark);
-  background-color: var(--cardLight);
-  border-radius: 8px;
-  font-size: 15px;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 select {
@@ -381,83 +325,16 @@ select {
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-input[type="text"]:focus,
-input[type="email"]:focus,
-input[type="password"]:focus,
-input[type="number"]:focus,
-input[type="date"]:focus,
-input[type="tel"]:focus,
-select:focus,
-textarea:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.2);
-}
-
-input[type="checkbox"] {
-  position: absolute;
-  opacity: 0;
-  width: 60px;
-  height: 30px;
-  margin: 0;
-  cursor: pointer;
-  z-index: 1;
-}
-
-input[type="checkbox"] + label {
-  position: relative;
-  display: inline-block;
-  padding-left: 70px;
-  cursor: pointer;
-  line-height: 30px;
-  user-select: none;
-}
-
-input[type="checkbox"] + label::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 60px;
-  height: 30px;
-  background-color: #bdc3c7;
-  border-radius: 30px;
-  transition: background-color 0.3s;
-}
-
-input[type="checkbox"] + label::after {
-  content: '';
-  position: absolute;
-  left: 3px;
-  top: 3px;
-  width: 24px;
-  height: 24px;
-  background-color: white;
-  border-radius: 50%;
-  transition: left 0.3s;
-}
-
-input[type="checkbox"]:checked + label::before {
-  background-color: var(--secondary);
-}
-
-input[type="checkbox"]:checked + label::after {
-  left: 33px;
-}
-
-input[type="checkbox"]:focus + label::before {
-  box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);
-}
-
 table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0 10px;
   margin-bottom: 30px;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
-th, td {
+th,
+td {
   border: none;
   padding: 18px;
   text-align: left;
@@ -489,7 +366,7 @@ td {
 }
 
 td::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -524,50 +401,7 @@ tr:hover td::before {
   transform: translateY(-2px);
 }
 
-.action-button {
-  margin-left: 8px;
-  background-color: var(--secondary);
-  color: white;
-  border: none;
-  border-radius: 2px;
-  padding: 10px 8px;
-  font-size: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 32px;
-}
-
-.action-button:hover {
-  background-color: var(--menubg);
-  transform: translateY(-2px);
-}
-
-.action-button:focus {
-  background-color: var(--primary);
-  outline: none;
-}
-
-.delete-button {
-  margin-left: 8px;
-  background-color: var(--tertiary);
-  color: var(--textLight);
-  border: none;
-  border-radius: 20px;
-  padding: 6px 12px;
-  font-size: 13px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 32px;
-}
-
 .action-icon {
-  color: var(--secondary);
   margin-left: 8px;
   transition: transform 0.2s ease;
 }
@@ -584,16 +418,6 @@ tr:hover td::before {
 
 .delete-icon:hover {
   transform: scale(1.2);
-}
-
-.delete-button:hover {
-  background-color: #c0392b;
-  transform: translateY(-2px);
-}
-
-.delete-button:focus {
-  background-color: #a93226;
-  outline: none;
 }
 
 .status-badge {
@@ -647,26 +471,6 @@ tr:hover td::before {
   color: var(--primary);
 }
 
-.close-button {
-  background: var(--menubg);
-  border: none;
-  font-size: 1.75rem;
-  cursor: pointer;
-  transition: color 0.2s ease, transform 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--textLight);
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-}
-
-.close-button:hover {
-  color: var(--tertiary);
-  transform: rotate(90deg);
-}
-
 .profile-avatar {
   border: 4px solid var(--primary);
   margin-bottom: 2rem;
@@ -678,60 +482,31 @@ tr:hover td::before {
   transform: scale(1.05);
 }
 
-
-
 .profile-email,
 .profile-role {
   color: var(--textDark);
   margin-bottom: 1rem;
 }
 
-.settings-button,
-.logout-button {
-  width: 100%;
-  padding: 1rem;
-  border: none;
-  border-radius: 25px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  margin-top: 1.5rem;
-}
-
-.settings-button {
-  background-color: var(--primary);
-  color: var(--textLight);
-}
-
-.logout-button {
-  background-color: var(--tertiary);
-  color: var(--textLight);
-}
-
-.settings-button:hover,
-.logout-button:hover {
-  opacity: 0.9;
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
-
-
-
 @media (max-width: 768px) {
-  .admin-side-bar {
-    width: 100%;
-    height: auto;
-    position: static;
+  h1 {
+    font-size: 2.2em;
   }
-
-
-
-  h1 { font-size: 2.2em; }
-  h2 { font-size: 1.9em; }
-  h3 { font-size: 1.6em; }
-  h4 { font-size: 1.3em; }
-  h5 { font-size: 1.1em; }
-  h6 { font-size: 0.9em; }
+  h2 {
+    font-size: 1.9em;
+  }
+  h3 {
+    font-size: 1.6em;
+  }
+  h4 {
+    font-size: 1.3em;
+  }
+  h5 {
+    font-size: 1.1em;
+  }
+  h6 {
+    font-size: 0.9em;
+  }
 }
 
 .custom-dropdown-menu {
@@ -764,14 +539,6 @@ tr:hover td::before {
   color: var(--tertiary);
 }
 
-.dynamic-form {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2.5rem;
-  background-color: var(--cardLight);
-  border-radius: 15px;
-}
-
 .dynamic-form .flex {
   display: flex;
   flex-wrap: wrap;
@@ -789,61 +556,10 @@ tr:hover td::before {
   color: var(--textDark);
 }
 
-.dynamic-form input[type="text"],
-.dynamic-form input[type="email"],
-.dynamic-form input[type="password"],
-.dynamic-form input[type="number"],
-.dynamic-form input[type="tel"],
-.dynamic-form input[type="date"],
-.dynamic-form input[type="datetime-local"],
-.dynamic-form input[type="time"],
-.dynamic-form select,
-.dynamic-form textarea {
-  width: 100%;
-  padding: 0.9rem;
-  border: 2px solid var(--cardDark);
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-.dynamic-form input:focus,
-.dynamic-form select:focus,
-.dynamic-form textarea:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.2);
-}
-
 .dynamic-form .validation-error {
   color: var(--tertiary);
   font-size: 0.9rem;
   margin-top: 0.5rem;
-}
-
-.dynamic-form button {
-  background-color: var(--primary);
-  color: var(--textLight);
-  padding: 0.9rem 1.75rem;
-  border: none;
-  border-radius: 25px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
-}
-
-.dynamic-form button:hover {
-  background-color: var(--backgroundHover);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-}
-
-.dynamic-form button:disabled {
-  background-color: var(--cardDark);
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
 }
 
 .dynamic-form .tag {
@@ -870,16 +586,6 @@ tr:hover td::before {
 
   .dynamic-form .min-w-\[16rem\] {
     flex-basis: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .dynamic-form {
-    padding: 1.25rem;
-  }
-
-  .dynamic-form button {
-    width: 100%;
   }
 }
 
@@ -1093,7 +799,6 @@ tr:hover td::before {
 .tab.active {
   border-bottom: 2px solid var(--primary);
   color: var(--primary);
-  
 }
 
 .modal {

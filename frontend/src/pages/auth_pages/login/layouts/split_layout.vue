@@ -5,8 +5,8 @@
       class="w-full lg:w-5/12 bg-cardDark flex flex-col justify-center py-8 px-6 sm:px-6 lg:px-8 xl:px-12 form-container scaled-content">
       <div class="mx-auto w-full max-w-md">
         <!-- Logo and Title -->
-        <Logo class="h-8 w-auto mb-8 mx-auto lg:mx-0" />
         <div class="text-center lg:text-left">
+          <Logo class="h-8 w-auto mx-auto lg:mx-0" />
           <h2 class="mt-4 text-xl font-extrabold text-secondary">Sign in to your account</h2>
 
         </div>
@@ -74,7 +74,6 @@
           </form>
 
 
-
           <!-- Error Message -->
           <div v-if="error" class="mt-3 text-center text-sm text-red-600">
             {{ error }}
@@ -92,7 +91,7 @@
               <p class="text-gray-500">Loading...</p>
             </div>
             <div v-else-if="error || !data" class="h-screen w-full flex items-center justify-center">
-
+              
             </div>
             <div v-else class="h-full w-full">
               <SlideShow :slides="data" class="h-full w-full" />
@@ -100,11 +99,8 @@
           </template>
         </DataFetcher>
       </div>
-      <!-- Overlay 
-       
-            <div class="absolute inset-0 bg-black opacity-50"></div>
-      -->
-
+      <!-- Overlay -->
+      <div class="absolute inset-0 bg-black opacity-50"></div>
       <div class="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-4">
       </div>
     </div>
@@ -146,7 +142,7 @@ export default {
 </script>
 <style>
 .right-content {
-  background-image: url('https://images.unsplash.com/photo-1509453721491-c3af5961df76?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGNvbnN0cnVjdGlvbnxlbnwwfHwwfHx8MA%3D%3D');
+  background-image: url('https://images.pexels.com/photos/5632402/pexels-photo-5632402.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

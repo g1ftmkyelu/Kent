@@ -1,5 +1,34 @@
 exports.system_settings = [
   {
+    name: "system-logs",
+    path: "system-logs",
+    icon: "pi pi-file",
+    menuGroupIcon: "pi pi-shield",
+    renderMode: "crud",
+    schema: [
+
+      {
+        name: "action",
+
+        type: "text",
+      },
+      {
+        name: "user",
+
+        type: "text",
+      },
+      {
+        name: "status",
+
+        type: "status",
+        options: [
+          { label: "Success", value: "Success", color: "#28a745" },
+          { label: "Failure", value: "Failure", color: "#dc3545" },
+        ],
+      },
+    ],
+  },
+  {
     name: "company-config",
     icon: "fa fa-building",
     label: "Company Configuration",

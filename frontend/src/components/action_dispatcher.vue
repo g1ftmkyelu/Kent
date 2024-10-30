@@ -2,39 +2,33 @@
   <div class="action-dispatcher">
     <!-- Dropdown orientation (default) -->
     <a-dropdown v-if="orientation === 'dropdown'" :trigger="['click']">
-      <button class="action-dropdown" type="text">
-        <i class="pi pi-ellipsis-h"></i>
-      </button>
+      <a-button class="action-dropdown" type="text">
+        <i class="pi pi-ellipsis-h text-textLighter"></i>
+      </a-button>
       <template #overlay>
         <a-menu class="custom-dropdown-menu">
-          <ActionMenuItem 
-            v-for="action in filteredActions" 
-            :key="action.name" 
-            :action="action" 
-            :item="item"
-            @action-click="handleAction"
-          />
+          <ActionMenuItem v-for="action in filteredActions" :key="action.name" :action="action" :item="item"
+            @action-click="handleAction" />
         </a-menu>
       </template>
     </a-dropdown>
 
     <!-- Buttons orientation -->
     <div v-else-if="orientation === 'buttons'" class="flex space-x-2">
-      <button 
-        v-for="action in filteredActions" 
-        :key="action.name"
-        :class="action.name === 'deleteResource' ? 'delete-button' : 'action-button'"
+      <a-button v-for="action in filteredActions" :key="action.name"
+        :type="action.name === 'deleteResource' ? 'danger' : 'primary'"
         @click="handleAction(item, action.name)"
-      >
+         :style="{ backgroundColor: 'var(--primary)', borderColor: 'var(--primary)' }"
+        >
         <i :class="[action.icon, 'mr-2']"></i>
         {{ action.label }}
-      </button>
+      </a-button>
     </div>
 
-    <!-- Icons orientation -->
-    <div v-else-if="orientation === 'icons'" class="flex space-x-10">
+    <!-- Icons or ientation -->
+    <div v-else-if="orientation === 'icons'" class="flex space-x-5">
       <a-tooltip v-for="action in filteredActions" :key="action.name" :title="action.label">
-          <i          shape="circle" 
+        <i shape="circle"
           :class="action.name === 'deleteResource' ? `action-icon ${action.icon}` : `action-icon ${action.icon}`"
           @click="handleAction(item, action.name)"></i>
       </a-tooltip>
@@ -42,7 +36,7 @@
 
     <!-- Modal orientation -->
     <div v-else-if="orientation === 'modal'">
-      <span class="hover:cursor-pointer text-xl"  @click="showModal = true" >
+      <span class="hover:cursor-pointer text-xl" @click="showModal = true">
         <i class="pi pi-ellipsis-v"></i>
       </span>
       <a-modal v-model:visible="showModal" title="Select An Action" :cancellable="false" @ok="showModal = false">
@@ -80,14 +74,10 @@
     </a-list>
 
     <!-- Grid orientation -->
-    <div v-else-if="orientation === 'grid'" class="grid grid-cols-3 mt-14 gap-2">
-      <span 
-        v-for="action in filteredActions" 
-        :key="action.name"
-        :color="action.name === 'deleteResource' ? 'danger' : 'primary'"
-        @click="handleAction(item, action.name)"
-        class="flex cursor-pointer flex-col items-center justify-center p-2"
-      >
+    <div v-else-if="orientation === 'grid'" class="grid grid-cols-3  gap-y-2">
+      <span v-for="action in filteredActions" :key="action.name"
+        :color="action.name === 'deleteResource' ? 'danger' : 'primary'" @click="handleAction(item, action.name)"
+        class="flex cursor-pointer flex-col items-center justify-center p-2">
         <i :class="[action.icon, 'text-xl mt-5 text-secondary mb-1']"></i>
         <span class="text-xs">{{ action.label }}</span>
       </span>
@@ -95,19 +85,24 @@
 
     <!-- Floating Action Button orientation -->
     <div v-else-if="orientation === 'fab'" class="fab-container">
-      <button @click="toggleFab" class="fab-button" :class="{ 'fab-open': isFabOpen }">
+      <a-button @click="toggleFab" class="fab-button" :class="{ 'fab-open': isFabOpen }">
         <i :class="isFabOpen ? 'pi pi-times' : 'pi pi-plus'"></i>
-      </button>
+      </a-button>
       <transition-group name="fab-actions" tag="div" class="fab-actions">
-        <button 
-          v-for="action in filteredActions"
-          :key="action.name"
-          v-show="isFabOpen"
-          @click="handleAction(item, action.name)"
-          class="fab-action-button"
-        >
+        <a-button v-for="action in filteredActions" :key="action.name" v-show="isFabOpen"
+          @click="handleAction(item, action.name)" class="fab-action-button">
           <i :class="[action.icon]"></i>
-        </button>
+        </a-button>
+      </transition-group>
+    </div>
+
+    <!-- Alternative Floating Action Button orientation -->
+    <div v-else-if="orientation === 'alt-fab'" class="fab-container">
+      <transition-group name="fab-actions" tag="div" class="fab-actions">
+        <a-button v-for="action in filteredActions" :key="action.name" @click="handleAction(item, action.name)"
+          class="fab-action-button">
+          <i :class="[action.icon]"></i>
+        </a-button>
       </transition-group>
     </div>
   </div>
@@ -117,7 +112,8 @@
 import { ref, computed } from 'vue';
 import resourceFunctions from '../executables/actions';
 import ActionMenuItem from './action_menu_item.vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
+
 
 export default {
   name: 'ActionDispatcher',
@@ -136,33 +132,42 @@ export default {
     orientation: {
       type: String,
       default: 'dropdown',
-      validator: (value) => ['dropdown', 'buttons', 'icons', 'modal', 'list', 'grid', 'fab'].includes(value)
+      validator: (value) => ['dropdown', 'buttons', 'icons', 'modal', 'list', 'grid', 'fab', 'alt-fab'].includes(value)
     }
   },
   setup(props) {
     const loading = ref(false);
     const showModal = ref(false);
     const isFabOpen = ref(false);
-
     const router = useRouter();
-
-    const filteredActions = computed(() => 
+    const route = useRoute();
+    const filteredActions = computed(() =>
       props.resource.actions.filter(a => a.name !== 'createResource')
     );
+
+
 
     const handleAction = async (item, actionName) => {
       loading.value = true;
       try {
         const actionConfig = resourceFunctions.find(action => action.key === actionName);
+    // Get path from window.location
+    const currentPath = window.location.pathname;
+    console.log('Current path:', currentPath);
+    const firstPathSegment = currentPath.split('/')[1];
+    console.log('First path segment:', firstPathSegment);
+    
+
         if (actionConfig && typeof actionConfig.value === 'function') {
           await actionConfig.value({
             resource: props.resource.name,
             fullResource: props.resource,
             path: props.resource.path,
-            id: item._id||item.id,
+            id: item._id || item.id,
             data: item,
             mode: props.resource.renderMode,
-            router: router
+            router: router,
+            route: firstPathSegment  // Add the new parameter here
           });
           console.log(`Action ${actionName} performed successfully`);
         } else {
@@ -195,7 +200,11 @@ export default {
 
 <style scoped>
 .action-dispatcher {
-  z-index: 2;
+  z-index: 999;
+}
+
+button {
+  color: white;
 }
 
 .action-dropdown {
@@ -206,10 +215,7 @@ export default {
   padding: 0px;
 }
 
-.action-dropdown i {
-  color: var(--primary);
-  color: var(--backgroundHover);
-}
+
 
 .action-dropdown:hover {
   color: var(--menubg);
@@ -230,12 +236,12 @@ export default {
 
 .fab-button {
   width: 56px;
-  height: 56px;
+  height: 90px;
   border-radius: 50%;
   background-color: var(--primary);
   color: white;
   border: none;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -264,7 +270,7 @@ export default {
   background-color: var(--primary);
   color: white;
   border: none;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -287,5 +293,17 @@ export default {
 .fab-actions-leave-to {
   opacity: 0;
   transform: translateY(10px);
+}
+
+/* Styles for the alternative FAB */
+.fab-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.fab-action-button {
+  margin-bottom: 10px;
+  /* Space between buttons */
 }
 </style>

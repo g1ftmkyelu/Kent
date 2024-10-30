@@ -1,5 +1,5 @@
 import { icon } from "leaflet";
-import { translationKeys } from '@/executables/translation';
+import { translationKeys } from "@/executables/translation";
 import * as Yup from "yup";
 
 export const user_management_system = [
@@ -9,15 +9,10 @@ export const user_management_system = [
     icon: "pi pi-users", // Replaced "fa fa-user"
     label: translationKeys.Users,
     isUser: true,
-    menuGroup: translationKeys.Users,
-    menuGroupIcon: "pi pi-cog", // Replaced "fa fa-user-cog"
+    menuGroup: translationKeys.UserManagement,
+    menuGroupIcon: "pi pi-users", // Replaced "fa fa-user-cog"
     resourceGroup: translationKeys.UserManagementSystem || "User Management",
     schema: [
-      {
-        name: "undefined",
-        title: translationKeys.ProfilePicture,
-        type: "image",
-      },
       {
         name: "fullname",
         title: translationKeys.FullName,
@@ -76,24 +71,86 @@ export const user_management_system = [
       },
       {
         name: "gender",
-        title: translationKeys.Gender,
+        title: translationKeys.Gender || "Gender",
         type: "ref",
         resource: "genders",
         field: "gender",
         validation: Yup.string().required("Gender is required."),
       },
       {
+        name: "undefined",
+        title: translationKeys.ProfilePicture,
+        type: "image",
+        validation: Yup.string().required("Image is required."),
+      },
+      {
         name: "description",
         title: translationKeys.Description,
         type: "richtext",
+        validation: Yup.string().required("description is required."),
       },
-      {
-        name:"isAccountActive",
-        title: translationKeys.IsActive||"Is Account Active",
-        type: "check",
-      }
     ],
     renderMode: "crud",
+    crudType: "grid",
+   layout: {
+      rows: 4,
+      columns: 2,
+      fields: {
+        undefined: {  // Profile image
+          rowStart: 1,
+          colStart: 1,
+          rowSpan: 4,  // Now spans all rows
+          colSpan: 1,
+          alignment: "middle-center",
+        },
+        fullname: {
+          rowStart: 1,
+          colStart: 2,
+          rowSpan: 1,
+          colSpan: 1,
+          alignment: "middle-left",
+        },
+        email: {
+          rowStart: 2,
+          colStart: 2,
+          rowSpan: 1,
+          colSpan: 1,
+          alignment: "middle-left",
+        },
+        phoneNumber: {
+          rowStart: 3,
+          colStart: 2,
+          rowSpan: 1,
+          colSpan: 1,
+          alignment: "middle-left",
+        },
+        role: {
+          rowStart: 4,
+          colStart: 2,
+          rowSpan: 1,
+          colSpan: 1,  // Reduced to 1 as it only needs to span the remaining space
+          alignment: "middle-left",
+        },
+      },
+      actions: [
+        {
+          name: "user_actions",
+          rowStart: 1,
+          rowSpan: 1,
+          colStart: 2,
+          colSpan: 1,
+          alignment: "top-right",
+          actions: [
+            { name: "goToView", icon: "pi pi-key", label: "View" },
+            { name: "goToEdit", icon: "pi pi-eye", label: "Edit" },
+            { name: "deleteResource", icon: "pi pi-trash", label: "Delete" },
+          ],
+          orientation: "dropdown",
+          style: "position: absolute; top: 0.5rem; right: 0.5rem; z-index: 10;",
+        },
+      ],
+    },
+
     actions: [
       {
         name: "goToView",
@@ -117,7 +174,7 @@ export const user_management_system = [
     path: "staff-statuses",
     icon: "pi pi-check", // Replaced "fa fa-check"
     label: translationKeys.StaffStatuses,
-    menuGroup: translationKeys.Users,
+    menuGroup: translationKeys.UserManagement,
     menuGroupIcon: "pi pi-cog", // Replaced "fa fa-user-cog"
     resourceGroup: translationKeys.UserManagementSystem || "User Management",
     schema: [
@@ -131,6 +188,7 @@ export const user_management_system = [
         name: "description",
         title: translationKeys.Description,
         type: "richtext",
+        validation: Yup.string().required("Description is required."),
       },
     ],
     renderMode: "crud",
@@ -139,14 +197,51 @@ export const user_management_system = [
       { edit: "goToEdit" },
       { delete: "deleteResource" },
     ],
+    layout: {
+      rows: 2,
+      columns: 2,
+      fields: {
+        status: {
+          rowStart: 1,
+          colStart: 1,
+          rowSpan: 1,
+          colSpan: 1,
+          alignment: "top-left",
+        },
+        description: {
+          rowStart: 2,
+          colStart: 1,
+          rowSpan: 1,
+          colSpan: 2,
+          alignment: "top-left",
+        },
+      },
+      actions: [
+        {
+          name: "status_actions",
+          rowStart: 1,
+          rowSpan: 1,
+          colStart: 2,
+          colSpan: 1,
+          alignment: "top-right",
+          actions: [
+            { name: "goToView", icon: "pi pi-key", label: "View" },
+            { name: "goToEdit", icon: "pi pi-eye", label: "Edit" },
+            { name: "deleteResource", icon: "pi pi-trash", label: "Delete" },
+          ],
+          orientation: "dropdown",
+          style: "position: absolute; top: 0.5rem; right: 0.5rem; z-index: 10;",
+        },
+      ],
+    },
   },
   {
     name: "genders",
-    icon: "pi pi-venus-mars", // Replaced "fa fa-venus-mars"
     path: "genders",
+    icon: "pi pi-user", // Replaced "fa fa-venus-mars"
     label: translationKeys.Genders,
-    menuGroup: translationKeys.Users,
-    menuGroupIcon: "pi pi-cog", // Replaced "fa fa-user-cog"
+    menuGroup: translationKeys.UserManagement,
+    menuGroupIcon: "pi pi-users", // Replaced "fa fa-user-cog"
     resourceGroup: translationKeys.UserManagementSystem || "User Management",
     schema: [
       {
@@ -159,11 +254,7 @@ export const user_management_system = [
         name: "description",
         title: translationKeys.Description,
         type: "richtext",
-      },
-      {
-        name: "icon",
-        title: translationKeys.Icon,
-        type: "image",
+        validation: Yup.string().required("Description is required."),
       },
     ],
     renderMode: "crud",
@@ -173,6 +264,50 @@ export const user_management_system = [
       { edit: "goToEdit" },
       { delete: "deleteResource" },
     ],
+    layout: {
+      rows: 2,
+      columns: 1,
+      fields: {
+        gender: {
+          rowStart: 1,
+          colStart: 1,
+          rowSpan: 1,
+          colSpan: 1,
+          alignment: "top-left",
+        },
+        description: {
+          rowStart: 2,
+          colStart: 1,
+          rowSpan: 1,
+          colSpan: 1,
+          alignment: "top-left",
+        },
+        icon: {
+          rowStart: 3,
+          colStart: 1,
+          rowSpan: 1,
+          colSpan: 1,
+          alignment: "top-left",
+        },
+      },
+      actions: [
+        {
+          name: "gender_actions",
+          rowStart: 1,
+          rowSpan: 1,
+          colStart: 1,
+          colSpan: 1,
+          alignment: "top-right",
+          actions: [
+            { name: "goToView", icon: "pi pi-key", label: "View" },
+            { name: "goToEdit", icon: "pi pi-eye", label: "Edit" },
+            { name: "deleteResource", icon: "pi pi-trash", label: "Delete" },
+          ],
+          orientation: "dropdown",
+          style: "position: absolute; top: 0.5rem; right: 0.5rem; z-index: 10;",
+        },
+      ],
+    },
   },
   {
     name: "roles",
@@ -193,6 +328,7 @@ export const user_management_system = [
         name: "description",
         title: translationKeys.Description,
         type: "richtext",
+        validation: Yup.string().required("Description is required."),
       },
     ],
     renderMode: "crud",
@@ -202,6 +338,43 @@ export const user_management_system = [
       { edit: "goToEdit" },
       { delete: "deleteResource" },
     ],
+    layout: {
+      rows: 2,
+      columns: 2,
+      fields: {
+        roleName: {
+          rowStart: 1,
+          colStart: 1,
+          rowSpan: 1,
+          colSpan: 1,
+          alignment: "top-left",
+        },
+        description: {
+          rowStart: 2,
+          colStart: 1,
+          rowSpan: 1,
+          colSpan: 2,
+          alignment: "top-left",
+        },
+      },
+      actions: [
+        {
+          name: "role_actions",
+          rowStart: 1,
+          rowSpan: 1,
+          colStart: 2,
+          colSpan: 1,
+          alignment: "top-right",
+          actions: [
+            { name: "goToView", icon: "pi pi-key", label: "View" },
+            { name: "goToEdit", icon: "pi pi-eye", label: "Edit" },
+            { name: "deleteResource", icon: "pi pi-trash", label: "Delete" },
+          ],
+          orientation: "dropdown",
+          style: "position: absolute; top: 0.5rem; right: 0.5rem; z-index: 10;",
+        },
+      ],
+    },
   },
   {
     name: "modules",
@@ -222,6 +395,10 @@ export const user_management_system = [
         name: "description",
         title: translationKeys.Description,
         type: "richtext",
+        validation: Yup.string()
+          .required("Description is required.")
+          .min(10, "Description must be at least 10 characters long.")
+          .max(50, "Description cannot exceed 50 characters."),
       },
     ],
     renderMode: "crud",
@@ -230,48 +407,46 @@ export const user_management_system = [
       { edit: "goToEdit" },
       { delete: "deleteResource" },
     ],
-  },
-  {
-    name: "extra-actions",
-    path: "extra-actions",
-    icon: "fa fa-hammer", // Replaced "fa fa-hammer"
-    label: translationKeys.ExtraActions || "Extra Actions",
-    menuGroup: translationKeys.AccessControl,
-    menuGroupIcon: "pi pi-shield", // Replaced "fa fa-user-shield"
-    resourceGroup: translationKeys.UserManagementSystem || "User Management",
-    schema: [
-      {
-        name: "icon",
-        title: translationKeys.Icon || "Icon",
-        type: "icon",
-        validation: Yup.string().required("Icon is required."),
+    layout: {
+      rows: 2,
+      columns: 2,
+      fields: {
+        moduleName: {
+          rowStart: 1,
+          colStart: 1, // Align it to the first cell to create a balanced look
+          rowSpan: 1,
+          colSpan: 1,
+          alignment: "middle-left",
+        },
+        description: {
+          rowStart: 1,
+          colStart: 2, // Place it in the adjacent cell to the right
+          rowSpan: 1,
+          colSpan: 1,
+          alignment: "middle-left",
+        },
       },
-      {
-        name: "label",
-        title: translationKeys.Action || "Action Name",
-        type: "text",
-        validation: Yup.string().required("Action Name is required."),
-      },
-      {
-        name: "name",
-        title: translationKeys.Name || "functionName",
-        type: "text",
-        validation: Yup.string().required("Name is required."),
-      },
-      {
-        name: "description",
-        title: translationKeys.Description,
-        type: "richtext",
-      },
-    ],
-    renderMode: "crud",
+      actions: [
+        {
+          name: "user_actions",
+          rowStart: 2, // Move the actions to the second row for better balance
+          rowSpan: 1,
+          colStart: 1, // Span across the grid to center-align the actions
+          colSpan: 2,
+          alignment: "center", // Center the actions to make it look even
+          actions: [
+            { name: "goToView", icon: "pi pi-key", label: "View" },
+            { name: "goToEdit", icon: "pi pi-eye", label: "Edit" },
+            { name: "deleteResource", icon: "pi pi-trash", label: "Delete" },
+          ],
+          orientation: "dropdown",
+          style: "position: absolute; top: 0.5rem; right: 0.5rem; z-index: 10;",
+        },
+      ],
+    },
     
-    actions: [
-      { view: "goToView" },
-      { edit: "goToEdit" },
-      { delete: "deleteResource" },
-    ],
   },
+
   {
     name: "permissions",
     path: "permissions",
@@ -301,29 +476,25 @@ export const user_management_system = [
         name: "create",
         title: translationKeys.Create,
         type: "check",
+        validation: Yup.string().required("required."),
       },
       {
         name: "read",
         title: translationKeys.Read,
         type: "check",
+        validation: Yup.string().required("required."),
       },
       {
         name: "update",
         title: translationKeys.Update,
         type: "check",
+        validation: Yup.string().required("required."),
       },
       {
         name: "delete",
         title: translationKeys.Delete,
         type: "check",
-      },
-      {
-        name: "extraActions",
-        title: translationKeys.ExtraActions || "Extra Actions",
-        type: "tags",
-        tagInputType: "refs",
-        resource: "extra-actions",
-        field: "label",
+        validation: Yup.string().required("required."),
       },
     ],
     renderMode: "crud",
@@ -333,6 +504,57 @@ export const user_management_system = [
       { edit: "goToEdit" },
       { delete: "deleteResource" },
     ],
+    layout: {
+      rows: 4,
+      columns: 2,
+      fields: {
+        role: {
+          rowStart: 1,
+          colStart: 1,
+          rowSpan: 1,
+          colSpan: 1,
+          alignment: "top-left",
+        },
+        module: {
+          rowStart: 2,
+          colStart: 1,
+          rowSpan: 1,
+          colSpan: 1,
+          alignment: "top-left",
+        },
+        create: {
+          rowStart: 3,
+          colStart: 1,
+          rowSpan: 1,
+          colSpan: 1,
+          alignment: "top-left",
+        },
+        read: {
+          rowStart: 4,
+          colStart: 1,
+          rowSpan: 1,
+          colSpan: 1,
+          alignment: "top-left",
+        },
+      },
+      actions: [
+        {
+          name: "permission_actions",
+          rowStart: 1,
+          rowSpan: 1,
+          colStart: 2,
+          colSpan: 1,
+          alignment: "top-right",
+          actions: [
+            { name: "goToView", icon: "pi pi-key", label: "View" },
+            { name: "goToEdit", icon: "pi pi-eye", label: "Edit" },
+            { name: "deleteResource", icon: "pi pi-trash", label: "Delete" },
+          ],
+          orientation: "dropdown",
+          style: "position: absolute; top: 0.5rem; right: 0.5rem; z-index: 10;",
+        },
+      ],
+    },
   },
 
 ];

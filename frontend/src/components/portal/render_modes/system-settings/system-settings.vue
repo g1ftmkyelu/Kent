@@ -273,7 +273,7 @@ export default {
                     },
                 ],
 
-                renderMode: "crud",
+                renderMode: "singleton",
             },
         };
     },
