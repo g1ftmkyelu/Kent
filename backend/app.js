@@ -25,6 +25,7 @@ generatedResources.forEach((resource) => {
   app.use(setupDynamicRoutes(resource));
 });
 
+
 const port = process.env.PORT || 3000;
 nodecron.schedule('*/10 * * * *', async () => {
   try {
