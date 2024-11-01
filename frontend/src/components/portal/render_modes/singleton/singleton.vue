@@ -10,7 +10,7 @@ j<template>
         :resource="resource"
         :initial-data="object"
         :is-adding="isAdding"
-        redirect-to="current"
+        redirectTo="current"
         class="p-4 shadow-md rounded-md"
       />
         </div>

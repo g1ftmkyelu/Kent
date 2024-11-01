@@ -1,30 +1,104 @@
 <template>
   <div :class="showSubmit ? 'w-[95vw] lg:m-0 lg:w-[100%] card rounded-lg px-6 sm:p-8 lg:px-10' : ''">
     <form @submit.prevent="submitForm" class="py-8 dynamic-form">
-      <div class="flex flex-wrap gap-4">
-        <div v-for="field in resource.schema" :key="field.name" class="min-w-[16rem]">
+      <div
+        class="flex flex-wrap gap-4 [&>*:has([data-type='object-array'])]:w-full [&>*:has([data-type='richtext'])]:w-full">
+        <div v-for="field in resource.schema" :key="field.name" :class="[
+          field.type === 'object array' ? 'w-full' : 'min-w-full'
+        ]">
           <div v-if="field.type === 'object'">
             <h3 class="text-xl font-bold mb-4">{{ field.title }}</h3>
             <DynamicForm :resource="{ schema: field.schema }" :initial-data="formData[field.name]" :isAdding="isAdding"
               :showSubmit="false" v-model:form-data="formData[field.name]" />
           </div>
-          <div v-else-if="field.type === 'object array'">
-            <h3 class="text-xl font-bold mb-4">{{ field.title }}</h3>
-            <div>
-              <div v-for="(item, index) in formData[field.name]" :key="index" class="relative mb-4 p-4 rounded-lg">
-                <DynamicForm :resource="{ schema: field.schema }" :initial-data="item" :isAdding="isAdding"
-                  :showSubmit="false" v-model:form-data="formData[field.name][index]" />
+          <div class="mt-20" v-else-if="field.type === 'object array'">
+            <h3 class="text-3xl font-bold mb-4">{{ field.title }}</h3>
+            <div class="flex flex-wrap" :class="{ 'max-w-[calc(100%-2rem)]': formData[field.name].length > 1 }">
+              <div v-for="(item, index) in formData[field.name]" :key="index"
+                class="relative card flex-1">
+                <div v-for="subField in field.schema" :key="subField.name" :class="[
+                  subField.type === 'object array' ? 'w-full' : 'min-w-full']">
+                  <!-- Handle file type fields within object array -->
+                  <div v-if="['image', 'video', 'audio', 'document'].includes(subField.type)">
+                    <label class="block mb-2">{{ subField.title }}</label>
+
+                    <!-- File Preview -->
+                    <div v-if="getFilePreview(subField.name, subField.type, index, field.name)" class="mb-2">
+                      <!-- Image Preview -->
+                      <img v-if="subField.type === 'image'"
+                        :src="getFilePreview(subField.name, subField.type, index, field.name)"
+                        class="max-h-32 object-contain mb-2 rounded-md"
+                        :alt="getFileName(subField.name, index, field.name)" />
+
+                      <!-- Video Preview -->
+                      <video v-else-if="subField.type === 'video'"
+                        :src="getFilePreview(subField.name, subField.type, index, field.name)" controls
+                        class="max-h-32 w-full object-contain mb-2 rounded-md">
+                      </video>
+
+                      <!-- Audio Preview -->
+                      <audio v-else-if="subField.type === 'audio'"
+                        :src="getFilePreview(subField.name, subField.type, index, field.name)" controls
+                        class="w-full mb-2">
+                      </audio>
+
+                      <!-- Document Preview -->
+                      <div v-else-if="subField.type === 'document'"
+                        class="flex items-center gap-2 mb-2 p-2 bg-cardDark rounded-md">
+                        <i class="fas fa-file-alt text-2xl"></i>
+                        <span>{{ getFileName(subField.name, index, field.name) }}</span>
+                        <a :href="getFilePreview(subField.name, subField.type, index, field.name)" target="_blank"
+                          class="text-blue-500 hover:text-blue-700">
+                          {{ translationKeys.View }}
+                        </a>
+                      </div>
+
+                      <!-- Remove Button for Preview -->
+                      <button type="button" @click="removeFile(subField.name, index, field.name)"
+                        class="text-red-500 hover:text-red-700 mb-2">
+                        <i class="fas fa-times"></i> {{ translationKeys.Remove }}
+                      </button>
+                    </div>
+
+                    <!-- File Input -->
+                    <div class="flex items-center">
+                      <label :for="'file-input-' + field.name + '-' + index + '-' + subField.name"
+                        class="cursor-pointer bg-primary px-4 py-2 rounded-md flex items-center">
+                        <i class="fas fa-upload mr-2"></i>
+                        {{ getFilePreview(subField.name, subField.type, index, field.name) ?
+                          translationKeys.Change : translationKeys.Browse }}
+                      </label>
+                      <span class="ml-3 text-sm">
+                        {{ getFileName(subField.name, index, field.name) || translationKeys.NoFileChosen }}
+                      </span>
+                      <input :id="'file-input-' + field.name + '-' + index + '-' + subField.name" type="file"
+                        :accept="getAcceptTypes(subField.type)"
+                        @change="(e) => handleFileUpload(subField, e, index, field.name)" class="hidden" />
+                    </div>
+                  </div>
+
+                  <!-- Pass through to DynamicForm for other field types -->
+                  <div v-else>
+                    <DynamicForm :resource="{ schema: [subField] }" :initial-data="item" :isAdding="isAdding"
+                      :showSubmit="false" v-model:form-data="formData[field.name][index]" />
+                  </div>
+                </div>
+
+                <!-- Remove Object Button -->
                 <button type="button" @click="removeArrayItem(field.name, index)"
-                  class="absolute top-0 right-0 mt-2 mr-2">
+                  class="absolute top-2 right-2 text-red-500 hover:text-red-700">
                   <i class="fas fa-times"></i>
                 </button>
               </div>
+              <!-- Add New Object Button -->
+              <div @click="addArrayItem(field.name)"
+                class="flex items-center justify-center border-dashed border-2 border-gray-400 rounded-md p-4 cursor-pointer hover:bg-gray-200 transition duration-300 ease-in-out flex-1">
+                <i class="fas fa-plus mr-2 text-gray-600"></i>
+                <span class="text-gray-600">{{ translationKeys.Add }} More </span>
+              </div>
             </div>
-            <button type="button" @click="addArrayItem(field.name)" class="px-4 py-2 rounded-md">
-              {{ translationKeys.Add }} {{ field.title }}
-            </button>
-          </div>
 
+          </div>
           <div v-else-if="field.type !== 'object' && field.type !== 'object array'">
             <div class="flex-1 basis-32 min-w-[8rem]" v-if="field.type === 'text' || field.type === 'richtext'">
               <label class="block mb-2">{{ field.title }}</label>
@@ -32,29 +106,21 @@
                 <QuillEditor v-model:content="formData[field.name]" @update:content="formData[field.name] = $event"
                   contentType="html" :toolbar="[
                     ['bold', 'italic', 'underline', 'strike'],
-                    ['blockquote', 'code-block'],
                     [{ 'header': 1 }, { 'header': 2 }],
-                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                    [{ 'script': 'sub' }, { 'script': 'super' }],
-                    [{ 'indent': '-1' }, { 'indent': '+1' }],
-                    [{ 'direction': 'rtl' }],
                     [{ 'size': ['small', false, 'large', 'huge'] }],
-                    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                    [{ 'color': [] }, { 'background': [] }],
-                    [{ 'font': [] }],
-                    [{ 'align': [] }],
+
                     ['clean']
                   ]" class="w-full p-2.5" />
               </div>
               <input :placeholder="`please enter ${field.title}`" v-else v-model="formData[field.name]" type="text"
-                class="w-[16rem] px-3 py-2 bg-cardDark border border-textLighter rounded-md" />
+                class="w-full px-3 py-2 bg-cardDark border border-textLighter rounded-md" />
               <p v-if="validationErrors[field.name]" class="mt-1 text-sm validation-error">{{
                 validationErrors[field.name] }} <i class="fa fa-warning"></i></p>
             </div>
             <div class="flex-1 basis-32 min-w-[8rem]" v-else-if="field.type === 'email'">
               <label class="block mb-2">{{ field.title }}</label>
               <input :placeholder="`please enter ${field.title}`" v-model="formData[field.name]" type="email"
-                class="w-[16rem] px-3 py-2 rounded-md bg-cardDark border border-textLighter" />
+                class="w-full px-3 py-2 rounded-md bg-cardDark border border-textLighter" />
               <p v-if="validationErrors[field.name]" class="mt-1 text-sm validation-error">{{
                 validationErrors[field.name] }} <i class="fa fa-warning"></i></p>
             </div>
@@ -65,7 +131,7 @@
             <div class="flex-1 basis-32 min-w-[8rem]" v-else-if="field.type === 'password'">
               <label class="block mb-2">{{ ` ${field.title}` }} </label>
               <input :placeholder="`please enter ${field.title}`" v-model="formData[field.name]" type="password"
-                class="w-[16rem] px-3 py-2 rounded-md bg-cardDark border border-textLighter" />
+                class="w-full px-3 py-2 rounded-md bg-cardDark border border-textLighter" />
 
               <p v-if="validationErrors[field.name]" class="mt-1 text-sm validation-error">{{
                 validationErrors[field.name] }} <i class="fa fa-warning"></i></p>
@@ -73,21 +139,21 @@
             <div class="flex-1 basis-32 min-w-[8rem]" v-else-if="field.type === 'phone'">
               <label class="block mb-2">{{ field.title }}</label>
               <input :placeholder="`please enter ${field.title}`" v-model="formData[field.name]" type="tel"
-                class="w-[16rem] px-3 py-2 rounded-md bg-cardDark border border-textLighter" />
+                class="w-full px-3 py-2 rounded-md bg-cardDark border border-textLighter" />
               <p v-if="validationErrors[field.name]" class="mt-1 text-sm validation-error">{{
                 validationErrors[field.name] }} <i class="fa fa-warning"></i></p>
             </div>
             <div class="flex-1 basis-32 min-w-[8rem]" v-else-if="field.type === 'number'">
               <label class="block mb-2">{{ field.title }}</label>
               <input :placeholder="`please enter ${field.title}`" v-model="formData[field.name]" type="number"
-                class="w-[16rem] px-3 py-2 rounded-md bg-cardDark border border-textLighter" />
+                class="w-full px-3 py-2 rounded-md bg-cardDark border border-textLighter" />
               <p v-if="validationErrors[field.name]" class="mt-1 text-sm validation-error">{{
                 validationErrors[field.name] }} <i class="fa fa-warning"></i></p>
             </div>
             <div class="flex-1 basis-32 min-w-[8rem]" v-else-if="field.type === 'decimal'">
               <label class="block mb-2">{{ field.title }}</label>
               <input :placeholder="`please enter ${field.title}`" v-model="formData[field.name]" type="number"
-                step="0.01" class="w-[16rem] px-3 py-2 rounded-md bg-cardDark border border-textLighter" />
+                step="0.01" class="w-full px-3 py-2 rounded-md bg-cardDark border border-textLighter" />
               <p v-if="validationErrors[field.name]" class="mt-1 text-sm validation-error">{{
                 validationErrors[field.name] }} <i class="fa fa-warning"></i></p>
             </div>
@@ -95,27 +161,28 @@
               <label class="block mb-2">{{ field.title }}</label>
               <input :placeholder="`please enter ${field.title}`" :value="formatIsoDate(formData[field.name])"
                 @input="updateDate(field.name, $event.target.value)" type="date"
-                class="w-[16rem] px-3 py-2 rounded-md bg-cardDark border border-textLighter" />
+                class="w-full px-3 py-2 rounded-md bg-cardDark border border-textLighter" />
               <p v-if="validationErrors[field.name]" class="mt-1 text-sm validation-error">{{ field.name }} is
                 required<i class="fa fa-warning"></i></p>
             </div>
             <div class="flex-1 basis-32 min-w-[8rem]" v-else-if="field.type === 'datetime'">
               <label class="block mb-2">{{ field.title }}</label>
               <input :placeholder="`please enter ${field.title}`" v-model="formData[field.name]" type="datetime-local"
-                class="w-[16rem] px-3 py-2 rounded-md bg-cardDark border border-textLighter" />
+                class="w-full px-3 py-2 rounded-md bg-cardDark border border-textLighter" />
               <p v-if="validationErrors[field.name]" class="mt-1 text-sm validation-error">{{ field.name }} is
                 required<i class="fa fa-warning"></i></p>
             </div>
             <div class="flex-1 basis-32 min-w-[8rem]" v-else-if="field.type === 'time'">
               <label class="block mb-2">{{ field.title }}</label>
               <input :placeholder="`please enter ${field.title}`" v-model="formData[field.name]" type="time"
-                class="w-[16rem] px-3 py-2 rounded-md bg-cardDark border border-textLighter" />
+                class="w-full px-3 py-2 rounded-md bg-cardDark border border-textLighter" />
               <p v-if="validationErrors[field.name]" class="mt-1 text-sm validation-error">{{
                 validationErrors[field.name] }} <i class="fa fa-warning"></i></p>
             </div>
             <div v-if="field.type === 'ref'" class="flex-1 basis-32 min-w-[8rem]">
               <label class="block mb-2">Select {{ field.title }}</label>
-              <select v-model="formData[field.name]" class="w-full px-3 py-2 rounded-md bg-cardDark border border-textLighter">
+              <select v-model="formData[field.name]"
+                class="w-full px-3 py-2 rounded-md bg-cardDark border border-textLighter">
                 <option v-for="option in refOptions[field.name]" :key="option.id" :value="option.id">
                   {{ option.name }}
                 </option>
@@ -125,7 +192,8 @@
             </div>
             <div class="flex-1 basis-32 min-w-[8rem]" v-else-if="field.type === 'select' || field.type === 'status'">
               <label class="block mb-2">Select {{ field.title }}</label>
-              <select v-model="formData[field.name]" class="w-[16rem] px-3 py-2 rounded-md">
+              <select v-model="formData[field.name]"
+                class="w-full px-3 py-2 rounded-md bg-cardDark border border-textLighter">
                 <option v-for="option in field.options" :key="option.value" :value="option.value">
                   {{ option.label }}
                 </option>
@@ -207,21 +275,62 @@
               field.type === 'audio' ||
               field.type === 'document'
             ">
-              <label class="block mb-2">{{ field.title }}</label>
+
               <div v-if="getFilePreview(field.name)">
-                <div class="mb-2">
-                  <img v-if="field.type === 'image'" :src="getFilePreview(field.name)" alt="File preview"
-                    class="max-h-32 w-[16rem] object-contain mb-2" />
-                  <video v-else-if="field.type === 'video'" :src="getFilePreview(field.name)" controls
-                    class="max-h-32 object-contain mb-2"></video>
-                  <audio v-else-if="field.type === 'audio'" :src="getFilePreview(field.name)" controls
-                    class="mb-2"></audio>
-                  <div v-else class="mb-2">
-                    {{ getFilePreview(field.name).name }}
+                <!-- For files within object arrays -->
+                <div v-if="field.type === 'document'" class="mb-4">
+                  <label class="block mb-2">{{ field.title }}</label>
+
+                  <!-- File Preview -->
+                  <div v-if="getFilePreview(field.name, field.type, index, 'documents')" class="mb-2">
+                    <!-- Image Preview -->
+                    <img v-if="getFileType(field.name, index, 'documents').startsWith('image/')"
+                      :src="getFilePreview(field.name, field.type, index, 'documents')"
+                      class="max-h-32 object-contain mb-2" :alt="getFileName(field.name, index, 'documents')" />
+
+                    <!-- Video Preview -->
+                    <video v-else-if="getFileType(field.name, index, 'documents').startsWith('video/')"
+                      :src="getFilePreview(field.name, field.type, index, 'documents')" controls
+                      class="max-h-32 w-full object-contain mb-2"></video>
+
+                    <!-- Audio Preview -->
+                    <audio v-else-if="getFileType(field.name, index, 'documents').startsWith('audio/')"
+                      :src="getFilePreview(field.name, field.type, index, 'documents')" controls
+                      class="w-full mb-2"></audio>
+
+                    <!-- Document Preview -->
+                    <div v-else class="flex items-center gap-2 mb-2">
+                      <i class="fas fa-file-alt text-2xl"></i>
+                      <span>{{ getFileName(field.name, index, 'documents') }}</span>
+                      <a :href="getFilePreview(field.name, field.type, index, 'documents')" target="_blank"
+                        class="text-blue-500 hover:text-blue-700">
+                        {{ translationKeys.View }}
+                      </a>
+                    </div>
+
+                    <!-- Remove Button -->
+                    <button type="button" @click="removeFile(field.name, index, 'documents')"
+                      class="text-red-500 hover:text-red-700">
+                      <i class="fas fa-times"></i> {{ translationKeys.Remove }}
+                    </button>
+                  </div>
+
+                  <!-- File Input -->
+                  <div class="flex items-center">
+                    <label :for="'file-input-' + field.name + '-' + index"
+                      class="cursor-pointer rounded-md px-4 py-2 flex items-center">
+                      <i class="fas fa-upload mr-2"></i>
+                      {{ getFilePreview(field.name, field.type, index, 'documents') ? translationKeys.Change :
+                        translationKeys.Browse }}
+                    </label>
+                    <input :id="'file-input-' + field.name + '-' + index"
+                      @change="(e) => handleFileUpload(field, e, index, 'documents')" type="file"
+                      :accept="getAcceptTypes(field.type)" class="hidden" />
                   </div>
                 </div>
               </div>
               <div class="flex items-center">
+
                 <label :for="'file-input-' + field.name" class="cursor-pointer rounded-md px-4 py-2 flex items-center">
                   <i class="fas fa-upload mr-2"></i>
                   {{ translationKeys.Browse }}
@@ -237,27 +346,28 @@
             <div class="flex-1 basis-32 min-w-[8rem]" v-else-if="field.type === 'color'">
               <label class="block mb-2">{{ field.title }}</label>
               <input :placeholder="`please enter ${field.title}`" v-model="formData[field.name]" type="color"
-                class="w-[16rem] px-3 py-2 rounded-md" />
+                class="w-full px-3 py-2 rounded-md" />
               <p v-if="validationErrors[field.name]" class="mt-1 text-sm validation-error">{{
                 validationErrors[field.name] }} <i class="fa fa-warning"></i></p>
             </div>
             <div v-else-if="field.type === 'range'" class="flex-1 basis-32 min-w-[8rem]">
               <label class="block mb-2">{{ field.title }}</label>
               <input :placeholder="`please enter ${field.title}`" v-model="formData[field.name]" type="range"
-                :min="field.min || 0" :max="field.max || 100" :step="field.step || 1" class="w-[16rem]" />
+                :min="field.min || 0" :max="field.max || 100" :step="field.step || 1" class="w-full" />
             </div>
             <div v-else-if="field.type === 'tags'" class="mb-6 flex-1 basis-32 min-w-[8rem]">
               <label class="block mb-2">{{ field.title }}</label>
               <div class="flex flex-wrap items-center gap-2">
                 <div v-if="field.tagInputType === 'refs'" class="flex-1">
                   <div class="flex items-center">
-                    <select v-model="inputValue" class="rounded-l-md px-3 py-2 w-44">
+                    <select v-model="inputValue"
+                      class="w-full px-3 py-2 rounded-md bg-cardDark border border-textLighter">
                       <option value="" disabled>{{ translationKeys.SelectAnOption }}</option>
                       <option v-for="option in refOptions[field.name]" :key="option.id" :value="option.id">
                         {{ option.name }}
                       </option>
                     </select>
-                    <button type="button" @click="addTag(field.name)" class="rounded-r-md px-4 py-2">
+                    <button type="button" @click="addTag(field.name)" class="bg-primary px-4 py-2 rounded-md">
                       {{ translationKeys.Add }}
                     </button>
                   </div>
@@ -267,7 +377,7 @@
                 <div v-else class="flex-1">
                   <input :placeholder="`please enter ${field.title}`" type="text" v-model="inputValue"
                     placeholder="Add a tag" @keydown.enter.prevent="addTag(field.name)"
-                    class="w-[16rem] px-3 py-2 rounded-md" />
+                    class="w-full px-3 py-2 rounded-md" />
                   <p v-if="validationErrors[field.name]" class="mt-1 text-sm validation-error">{{
                     validationErrors[field.name] }} <i class="fa fa-warning"></i></p>
                 </div>
@@ -293,10 +403,11 @@
         </div>
       </div>
       <div v-if="showSubmit" class="mt-4">
-        <button v-if="!returnDataOnly" type="submit" :disabled="isUploading || actionLoading" class="">
+        <button v-if="!returnDataOnly" type="submit" :disabled="isUploading || actionLoading"
+          class="bg-primary px-4 py-2 rounded-md">
           {{ isUploading || actionLoading ? translationKeys.Processing : translationKeys.Submit }}
         </button>
-        <button v-if="returnDataOnly" type="button" @click="emitFormData" class="">
+        <button v-if="returnDataOnly" type="button" @click="emitFormData" class="bg-primary px-4 py-2 rounded-md">
           {{ translationKeys.Apply }}
         </button>
       </div>
@@ -517,15 +628,25 @@ export default {
       }
     }
     ,
-    getFilePreview(fieldName) {
-      const file = this.formData[fieldName];
+    getFilePreview(fieldName, fileType, arrayIndex = null, arrayField = null) {
+      let file;
+
+      // Handle files in object arrays
+      if (arrayIndex !== null && arrayField !== null) {
+        if (!this.formData[arrayField][arrayIndex]) return '';
+        file = this.formData[arrayField][arrayIndex][fieldName];
+      } else {
+        file = this.formData[fieldName];
+      }
+
+      // Handle File objects and URLs
       if (file instanceof File) {
         return URL.createObjectURL(file);
-      } else if (typeof file === "string") {
-        return file;
-      } else {
-        return "";
+      } else if (typeof file === 'string' && file) {
+        return file;  // Return the URL directly
       }
+
+      return '';
     },
 
     toggleFileInput(fieldName) {
@@ -742,12 +863,88 @@ export default {
       this.formData[fieldName].splice(index, 1);
     },
 
+    // Generic file preview method
+    getFilePreview(fieldName, fileType, arrayIndex = null, arrayField = null) {
+      let file;
 
-    handleFileUpload(field, event) {
-      this.formData[field.name] = event.target.files[0];
-      this.showFileInput[field.name] = false;
+      // Handle files in object arrays
+      if (arrayIndex !== null && arrayField !== null) {
+        file = this.formData[arrayField][arrayIndex][fieldName];
+      } else {
+        file = this.formData[fieldName];
+      }
+
+      // Handle File objects and URLs
+      if (file instanceof File) {
+        return URL.createObjectURL(file);
+      } else if (typeof file === 'string' && file) {
+        return file;  // Return the URL directly
+      }
+
+      return '';
     },
-    handleFileUploadArray(field, event) {
+
+    // Get file name from URL or File object
+    getFileName(fieldName, arrayIndex = null, arrayField = null) {
+      let file;
+
+      if (arrayIndex !== null && arrayField !== null) {
+        file = this.formData[arrayField][arrayIndex][fieldName];
+      } else {
+        file = this.formData[fieldName];
+      }
+
+      if (file instanceof File) {
+        return file.name;
+      } else if (typeof file === 'string') {
+        // Extract filename from URL
+        return file.split('/').pop().split('?')[0];
+      }
+      return '';
+    },
+
+    // Get file type from URL or File object
+    getFileType(fieldName, arrayIndex = null, arrayField = null) {
+      let file;
+
+      if (arrayIndex !== null && arrayField !== null) {
+        file = this.formData[arrayField][arrayIndex][fieldName];
+      } else {
+        file = this.formData[fieldName];
+      }
+
+      if (file instanceof File) {
+        return file.type;
+      } else if (typeof file === 'string') {
+        const ext = file.split('.').pop().toLowerCase();
+        const mimeTypes = {
+          pdf: 'application/pdf',
+          doc: 'application/msword',
+          docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          xls: 'application/vnd.ms-excel',
+          xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          // Add more mappings as needed
+        };
+        return mimeTypes[ext] || 'application/octet-stream';
+      }
+      return '';
+    },
+    handleFileUpload(field, event, arrayIndex = null, arrayField = null) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (arrayIndex !== null && arrayField !== null) {
+        // Create a new object to trigger reactivity
+        const updatedArray = [...this.formData[arrayField]];
+        updatedArray[arrayIndex] = {
+          ...updatedArray[arrayIndex],
+          [field.name]: file
+        };
+        this.formData[arrayField] = updatedArray;
+      } else {
+        this.formData[field.name] = file;
+      }
+    }, handleFileUploadArray(field, event) {
       const newFiles = Array.from(event.target.files);
       this.formData[field.name] = this.formData[field.name]
         ? [...this.formData[field.name], ...newFiles]
@@ -825,112 +1022,103 @@ export default {
 
     ,
     async submitForm() {
-
       const isValid = await this.validateFormData();
       if (!isValid) {
         toast.error("Please fill in all required fields.", {
           position: "bottom-center",
         });
-        return; // Stop the submission if the form is not valid
+        return;
       }
 
       if (this.returnDataOnly) {
-        // Emit an event with the form data
         this.$emit('form-data', this.formData);
         return;
       }
 
+      this.isUploading = true;
+      this.actionLoading = true;
 
-      const fileFields = this.resource.schema.filter(
-        (field) =>
-          field.type === "image" ||
-          field.type === "video" ||
-          field.type === "audio" ||
-          field.type === "document" ||
-          field.type === "image array" ||
-          field.type === "video array" ||
-          field.type === "audio array" ||
-          field.type === "document array"
-      );
+      try {
+        // Handle all file uploads before form submission
+        for (const field of this.resource.schema) {
+          // Case 1: Handle object arrays containing file fields
+          if (field.type === 'object array') {
+            const fileSubfields = field.schema.filter(subfield =>
+              ['image', 'video', 'audio', 'document'].includes(subfield.type)
+            );
 
-      if (fileFields.length > 0) {
-        this.isUploading = true;
-        this.actionLoading = true;
-
-        try {
-          // Handle single file fields
-          for (const field of fileFields) {
-            if (
-              field.type === "image" ||
-              field.type === "video" ||
-              field.type === "audio" ||
-              field.type === "document"
-            ) {
-              const file = this.formData[field.name];
-              if (file instanceof File) {
-                const storageRef = firebase.storage().ref();
-                const fileRef = storageRef.child(`${field.name}/${file.name}`);
-                await fileRef.put(file);
-                const downloadURL = await fileRef.getDownloadURL();
-                this.formData[field.name] = downloadURL;
+            if (fileSubfields.length > 0 && Array.isArray(this.formData[field.name])) {
+              for (let i = 0; i < this.formData[field.name].length; i++) {
+                for (const subfield of fileSubfields) {
+                  const file = this.formData[field.name][i][subfield.name];
+                  if (file instanceof File) {
+                    const storageRef = firebase.storage().ref();
+                    const fileRef = storageRef.child(`${field.name}/${i}/${file.name}`);
+                    await fileRef.put(file);
+                    const downloadURL = await fileRef.getDownloadURL();
+                    this.formData[field.name][i][subfield.name] = downloadURL;
+                  }
+                }
               }
             }
           }
 
-          // Handle file array fields
-          for (const field of fileFields) {
-            if (
-              field.type === "image array" ||
-              field.type === "video array" ||
-              field.type === "audio array" ||
-              field.type === "document array"
-            ) {
-              const existingFiles = this.formData[field.name] || [];
-              const newFiles = [];
-              const downloadURLs = [];
+          // Case 2: Handle single file fields
+          else if (['image', 'video', 'audio', 'document'].includes(field.type)) {
+            const file = this.formData[field.name];
+            if (file instanceof File) {
+              const storageRef = firebase.storage().ref();
+              const fileRef = storageRef.child(`${field.name}/${file.name}`);
+              await fileRef.put(file);
+              const downloadURL = await fileRef.getDownloadURL();
+              this.formData[field.name] = downloadURL;
+            }
+          }
 
-              // Separate existing files (URLs) from new files
-              for (const file of existingFiles) {
-                if (typeof file === "string") {
-                  downloadURLs.push(file);
-                } else {
-                  newFiles.push(file);
+          // Case 3: Handle file array fields
+          else if (['image array', 'video array', 'audio array', 'document array'].includes(field.type)) {
+            if (Array.isArray(this.formData[field.name])) {
+              const updatedFiles = [];
+
+              for (const file of this.formData[field.name]) {
+                if (typeof file === 'string') {
+                  // Already a URL, keep it
+                  updatedFiles.push(file);
+                } else if (file instanceof File) {
+                  // Upload new file and get URL
+                  const storageRef = firebase.storage().ref();
+                  const fileRef = storageRef.child(`${field.name}/${file.name}`);
+                  await fileRef.put(file);
+                  const downloadURL = await fileRef.getDownloadURL();
+                  updatedFiles.push(downloadURL);
                 }
               }
 
-              // Upload new files
-              for (const file of newFiles) {
-                const storageRef = firebase.storage().ref();
-                const fileRef = storageRef.child(`${field.name}/${file.name}`);
-                await fileRef.put(file);
-                const downloadURL = await fileRef.getDownloadURL();
-                downloadURLs.push(downloadURL);
-              }
-
-              // Store the download URLs in the same field
-              this.formData[field.name] = downloadURLs;
+              this.formData[field.name] = updatedFiles;
             }
           }
-        } catch (error) {
-          console.error(`Error uploading file: ${error.message}`);
-          this.$swal.fire(
-            "Error!",
-            `Error uploading file: ${error.message}`,
-            "error"
-          );
-          this.isUploading = false;
-          return;
         }
 
         this.isUploading = false;
         this.actionLoading = false;
-      }
 
-      // Form submission logic
-      if (this.isAdding) {
-        this.add();
-      } else {
-        this.edit();
+        // Form submission logic
+        if (this.isAdding) {
+          this.add();
+        } else {
+          this.edit();
+        }
+
+      } catch (error) {
+        console.error(`Error uploading file: ${error.message}`);
+        this.$swal.fire(
+          "Error!",
+          `Error uploading file: ${error.message}`,
+          "error"
+        );
+        this.isUploading = false;
+        this.actionLoading = false;
+        return;
       }
     },
     add() {
@@ -957,8 +1145,9 @@ export default {
             const url = `/invoice/${response.data._id}`;
             this.$router.push(url);
           } else {
+            console.log(this.redirectTo);
             this.$router.push(
-              `/dashboard/${this.resource.path}?page=1&limit=30&search=&sortBy=&order=desc`
+              `/dashboard/${this.resource.name}`
             );
           }
         })
@@ -989,9 +1178,19 @@ export default {
         )
         .then(() => {
           this.$swal.fire("Success!", "Item updated successfully.", "success");
-          this.$router.push(
-            `/dashboard/${this.resource.path}?page=1&limit=30&search=&sortBy=&order=desc`
-          );
+          if (this.redirectTo === "prev") {
+            this.$router.go(-1);
+          } else if (this.redirectTo === "current") {
+            this.$router.go(0);
+          } else if (this.redirectTo === "invoice") {
+            const url = `/invoice/${response.data._id}`;
+            this.$router.push(url);
+          } else {
+            console.log(this.redirectTo);
+            this.$router.push(
+              `/dashboard/${this.resource.name}`
+            );
+          }
         })
         .catch((error) => {
           console.error(
@@ -1021,5 +1220,34 @@ export default {
   width: 0px;
   height: 0px;
   visibility: hidden;
+}
+
+.file-preview {
+  border: 1px solid #ddd;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.file-preview img,
+.file-preview video {
+  max-width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+}
+
+.file-preview audio {
+  width: 100%;
+}
+
+.file-icon {
+  font-size: 2rem;
+  margin-right: 1rem;
+}
+
+.preview-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
 }
 </style>

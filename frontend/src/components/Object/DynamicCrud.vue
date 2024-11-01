@@ -54,12 +54,7 @@
                     <a-row class="mb-4">
                         <a-col :span="24">
                             <a-space>
-                                <button
-                                    class="border border-primary text-primary py-1 hover:cursor-pointer hover:-translate-y-0.5 transition px-4 rounded-md"
-                                    @click="addNewItem()">
-                                    <i class="pi pi-plus"></i>
-                                </button>
-                                <a-input-search v-model:value="searchQuery" placeholder="Search..."
+                                     <a-input-search v-model:value="searchQuery" placeholder="Search..."
                                     @search="performSearch" style="width: 200px;" />
                             </a-space>
                         </a-col>
@@ -76,11 +71,23 @@
                     </a-row>
                 </a-row>
 
-                <a-empty v-if="displayItems.length === 0" />
+                <a-empty v-if="displayItems.length === 0" >
+    <template #description>
+      <span>
+        No {{ resource.label }} records found.
+     
+      </span>
+    </template>
+    <button class="bg-primary px-4 py-2 rounded-md text-text" @click="addNewItem()"><i class="pi pi-plus mr-2"></i> Create Now</button>
+  </a-empty>
+
+
+
+                
                 <template v-else>
                     <a-list v-if="viewMode === 'list'" :data-source="displayItems" :bordered="true">
                         <template #renderItem="{ item }">
-                            <div class="bg-cardLight p-3 border border-textLighter rounded-lg">
+                            <div class="bg-cardLight p-3 border border-textLighter first:rounded-t-lg last:rounded-b-lg">
                                 <objectrenderer :resource="resource" :display-data="item" :layout="finalLayout"
                                     default-orientation="dropdown" :show-heading="false" />
                             </div>
@@ -88,12 +95,18 @@
                         </template>
                     </a-list>
                     <a-row v-else :gutter="[16, 16]">
+                        <div @click="addNewItem()"
+                            class="flex items-center justify-center border-dashed border-2 border-text rounded-md  m-0 cursor-pointer hover:bg-gray-200 transition duration-300 ease-in-out flex-1">
+                            <i class="pi pi-plus mr-2 text-gray-600"></i>
+                            <span class=" mr-2">Add New </span>{{ resource.name }}
+                        </div>
                         <a-col v-for="item in displayItems" :key="item.id" :xs="24" :sm="12" :md="8">
                             <div class="bg-cardLight p-3 border border-textLighter rounded-lg">
                                 <objectrenderer :resource="resource" :display-data="item" :layout="finalLayout"
                                     default-orientation="icons" :show-heading="false" />
                             </div>
                         </a-col>
+
                     </a-row>
                 </template>
 
@@ -195,7 +208,7 @@ export default defineComponent({
         },
         defaultPageSize: {
             type: Number,
-            default: 10
+            default: 5
         }
     },
 
@@ -225,7 +238,7 @@ export default defineComponent({
 
         addNewItem() {
             this.$router.push({ path: `/dashboard/${this.resource.path}/item/add` });
-            
+
         },
         processStaticData() {
             if (!this.staticData) return [];

@@ -20,6 +20,12 @@ export const user_management_system = [
         validation: Yup.string().required("Full Name is required."),
       },
       {
+        name: "undefined",
+        title: translationKeys.ProfilePicture,
+        type: "image",
+        validation: Yup.string().required("Image is required."),
+      },
+      {
         name: "email",
         title: translationKeys.Email,
         type: "email",
@@ -76,12 +82,6 @@ export const user_management_system = [
         resource: "genders",
         field: "gender",
         validation: Yup.string().required("Gender is required."),
-      },
-      {
-        name: "undefined",
-        title: translationKeys.ProfilePicture,
-        type: "image",
-        validation: Yup.string().required("Image is required."),
       },
       {
         name: "description",

@@ -10,7 +10,7 @@
             'sm:col-span-2 lg:col-span-3': ['image', 'object', 'richtext', 'image array', 'object array'].includes(field.type)
           }">
             <div class="p-4">
-              <h3 class="mb-2">{{ field.title }}</h3>
+              <h3 class="mb-2 font-bold">{{ field.title }}</h3>
               <!-- Text, Email, Phone, Number, Decimal -->
               <div v-if="['text', 'email', 'phone', 'number', 'decimal'].includes(field.type)">
                 <p>{{ formData[field.name] }}</p>
@@ -60,7 +60,7 @@
               <div v-else-if="['image', 'video', 'audio', 'document'].includes(field.type)" class="w-full">
                 <div v-if="field.type === 'image'" class="mb-4 flex justify-center">
                   <img :src="formData[field.name]" :alt="field.title"
-                    class="w-96 h-96 max-h-64 object-cover" />
+                    class="w-96 h-[42rem] max-h-64 object-fill" />
                 </div>
                 <div v-else-if="field.type === 'video'" class="mb-4">
                   <video :src="formData[field.name]" class="w-full max-h-64 object-cover" controls>
@@ -118,15 +118,79 @@
               <!-- Object Array -->
               <div v-else-if="field.type === 'object array'" class="w-full">
                 <div v-for="(item, index) in formData[field.name]" :key="index"
-                  class="pb-4 mb-4 last:pb-0 last:mb-0">
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  class=" card ">
+                  <div class="flex">
                     <div v-for="subField in field.schema" :key="subField.name">
                       <h4 class="mb-1">
                         {{ subField.title }}
                       </h4>
-                      <p v-if="subField.type !== 'ref'">
+                      <p v-if="subField.type === 'document'">
+                        <a :href="item[subField.name]" :download="`${subField.title}.pdf`">
+                          Download {{ subField.title }}
+                        </a>
+                      </p>
+                      <p v-else-if="subField.type !== 'ref'">
                         {{ item[subField.name] }}
                       </p>
+                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                      <div v-else-if="['image', 'video', 'audio', 'document'].includes(subField.type)" class="w-full">
+                <div v-if="subField.type === 'image'" class="mb-4 flex justify-center">
+                  <img :src="formData[subField.name]" :alt="subField.title"
+                    class="w-96 h-[42rem] max-h-64 object-fill" />
+                </div>
+                <div v-else-if="subField.type === 'video'" class="mb-4">
+                  <video :src="formData[subField.name]" class="w-full max-h-64 object-cover" controls>
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+                <div v-else-if="subField.type === 'audio'" class="mb-4">
+                  <audio :src="formData[subField.name]" class="w-full" controls>
+                    Your browser does not support the audio element.
+                  </audio>
+                </div>
+                <div v-else-if="subField.type === 'document'" class="mb-4">
+                  <a :href="formData[subField.name]" :download="`${subField.title}.pdf`"
+                    class="inline-flex items-center px-4">
+                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    Download {{ subField.title }}
+                  </a>
+                </div>
+              </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                       <p v-else>
                         {{ getRefLabel(subField.resource, item[subField.name]) }}
                       </p>

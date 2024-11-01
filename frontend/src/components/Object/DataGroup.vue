@@ -44,7 +44,7 @@
                     <!-- List View -->
                     <a-list v-if="displayMode === 'list'" :data-source="limitedItems" :bordered="true">
                         <template #renderItem="{ item }">
-                            <div class="bg-cardLight p-3 border border-textLighter rounded-lg">
+                            <div class="bg-cardLight p-3 border border-textLighter first:rounded-t-lg last:rounded-b-lg">
                                 <objectrenderer :resource="resource" :display-data="item" :layout="resource.layout"
                                     default-orientation="dropdown" :show-heading="false" />
                             </div>

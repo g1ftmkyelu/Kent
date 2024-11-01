@@ -5,18 +5,18 @@
         <form @submit.prevent="updatePassword">
           <div class="mb-4">
             <label for="currentPassword" class="block mb-2">{{ translationKeys.CurrentPassword }}</label>
-            <input type="password" id="currentPassword" v-model="currentPassword"  required>
+            <input type="password" class="w-full px-3 py-2 rounded-md bg-cardDark border border-textLighter" id="currentPassword" v-model="currentPassword"  required>
           </div>
           <div class="mb-4">
             <label for="newPassword" class="block mb-2">{{ translationKeys.NewPassword }}</label>
-            <input type="password" id="newPassword" v-model="newPassword"  required>
+            <input  class="w-full px-3 py-2 rounded-md bg-cardDark border border-textLighter" type="password" id="newPassword" v-model="newPassword"  required>
           </div>
           <div class="mb-6">
             <label for="confirmPassword" class="block mb-2">{{ translationKeys.ConfirmNewPassword }}</label>
-            <input type="password" id="confirmPassword" v-model="confirmPassword"  required>
+            <input type="password" class="w-full px-3 py-2 rounded-md bg-cardDark border border-textLighter" id="confirmPassword" v-model="confirmPassword"  required>
           </div>
           <div class="flex justify-start">
-            <button type="submit" class="">{{ translationKeys.UpdatePassword }}</button>
+            <button  type="submit" class="bg-primary px-4 py-2 rounded-md">{{ translationKeys.UpdatePassword }}</button>
           </div>
         </form>
         <transition name="fade">

@@ -13,7 +13,7 @@
           <span class="mt-2 p-2 w-9 flex cursor-pointer text-primary items-center mb-4" @click="this.$router.go(-1)">
                 <i class="pi pi-arrow-left common-text"></i>&nbsp;BACK
           </span>
-          <DynamicForm :resource="resource" :initial-data="initialData" :is-adding="true" />
+          <DynamicForm :resource="resource" :initial-data="inventoryItem" :is-adding="true" />
         </div>
 
         <div class=" sm:w-full w-[18.7rem]" v-else-if="mode === 'edit'">
@@ -99,9 +99,7 @@ export default {
 
     if (mode === "add") {
       this.inventoryItem = {
-        itemName: "",
-        quantity: null,
-        unitOfMeasure: "",
+
       };
     } else {
       this.fetchInventoryItem();
@@ -112,6 +110,7 @@ export default {
     goBack() {
       this.$router.go(-1);
     },
+
     fetchInventoryItem() {
       this.loading = true;
       const itemId = this.$route.params.id;

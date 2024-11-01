@@ -134,7 +134,7 @@
     
     try {
       const searchPromises = resources.value.map(async (resource) => {
-        const response = await fetch(`http://localhost:4500/api/v1/${resource.path}?search=${searchQuery.value}&limit=${MAX_RESULTS}`);
+        const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/api/v1/${resource.path}?search=${searchQuery.value}&limit=${MAX_RESULTS}`);
         const data = await response.json();
         return data.data.map(item => ({
           ...item,

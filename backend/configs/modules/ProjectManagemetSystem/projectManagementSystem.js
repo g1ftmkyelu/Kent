@@ -13,12 +13,7 @@ exports.construction_tracking_system = [
         title: "Project Name",
         type: "text",
       },
-      {
-        name: "projectCode",
-        title: "Project Code",
-        type: "text",
 
-      },
       {
         name: "startDate",
         title: "Start Date",
@@ -37,16 +32,34 @@ exports.construction_tracking_system = [
         type: "text",
   
       },
+
+
       {
-        name: "status",
+        name:"client",
+        type: "ref",
+        resource: "users",
+        field: "fullname",
+      },
 
-        type: "status",
+      
+      {
+        name: "milestones",
+        type: "select",
         options: [
-          { label: "Pending", value: "pending", color: "#FFD700" },
-          { label: "Approved", value: "approved", color: "#007ACC" },
-          { label: "Declined", value: "declined", color: "#008000" },
+          { label: "Planning & Permits", value: "planning", color: "#007bff" },
+          { label: "Site Preparation", value: "site_preparation", color: "#6c757d" },
+          { label: "Foundation", value: "foundation", color: "#7952b3" },
+          { label: "Framing", value: "framing", color: "#17a2b8" },
+          { label: "Roofing", value: "roofing", color: "#ffc107" },
+          { label: "Windows & Doors", value: "windows_doors", color: "#dc3545" },
+          { label: "Rough-In", value: "rough_in", color: "#28a745" }, // Plumbing, Electrical, HVAC
+          { label: "Insulation", value: "insulation", color: "#20c997" },
+          { label: "Drywall", value: "drywall", color: "#fd7e14" },
+          { label: "Interior Finishes", value: "interior_finishes", color: "#343a40" }, // Paint, Cabinets, Trim
+          { label: "Exterior Finishes", value: "exterior_finishes", color: "#17c0eb" }, // Siding, Landscaping
+          { label: "Final Inspection", value: "final_inspection", color: "#6610f2" },
+          { label: "Handover", value: "handover", color: "#e83e8c" } // Completion & Client Walkthrough
         ],
-
       },
       {
         name: "teams",
@@ -57,35 +70,32 @@ exports.construction_tracking_system = [
         field: "teamName",
 
       },
-      {
-        name: "milestones",
-        title: "Milestones",
-        type: "tags",
-        tagInputType: "refs",
-        resource: "milestones",
-        field: "milestoneName",
 
-      },
       {
         name: "description",
         title: "Description",
         type: "richtext",
 
       },
-      {
-        name: "projectManager",
-        title: "Project Manager",
-        type: "ref",
-        resource: "users",
-        field: "fullname",
-      },
-      {
-        name: "attachments",
-        title: "Project Documents",
-        type: "document array",
 
-      },
-    ],
+
+      {
+        name: "documents",
+        title: "Project Documents",
+        type: "object array",
+        schema: [
+
+
+          {
+            name: "file",
+            title: "File",
+            type: "document"
+          }
+        ]
+      }
+        
+      // In the projects schema array, add this field:
+  ],
     layout:{
         rows:8,
         columns:8,
@@ -106,75 +116,7 @@ exports.construction_tracking_system = [
     renderMode: "crud",
  },
 
-  {
-    name: "milestones",
-    icon: "fa fa-flag",
-    label: "Milestones",
-    menuGroup: "Projects",
-    menuGroupIcon: "fa fa-folder",
-    schema: [
-      {
-        name: "milestoneName",
-        title: "Milestone Name",
-        type: "text",
-  
-      },
-      {
-        name: "dueDate",
-        title: "Due Date",
-        type: "date",
 
-      },
-      {
-        name: "completionPercentage",
-        title: "Completion Percentage",
-        type: "number",
-
-      },
-      {
-        name: "description",
-        title: "Description",
-        type: "richtext",
-
-      },
-      {
-        name: "status",
-
-        type: "status",
-        options: [
-          { label: "Pending", value: "pending", color: "#FFD700" },
-          { label: "In Progress", value: "inProgress", color: "#007ACC" },
-          { label: "Completed", value: "completed", color: "#008000" },
-          { label: "Failed", value: "failed", color: "#FF6347" },
-          { label: "On Hold", value: "onHold", color: "#008080" },
-        ],
-
-      },
-      {
-        name: "tasks",
-        title: "Tasks",
-        type: "tags",
-        tagInputType: "refs",
-        resource: "tasks",
-        field: "taskName",
-
-      },
-    ],
-    layout:{
-        rows:8,
-        columns:4,
-        fields: {
-          milestoneName: { rowStart: 1, colStart: 1, rowSpan: 1, colSpan: 1 },
-          dueDate: { rowStart: 1, colStart: 2, rowSpan: 1, colSpan: 1 },
-          completionPercentage: { rowStart: 1, colStart: 3, rowSpan: 1, colSpan: 1 },
-          description: { rowStart: 2, colStart: 1, rowSpan: 1, colSpan: 3 },
-          status: { rowStart: 3, colStart: 1, rowSpan: 1, colSpan: 3 },
-          tasks: { rowStart: 4, colStart: 1, rowSpan: 1, colSpan: 3 },
-        }
-    },
-    renderMode: "crud",
-    
-  },
 
   {
     name: "teams",
@@ -391,6 +333,12 @@ exports.construction_tracking_system = [
         ],
       },
       {
+        name:"project",
+        type: "ref",
+        resource: "projects",
+        field: "projectName",
+      },
+      {
         name: "location",
         type: "text",
   
@@ -483,6 +431,7 @@ exports.construction_tracking_system = [
             { label: "Annual Report", value: "annualReport" }
         ]
       },
+
       {
         name: "supervisor",
         type: "text",

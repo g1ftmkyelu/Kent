@@ -45,8 +45,6 @@ const progressChartData = {
 // Injuries Resource
 const injuriesResource = Resources.find(resource => resource.path === "injuries");
 
-// Reports Resource
-const reportsResource = Resources.find(resource => resource.path === "reports");
 
 // Material Inquiries Resource
 const materialInquiriesResource = Resources.find(resource => resource.path === "material_inquiries");
@@ -73,22 +71,7 @@ export const blockConfigs = [
       }
     }
   },
-  {
-    id: 'reports-block',
-    name: 'Reports',
-    title:'Today\'s Reports',
-    config: {
-      type: 'data-group',
-      props: {
-        resource: reportsResource,
-        showHeader:false,
-        layout: reportsResource.layout,
-        useApi: true,
-        showMoreLink: true,
-        maxDisplayItems:4
-      }
-    }
-  },
+
   {
     id: 'material-inquiries-block',
     name: 'Material Inquiries',
@@ -184,14 +167,7 @@ export const layout = [
     colSpan: 12
   },
  
-  // Bottom Row - Split
-  {
-    name: 'Reports',
-    rowStart: 3,
-    colStart: 1,
-    rowSpan: 1,
-    colSpan: 6
-  },
+
   {
     name: 'Projects',
     rowStart: 3,

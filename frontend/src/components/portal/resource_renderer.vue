@@ -27,6 +27,7 @@
   <market v-else-if="resource.renderMode === 'market'" :resource="resource" />
   <notifications v-else-if="resource.renderMode === 'notifications'" :resource="resource" />
   <systemSettings v-else-if="resource.renderMode === 'system-config'" :resource="resource" />
+  <kanban_board v-else-if="resource.renderMode === 'kanban'" :resource="resource" />
 
     <h1 v-else>unknown renderMode</h1>
 
@@ -46,6 +47,7 @@ import data_fetcher from "../data_fetcher.vue";
 import Table_view from "./render_modes/crud/table_view.vue";
 import notifications from "./render_modes/notifications/notifications.vue";
 import dashboard_renderer from "./dashboards/dashboard_renderer.vue";
+import kanban_board from "./render_modes/kanban/kanban_board.vue";
 
 export default {
   components: {
@@ -60,7 +62,8 @@ export default {
     data_fetcher,
     Table_view,
     notifications,
-    dashboard_renderer
+    dashboard_renderer,
+    kanban_board
   },
   mounted() {
     // Scroll to the top when component is mounted

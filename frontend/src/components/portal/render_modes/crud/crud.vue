@@ -1,6 +1,5 @@
 <template>
   <DynamicCrud :resource="resource" :layout="resource.layout" />
-
 </template>
 
 <script>

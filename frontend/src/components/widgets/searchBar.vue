@@ -150,7 +150,7 @@ const displayedProducts = computed(() => {
 // API calls
 const fetchCategories = async () => {
   try {
-    const response = await fetch('http://localhost:4500/api/v1/categories?limit=1000');
+    const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/api/v1/categories?limit=1000`);
     const data = await response.json();
     categories.value = data.data;
   } catch (error) {
@@ -161,7 +161,7 @@ const fetchCategories = async () => {
 
 const fetchProducts = async () => {
   try {
-    const response = await fetch('http://localhost:4500/api/v1/products?limit=1000');
+    const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/api/v1/products?limit=1000`);
     const data = await response.json();
     products.value = data.data.slice(0, MAX_RESULTS);
     applyFilters();

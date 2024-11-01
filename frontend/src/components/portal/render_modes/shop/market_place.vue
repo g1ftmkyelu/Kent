@@ -267,7 +267,7 @@ export default {
 
     const fetchCategories = async () => {
       try {
-        const response = await fetch('http://localhost:4500/api/v1/categories');
+        const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/api/v1/categories`);
         const data = await response.json();
         categories.value = data.data;
         return data.data;

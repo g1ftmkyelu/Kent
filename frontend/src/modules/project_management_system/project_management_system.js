@@ -16,13 +16,7 @@ export const construction_tracking_system = [
         type: "text",
         validation: Yup.string().required("Project Name is required."),
       },
-      {
-        name: "projectCode",
-        title: "Project Code",
-        type: "text",
-        defaultValue: () => `PRJT-${uuidv4().split("-")[0]}`,
-        validation: Yup.string().required("Order Number is required."),
-      },
+
       {
         name: "startDate",
         title: "Start Date",
@@ -42,54 +36,66 @@ export const construction_tracking_system = [
         validation: Yup.string().required("Location is required"),
       },
       {
-        name: "status",
-        title: translationKeys.Status || "Status",
-        type: "status",
-        options: [
-          { label: "Pending", value: "pending", color: "#FFD700" },
-          { label: "Approved", value: "approved", color: "#007ACC" },
-          { label: "Declined", value: "declined", color: "#008000" },
-        ],
-        validation: Yup.string().required("Status is required"),
+        name:"client",
+        type: "ref",
+        title: translationKeys.Client || "Client",
+        resource: "users",
+        field: "fullname",
+        validation: Yup.string().required("Client is required"),
       },
       {
         name: "milestones",
-        title: "Milestones",
-        type: "tags",
-        tagInputType: "refs",
-        resource: "milestones",
-        field: "milestoneName",
-        validation: Yup.string().required("Status is required"),
-      },
+        title: translationKeys.Status || "Milestones",
+        type: "status",
+        options: [
+          { label: "Planning & Permits", value: "planning", color: "#007bff" },
+          { label: "Site Preparation", value: "site_preparation", color: "#6c757d" },
+          { label: "Foundation", value: "foundation", color: "#7952b3" },
+          { label: "Framing", value: "framing", color: "#17a2b8" },
+          { label: "Roofing", value: "roofing", color: "#ffc107" },
+          { label: "Windows & Doors", value: "windows_doors", color: "#dc3545" },
+          { label: "Rough-In", value: "rough_in", color: "#28a745" }, // Plumbing, Electrical, HVAC
+          { label: "Insulation", value: "insulation", color: "#20c997" },
+          { label: "Drywall", value: "drywall", color: "#fd7e14" },
+          { label: "Interior Finishes", value: "interior_finishes", color: "#343a40" }, // Paint, Cabinets, Trim
+          { label: "Exterior Finishes", value: "exterior_finishes", color: "#17c0eb" }, // Siding, Landscaping
+          { label: "Final Inspection", value: "final_inspection", color: "#6610f2" },
+          { label: "Handover", value: "handover", color: "#e83e8c" } // Completion & Client Walkthrough
+        ],
+        validation: Yup.string().required("Milestone is required"),
+      }
+      ,
       {
         name: "description",
         title: "Description",
         type: "richtext",
         validation: Yup.string().required("Description is required"),
       },
+ 
       {
-        name: "projectManager",
-        title: "Project Manager",
-        type: "ref",
-        resource: "users",
-        field: "fullname",
-        validation: Yup.string().required("Project Manager is required"),
-      },
+        name: "documents",
+        title: "Project Documents",
+        type: "object array",
+        schema: [
+
+          {
+            name: "file",
+            title: "File",
+            type: "document"
+          }
+        ]
+      }
+        
 
     ],
-    renderMode: "crud",
+    renderMode: "kanban",
    layout: {
-    rows: 3,
+    rows: 2,
     columns: 5,
     fields: {
       projectName: { rowStart: 1, colStart: 1, rowSpan: 1, colSpan: 2 },
-      projectCode: { rowStart: 1, colStart: 3, rowSpan: 1, colSpan: 1 },
-      startDate: { rowStart: 1, colStart: 4, rowSpan: 1, colSpan: 1 },
-      expectedEndDate: { rowStart: 1, colStart: 5, rowSpan: 1, colSpan: 1 },
-      location: { rowStart: 2, colStart: 1, rowSpan: 1, colSpan: 2 },
-      status: { rowStart: 2, colStart: 3, rowSpan: 1, colSpan: 1 },
-      projectManager: { rowStart: 2, colStart: 4, rowSpan: 1, colSpan: 2 },
-      description: { rowStart: 3, colStart: 1, rowSpan: 1, colSpan: 7 },
+      status: { rowStart: 2, colStart: 1, rowSpan: 1, colSpan: 4 },
+
     },
     actions: [
       {
@@ -100,102 +106,18 @@ export const construction_tracking_system = [
         colSpan: 1,
         alignment: "top-right",
         actions: [
-          { name: "goToView", icon: "pi pi-key", label: "View" },
-          { name: "goToEdit", icon: "pi pi-eye", label: "Edit" },
+          { name: "goToView", icon: "pi pi-eye", label: "View" },
+          { name: "goToEdit", icon: "pi pi-pencil", label: "Edit" },
           { name: "deleteResource", icon: "pi pi-trash", label: "Delete" },
         ],
-        orientation: "dropdown",
+        orientation: "icons",
         style: "position: absolute; top: 0.5rem; right: 0.5rem; z-index: 10;",
       },
     ],
   },
   },
 
-  {
-    name: "milestones",
-    path: "milestones",
-    icon: "pi pi-flag",
-    label: "Milestones",
 
-    schema: [
-      {
-        name: "milestoneName",
-        title: "Milestone Name",
-        type: "text",
-        validation: Yup.string().required("Milestone Name is required"),
-      },
-      {
-        name: "dueDate",
-        title: "Due Date",
-        type: "date",
-        validation: Yup.date().required("Due Date is required"),
-      },
-      {
-        name: "completionPercentage",
-        title: "Completion Percentage",
-        type: "number",
-        validation: Yup.number().required("Completion Percentage is required"),
-      },
-      {
-        name: "description",
-        title: "Description",
-        type: "richtext",
-        validation: Yup.string().required("Description is required"),
-      },
-      {
-        name: "status",
-        title: translationKeys.Status || "Status",
-        type: "status",
-        options: [
-          { label: "Pending", value: "pending", color: "#FFD700" },
-          { label: "In Progress", value: "inProgress", color: "#007ACC" },
-          { label: "Completed", value: "completed", color: "#008000" },
-          { label: "Failed", value: "failed", color: "#FF6347" },
-          { label: "On Hold", value: "onHold", color: "#008080" },
-        ],
-        validation: Yup.string().required("Status is required"),
-      },
-      {
-        name: "tasks",
-        title: "Tasks",
-        type: "tags",
-        tagInputType: "refs",
-        resource: "tasks",
-        field: "taskName",
-        validation: Yup.string().required("Status is required"),
-      },
-    ],
-    layout:{
-      rows: 3,
-      columns: 4,
-      fields: {
-        milestoneName: { rowStart: 1, colStart: 1, rowSpan: 1, colSpan: 2 },
-        dueDate: { rowStart: 1, colStart: 3, rowSpan: 1, colSpan: 1 },
-        completionPercentage: { rowStart: 2, colStart: 3, rowSpan: 1, colSpan: 1 },
-        description: { rowStart: 2, colStart: 1, rowSpan: 1, colSpan: 2 },
-        status: { rowStart: 3, colStart: 1, rowSpan: 1, colSpan: 3 },
-        tasks: { rowStart: 4, colStart: 1, rowSpan: 2, colSpan: 4 }
-      },
-      actions: [
-        {
-          name: "user_actions",
-          rowStart: 1,
-          rowSpan: 1,
-          colStart: 4,
-          colSpan: 1,
-          alignment: "top-right",
-          actions: [
-            { name: "goToView", icon: "pi pi-key", label: "View" },
-            { name: "goToEdit", icon: "pi pi-eye", label: "Edit" },
-            { name: "deleteResource", icon: "pi pi-trash", label: "Delete" }
-          ],
-          orientation: "dropdown",
-          style: "position: absolute; top: 0.5rem; right: 0.5rem; z-index: 10;"
-        }
-      ]
-    },
-    renderMode: "crud",
-  },
 
   {
     name: "tasks",
@@ -231,6 +153,18 @@ export const construction_tracking_system = [
         validation: Yup.date().required("Due Date is required"),
       },
       {
+        name: "status",
+        title: "Status",
+        type: "status",
+        options: [
+          { label: "Pending", value: "pending", color: "#FFD700" },
+          { label: "In Progress", value: "inProgress", color: "#007ACC" },
+          { label: "Completed", value: "completed", color: "#008000" },
+
+        ],
+        validation: Yup.string().required("Status is required"),
+      },
+      {
         name: "priority",
         title: "Priority",
         type: "status",
@@ -243,19 +177,6 @@ export const construction_tracking_system = [
         validation: Yup.string().required("Priority is required"),
       },
       {
-        name: "status",
-        title: "Status",
-        type: "status",
-        options: [
-          { label: "Pending", value: "pending", color: "#FFD700" },
-          { label: "In Progress", value: "inProgress", color: "#007ACC" },
-          { label: "Completed", value: "completed", color: "#008000" },
-          { label: "Failed", value: "failed", color: "#FF6347" },
-          { label: "On Hold", value: "onHold", color: "#008080" },
-        ],
-        validation: Yup.string().required("Status is required"),
-      },
-      {
         name: "description",
         title: "Description",
         type: "richtext",
@@ -263,16 +184,11 @@ export const construction_tracking_system = [
       },
     ],
     layout: {
-      rows: 4,
+      rows: 3,
       columns: 4,
       fields: {
-        taskName: { rowStart: 1, colStart: 1, rowSpan: 1, colSpan: 2 },
-        team: { rowStart: 1, colStart: 3, rowSpan: 1, colSpan: 2 },
-        startDate: { rowStart: 2, colStart: 1, rowSpan: 1, colSpan: 2 },
-        dueDate: { rowStart: 2, colStart: 3, rowSpan: 1, colSpan: 2 },
-        priority: { rowStart: 3, colStart: 1, rowSpan: 1, colSpan: 2 },
-        status: { rowStart: 3, colStart: 3, rowSpan: 1, colSpan: 2 },
-        description: { rowStart: 4, colStart: 1, rowSpan: 1, colSpan: 4 },
+        taskName: { rowStart: 2, colStart: 1, rowSpan: 1, colSpan: 4 },
+        status: { rowStart: 3, colStart: 1, rowSpan: 1, colSpan: 2 },
       },
       actions: [
         {
@@ -283,11 +199,10 @@ export const construction_tracking_system = [
           colSpan: 1,
           alignment: "top-right",
           actions: [
-            { name: "goToView", icon: "pi pi-key", label: "View" },
-            { name: "goToEdit", icon: "pi pi-eye", label: "Edit" },
+            { name: "goToEdit", icon: "pi pi-pencil", label: "Edit" },
             { name: "deleteResource", icon: "pi pi-trash", label: "Delete" },
           ],
-          orientation: "dropdown",
+          orientation: "icons",
           style: "position: absolute; top: 0.5rem; right: 0.5rem; z-index: 10;",
         },
       ],
@@ -331,14 +246,12 @@ export const construction_tracking_system = [
       },
     ],
     layout: {
-      rows: 2,
+      rows: 3,
       columns: 2,
       fields: {
         teamName: { rowStart: 1, colStart: 1, rowSpan: 1, colSpan: 1 },
-        teamLead: { rowStart: 1, colStart: 2, rowSpan: 1, colSpan: 1 },
         members: { rowStart: 2, colStart: 1, rowSpan: 1, colSpan: 2 },
-        description: { rowStart: 3, colStart: 1, rowSpan: 1, colSpan: 2 },
-        teamMembers: { rowStart: 4, colStart: 1, rowSpan: 1, colSpan: 2 },
+        teamMembers: { rowStart: 3, colStart: 1, rowSpan: 2, colSpan: 2 },
       },
       actions: [
         {
@@ -349,11 +262,10 @@ export const construction_tracking_system = [
           colSpan: 1,
           alignment: "top-right",
           actions: [
-            { name: "goToView", icon: "pi pi-key", label: "View" },
-            { name: "goToEdit", icon: "pi pi-eye", label: "Edit" },
+            { name: "goToEdit", icon: "pi pi-pencil", label: "Edit" },
             { name: "deleteResource", icon: "pi pi-trash", label: "Delete" },
           ],
-          orientation: "buttons",
+          orientation: "icons",
         },
       ],
     },
@@ -433,98 +345,97 @@ export const construction_tracking_system = [
           colSpan: 1,
           alignment: "top-right",
           actions: [
-            { name: "goToView", icon: "pi pi-key", label: "View" },
-            { name: "goToEdit", icon: "pi pi-eye", label: "Edit" },
+           
+               { name: "goToEdit", icon: "pi pi-pencil", label: "Edit" },
             { name: "deleteResource", icon: "pi pi-trash", label: "Delete" },
           ],
-          orientation: "dropdown",
+          orientation: "icons",
           style: "position: absolute; top: 0.5rem; right: 0.5rem; z-index: 10;",
         },
       ],
     },
     renderMode: "crud",
   },
-
   {
-    name: "injuries",
-    path: "injuries",
-    icon: "pi pi-exclamation-triangle",
-    label: translationKeys.Injuries || "Injuries",
+    name: "tasks",
+    path: "my-tasks",
+    icon: "pi pi-list",
+    label: "My Tasks",
 
-    renderMode: "crud",
     schema: [
       {
-        name: "incidentType",
-        title: translationKeys.IncidentType || "Incident Type",
-        type: "select",
-        options: [
-          { label: "Slip and Fall", value: "slip_fall" },
-          { label: "Equipment Malfunction", value: "equipment_malfunction" },
-          { label: "Fire Hazard", value: "fire_hazard" },
-          { label: "Chemical Exposure", value: "chemical_exposure" },
-          { label: "Electrical Shock", value: "electrical_shock" },
-          { label: "Cuts and Lacerations", value: "cuts_lacerations" },
-        ],
-        validation: Yup.string().required("Incident type is required"),
-      },
-      {
-        name: "location",
-        title: translationKeys.Location || "Location",
+        name: "taskName",
+        title: "Task Name",
         type: "text",
-        validation: Yup.string().required("Location is required"),
+        validation: Yup.string().required("Task Name is required"),
       },
       {
-        name: "severity",
-        title: translationKeys.Severity || "Severity",
+        name: "team",
+        title: "Assigned Team",
+        type: "ref",
+        resource: "teams",
+        field: "teamName",
+        validation: Yup.string().required("Assigned Team is required"),
+      },
+      {
+        name: "startDate",
+        title: "Start Date",
+        type: "date",
+        validation: Yup.date().required("Start Date is required"),
+      },
+      {
+        name: "dueDate",
+        title: "Due Date",
+        type: "date",
+        validation: Yup.date().required("Due Date is required"),
+      },
+      {
+        name: "status",
+        title: "Status",
         type: "status",
         options: [
-          { label: "low", value: "low", color: "#FFD700" },
-          { label: "medium", value: "medium", color: "#007ACC" },
-          { label: "high", value: "high", color: "#008000" },
-          { label: "critical", value: "critical", color: "#FF6347" },
+          { label: "Pending", value: "pending", color: "#FFD700" },
+          { label: "In Progress", value: "inProgress", color: "#007ACC" },
+          { label: "Completed", value: "completed", color: "#008000" },
+
         ],
-        validation: Yup.string().required("Severity is required"),
+        validation: Yup.string().required("Status is required"),
       },
       {
-        name: "date",
-        title: translationKeys.Date || "Date",
-        type: "date",
-        validation: Yup.date().required("Date is required"),
+        name: "priority",
+        title: "Priority",
+        type: "status",
+        options: [
+          { label: "Low", value: "low", color: "#FFD700" },
+          { label: "Medium", value: "medium", color: "#007ACC" },
+          { label: "High", value: "high", color: "#008000" },
+          { label: "Critical", value: "critical", color: "#FF6347" },
+        ],
+        validation: Yup.string().required("Priority is required"),
+      },
+      {
+        name: "description",
+        title: "Description",
+        type: "richtext",
+        validation: Yup.string().required("Description is required"),
       },
     ],
     layout: {
-      rows: 1,
-      columns: 5,
+      rows: 3,
+      columns: 4,
       fields: {
-        location: { rowStart: 1, colStart: 1, rowSpan: 1, colSpan: 2 },
-        severity: { rowStart: 1, colStart: 3, rowSpan: 1, colSpan: 1 },
-        date: { rowStart: 1, colStart: 4, rowSpan: 1, colSpan: 1 },
+        taskName: { rowStart: 2, colStart: 1, rowSpan: 1, colSpan: 4 },
+        status: { rowStart: 3, colStart: 1, rowSpan: 1, colSpan: 2 },
       },
-      actions: [
-        {
-          name: "user_actions",
-          rowStart: 1,
-          rowSpan: 1,
-          colStart: 5,
-          colSpan: 1,
-          alignment: "top-right",
-          actions: [
-            { name: "goToView", icon: "pi pi-key", label: "View" },
-            { name: "goToEdit", icon: "pi pi-eye", label: "Edit" },
-            { name: "deleteResource", icon: "pi pi-trash", label: "Delete" },
-          ],
-          orientation: "dropdown",
-          style: "position: absolute; top: 0.5rem; right: 0.5rem; z-index: 10;",
-        },
-      ],
-    },
-  },
 
+    },
+    renderMode: "kanban",
+  },
   {
     name: "material_inquiries",
-    path: "material_inquiries",
+    path: "my-material_inquiries",
     icon: "pi pi-box",
-    label: translationKeys.MaterialInquiries || "Material Inquiries",
+    label: translationKeys.MaterialInquiries || "My Material Inquiries",
 
     renderMode: "crud",
     schema: [
@@ -567,7 +478,6 @@ export const construction_tracking_system = [
         materialName: { rowStart: 1, colStart: 1, rowSpan: 1, colSpan: 2 },
         supplier: { rowStart: 1, colStart: 3, rowSpan: 1, colSpan: 1 },
         quantity: { rowStart: 2, colStart: 1, rowSpan: 1, colSpan: 1 },
-        inquiryDate: { rowStart: 2, colStart: 2, rowSpan: 1, colSpan: 2 },
         status: { rowStart: 3, colStart: 1, rowSpan: 1, colSpan: 3 },
       },
       actions: [
@@ -579,148 +489,436 @@ export const construction_tracking_system = [
           colSpan: 1,
           alignment: "top-right",
           actions: [
-            { name: "goToView", icon: "pi pi-key", label: "View" },
-            { name: "goToEdit", icon: "pi pi-eye", label: "Edit" },
+           
+               { name: "goToEdit", icon: "pi pi-pencil", label: "Edit" },
             { name: "deleteResource", icon: "pi pi-trash", label: "Delete" },
           ],
-          orientation: "dropdown",
+          orientation: "icons",
           style: "position: absolute; top: 0.5rem; right: 0.5rem; z-index: 10;",
         },
       ],
     },
   },
+
   {
-    name: "reports",
-    path: "reports",
-    icon: "pi pi-calendar",
-    label: translationKeys.DailyReports || "Reports",
+    name: "injuries",
+    path: "injuries",
+    icon: "pi pi-exclamation-triangle",
+    label: translationKeys.Injuries || "Injuries",
 
     renderMode: "crud",
     schema: [
       {
-        name: "type",
-        title: translationKeys.ReportType || "Report Type",
+        name: "incidentType",
+        title: translationKeys.IncidentType || "Incident Type",
         type: "select",
         options: [
-          { label: "Weekly Report", value: "weeklyReport" },
-          { label: "Monthly Report", value: "monthlyReport" },
-          { label: "Daily Report", value: "dailyReport" },
-          { label: "Annual Report", value: "annualReport" },
+          { label: "Slip and Fall", value: "slip_fall" },
+          { label: "Equipment Malfunction", value: "equipment_malfunction" },
+          { label: "Fire Hazard", value: "fire_hazard" },
+          { label: "Chemical Exposure", value: "chemical_exposure" },
+          { label: "Electrical Shock", value: "electrical_shock" },
+          { label: "Cuts and Lacerations", value: "cuts_lacerations" },
         ],
+        validation: Yup.string().required("Incident type is required"),
       },
       {
-        name: "supervisor",
-        title: translationKeys.Supervisor || "Supervisor",
+        name: "location",
+        title: translationKeys.Location || "Location",
         type: "text",
-        validation: Yup.string().required("Supervisor name is required"),
+        validation: Yup.string().required("Location is required"),
       },
       {
-        name: "weatherConditions",
-        title: translationKeys.WeatherConditions || "Weather Conditions",
-        type: "select",
+        name:"project",
+        type: "ref",
+        title: translationKeys.Project || "Project",
+        resource: "projects",
+        field: "projectName",
+      },
+      {
+        name: "severity",
+        title: translationKeys.Severity || "Severity",
+        type: "status",
         options: [
-          { label: "Sunny", value: "sunny" },
-          { label: "Cloudy", value: "cloudy" },
-          { label: "Rainy", value: "rainy" },
-          { label: "Stormy", value: "stormy" },
+          { label: "low", value: "low", color: "#FFD700" },
+          { label: "medium", value: "medium", color: "#007ACC" },
+          { label: "high", value: "high", color: "#008000" },
+          { label: "critical", value: "critical", color: "#FF6347" },
         ],
-        validation: Yup.string().required("Weather conditions are required"),
+        validation: Yup.string().required("Severity is required"),
       },
       {
-        name: "workCompleted",
-        title: translationKeys.WorkCompleted || "Work Completed",
-        type: "richtext",
-        validation: Yup.string().required("Work completed is required"),
-      },
-      {
-        name: "issues",
-        title: translationKeys.Issues || "Issues",
-        type: "richtext",
-        validation: Yup.string(),
-      },
-      {
-        name: "safetyIncidents",
-        title: translationKeys.SafetyIncidents || "Safety Incidents",
-        type: "select",
-        options: [
-          { label: "None", value: "none" },
-          { label: "Minor", value: "minor" },
-          { label: "Major", value: "major" },
-        ],
-        validation: Yup.string().required("Safety incidents are required"),
+        name: "date",
+        title: translationKeys.Date || "Date",
+        type: "date",
+        validation: Yup.date().required("Date is required"),
       },
     ],
-layout:{
-  rows: 2,
-  columns: 3,
-  fields: {
-    // Top Row
-    reportDate: {
-      rowStart: 1,
-      colStart: 1,
-      rowSpan: 1,
-      colSpan: 1
+    layout: {
+      rows: 2,
+      columns: 5,
+      fields: {
+        location: { rowStart: 1, colStart: 1, rowSpan: 1, colSpan: 2 },
+        severity: { rowStart: 2, colStart: 1, rowSpan: 1, colSpan: 2},
+        date: { rowStart: 1, colStart: 4, rowSpan: 1, colSpan: 1 },
+      },
+      actions: [
+        {
+          name: "user_actions",
+          rowStart: 1,
+          rowSpan: 1,
+          colStart: 5,
+          colSpan: 1,
+          alignment: "top-right",
+          actions: [
+           
+               { name: "goToEdit", icon: "pi pi-pencil", label: "Edit" },
+            { name: "deleteResource", icon: "pi pi-trash", label: "Delete" },
+          ],
+          orientation: "icons",
+          style: "position: absolute; top: 0.5rem; right: 0.5rem; z-index: 10;",
+        },
+      ],
     },
-    supervisor: {
-      rowStart: 1, 
-      colStart: 1,
-      rowSpan: 1,
-      colSpan: 1
-    },
-
- 
-    // Middle Row
-    weatherConditions: {
-      rowStart: 1,
-      colStart: 1,
-      rowSpan: 1,
-      colSpan: 1
-    },
-    workCompleted: {
-      rowStart: 2,
-      colStart: 1,
-      rowSpan: 1,
-      colSpan: 2
-    },
- 
-
-    safetyIncidents: {
-      rowStart: 3,
-      colStart: 3,
-      rowSpan: 1,
-      colSpan: 1
-    }
   },
- 
-  actions: [
+
+  {
+    name: "material_inquiries",
+    path: "material_inquiries",
+    icon: "pi pi-box",
+    label: translationKeys.MaterialInquiries || "Material Inquiries",
+
+    renderMode: "kanban",
+    schema: [
+      {
+        name: "materialName",
+        title: translationKeys.MaterialName || "Material Name",
+        type: "text",
+        validation: Yup.string().required("Material name is required"),
+      },
+      {
+        name: "quantity",
+        title: translationKeys.Quantity || "Quantity",
+        type: "number",
+        validation: Yup.number()
+          .required("Quantity is required")
+          .min(1, "Quantity must be at least 1"),
+      },
+      {
+        name: "inquiryDate",
+        title: translationKeys.InquiryDate || "Inquiry Date",
+        type: "date",
+        validation: Yup.date().required("Inquiry date is required"),
+      },
+      {
+        name: "status",
+        title: translationKeys.Status || "Status",
+        type: "status",
+        options: [
+          { label: "Pending", value: "pending", color: "#FFD700" },
+          { label: "Approved", value: "approved", color: "#007ACC" },
+          { label: "Declined", value: "declined", color: "#008000" },
+        ],
+        validation: Yup.string().required("Status is required"),
+      },
+    ],
+    layout: {
+      rows: 3,
+      columns: 3,
+      fields: {
+        materialName: { rowStart: 1, colStart: 1, rowSpan: 1, colSpan: 2 },
+        supplier: { rowStart: 1, colStart: 3, rowSpan: 1, colSpan: 1 },
+        quantity: { rowStart: 2, colStart: 1, rowSpan: 1, colSpan: 1 },
+        status: { rowStart: 3, colStart: 1, rowSpan: 1, colSpan: 3 },
+      },
+      actions: [
+        {
+          name: "user_actions",
+          rowStart: 1,
+          rowSpan: 1,
+          colStart: 3,
+          colSpan: 1,
+          alignment: "top-right",
+          actions: [
+           
+               { name: "goToEdit", icon: "pi pi-pencil", label: "Edit" },
+            { name: "deleteResource", icon: "pi pi-trash", label: "Delete" },
+          ],
+          orientation: "icons",
+          style: "position: absolute; top: 0.5rem; right: 0.5rem; z-index: 10;",
+        },
+      ],
+    },
+  },
+
+
     {
-      name: "user_actions",
-      orientation: "dropdown",
-        alignment: "top-right",
-        
-        rowStart: 1,
-        colStart: 3,
-        rowSpan: 1,
-        colSpan: 1,
-      items: [
+      name: "reports",
+      path: "reports",
+      icon: "pi pi-file",
+      label: "Daily Reports",
+  
+      schema: [
+
         {
-          name: "goToView",
-          icon: "pi pi-eye",
-          label: "View"
+          name: "project",
+          title: "Project",
+          type: "ref",
+          resource: "projects",
+          field: "projectName",
+          validation: Yup.string().required("Project is required"),
         },
         {
-          name: "goToEdit", 
-          icon: "pi pi-pencil",
-          label: "Edit"
+          name: "weather",
+          title: "Weather Conditions",
+          type: "object",
+          schema: [
+            {
+              name: "temperature",
+              title: "Temperature",
+              type: "number",
+            },
+            {
+              name: "conditions",
+              title: "Conditions",
+              type: "select",
+              options: [
+                { label: "Sunny", value: "sunny" },
+                { label: "Cloudy", value: "cloudy" },
+                { label: "Rainy", value: "rainy" },
+                { label: "Windy", value: "windy" },
+              ],
+            },
+          ],
         },
         {
-          name: "deleteResource",
-          icon: "pi pi-trash",
-          label: "Delete"
-        }
-      ]
+          name: "workHours",
+          title: "Work Hours",
+          type: "object",
+          schema: [
+            {
+              name: "startTime",
+              title: "Start Time",
+              type: "time",
+            },
+            {
+              name: "endTime",
+              title: "End Time",
+              type: "time",
+            },
+          ],
+        },
+        {
+          name: "workforce",
+          title: "Workforce on Site",
+          type: "object array",
+          schema: [
+            {
+              name: "type",
+              title: "Worker Type",
+              type: "text",
+            },
+            {
+              name: "count",
+              title: "Number of Workers",
+              type: "number",
+            },
+          ],
+        },
+        {
+          name: "equipmentUsed",
+          title: "Equipment Used",
+          type: "object array",
+          schema: [
+            {
+              name: "equipmentName",
+              title: "Equipment",
+              type: "text",
+            },
+            {
+              name: "quantity",
+              title: "Quantity",
+              type: "number",
+            },
+            {
+              name: "hours",
+              title: "Hours Used",
+              type: "number",
+            },
+          ],
+        },
+        {
+          name: "completedWork",
+          title: "Work Completed",
+          type: "object array",
+          schema: [
+            {
+              name: "task",
+              title: "Task",
+              type: "ref",
+              resource: "tasks",
+              field: "taskName",
+            },
+            {
+              name: "progress",
+              title: "Progress",
+              type: "number",
+            },
+            {
+              name: "notes",
+              title: "Notes",
+              type: "text",
+            },
+          ],
+        },
+        {
+          name: "materialsDelivered",
+          title: "Materials Delivered",
+          type: "object array",
+          schema: [
+            {
+              name: "material",
+              title: "Material",
+              type: "text",
+            },
+            {
+              name: "quantity",
+              title: "Quantity",
+              type: "number",
+            },
+            {
+              name: "unit",
+              title: "Unit",
+              type: "text",
+            },
+          ],
+        },
+        {
+          name: "delays",
+          title: "Delays/Issues",
+          type: "object array",
+          schema: [
+            {
+              name: "issue",
+              title: "Issue Description",
+              type: "text",
+            },
+            {
+              name: "duration",
+              title: "Duration (minutes)",
+              type: "number",
+            },
+            {
+              name: "impact",
+              title: "Impact",
+              type: "select",
+              options: [
+                { label: "Minor", value: "minor" },
+                { label: "Moderate", value: "moderate" },
+                { label: "Major", value: "major" },
+              ],
+            },
+          ],
+        },
+        {
+          name: "safetyObservations",
+          title: "Safety Observations",
+          type: "object array",
+          schema: [
+            {
+              name: "observation",
+              title: "Observation",
+              type: "text",
+            },
+            {
+              name: "type",
+              title: "Type",
+              type: "select",
+              options: [
+                { label: "Hazard", value: "hazard" },
+                { label: "Compliance", value: "compliance" },
+                { label: "Improvement", value: "improvement" },
+              ],
+            },
+            {
+              name: "action",
+              title: "Action Taken",
+              type: "text",
+            },
+          ],
+        },
+        {
+          name: "nextDayPlanning",
+          title: "Next Day Planning",
+          type: "object array",
+          schema: [
+            {
+              name: "plannedTask",
+              title: "Planned Task",
+              type: "text",
+            },
+            {
+              name: "requiredResources",
+              title: "Required Resources",
+              type: "text",
+            },
+          ],
+        },
+        {
+          name: "photos",
+          title: "Site Photos",
+          type: "object array",
+          schema: [
+            {
+              name: "photo",
+              title: "Photo",
+              type: "image",
+            },
+            {
+              name: "description",
+              title: "Description",
+              type: "text",
+            },
+          ],
+        },
+        {
+          name: "submittedBy",
+          title: "Submitted By",
+          type: "ref",
+          resource: "users",
+          field: "fullname",
+          validation: Yup.string().required("Submitter is required"),
+        },
+      ],
+      layout: {
+        rows: 4,
+        columns: 3,
+        fields: {
+          reportDate: { rowStart: 1, colStart: 1, rowSpan: 1, colSpan: 1 },
+          project: { rowStart: 1, colStart: 2, rowSpan: 1, colSpan: 2 },
+          
+        },
+        actions: [
+          {
+            name: "user_actions",
+            rowStart: 1,
+            rowSpan: 1,
+            colStart: 3,
+            colSpan: 1,
+            alignment: "top-right",
+            actions: [
+              { name: "goToView", icon: "pi pi-eye", label: "View" },
+              { name: "goToEdit", icon: "pi pi-pencil", label: "Edit" },
+              { name: "deleteResource", icon: "pi pi-trash", label: "Delete" },
+              { name: "exportPDF", icon: "pi pi-file-pdf", label: "Export PDF" },
+            ],
+            orientation: "icons",
+            style: "position: absolute; top: 0.5rem; right: 0.5rem; z-index: 10;",
+          },
+        ],
+      },
+      renderMode: "crud",
     }
-  ]
- }
-  },
+  
+
 ];
