@@ -53,17 +53,22 @@ exports.user_management_system = [
       {
         name: "status",
         title: "Status",
-        type: "ref",
-        resource: "staff-statuses",
-        isStatus: true,
-        field: "status",
+        type:"status",
+        options: [
+          { label: "active", value: "active", color: "#008000" },
+          { label: "inactive", value: "inactive", color: "#FF6347" },
+          { label: "suspended", value: "suspended", color: "#FFD700" },
+        ],
+
       },
       {
         name: "gender",
         title: "Gender",
-        type: "ref",
-        resource: "genders",
-        field: "gender",
+        type:"select",
+        options: [
+          { label: "Male", value: "male" },
+          { label: "Female", value: "female" }
+        ]
       },
       {
         name: "description",
@@ -89,63 +94,7 @@ exports.user_management_system = [
       { delete: "deleteResource" },
     ],
   },
-  {
-    name: "staff-statuses",
-    icon: "fa fa-check",
-    label: "Staff Statuses",
-    menuGroup: "Users",
-    menuGroupIcon: "fa fa-user-cog",
-    schema: [
-      {
-        name: "status",
-        title: "Status",
-        type: "text",
-      },
-      {
-        name: "description",
-        title: "Description",
-        type: "richtext",
-      },
-    ],
 
-    renderMode: "singleton",
-    actions: [
-      { view: "goToView" },
-      { edit: "goToEdit" },
-      { delete: "deleteResource" },
-    ],
-  },
-  {
-    name: "genders",
-    icon: "fa fa-venus-mars",
-    label: "Genders",
-    menuGroup: "Users",
-    menuGroupIcon: "fa fa-user-cog",
-    schema: [
-      {
-        name: "gender",
-        title: "Gender",
-        type: "text",
-      },
-      {
-        name: "description",
-        title: "Description",
-        type: "richtext",
-      },
-      {
-        name: "icon",
-        title: "Icon",
-        type: "image",
-      },
-    ],
-
-    renderMode: "crud",
-    actions: [
-      { view: "goToView" },
-      { edit: "goToEdit" },
-      { delete: "deleteResource" },
-    ],
-  },
   {
     name: "roles",
     icon: "fa fa-bookmark",

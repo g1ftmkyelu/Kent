@@ -96,9 +96,9 @@
                     </a-list>
                     <a-row v-else :gutter="[16, 16]">
                         <div @click="addNewItem()"
-                            class="flex items-center justify-center border-dashed border-2 border-text rounded-md  m-0 cursor-pointer hover:bg-gray-200 transition duration-300 ease-in-out flex-1">
+                            class="flex items-center justify-center border-dashed border-2 border-text rounded-md  mx-3 my-0.5 cursor-pointer hover:bg-gray-200 transition duration-300 ease-in-out flex-1">
                             <i class="pi pi-plus mr-2 text-gray-600"></i>
-                            <span class=" mr-2">Add New </span>{{ resource.name }}
+                            <span class=" text-xl font-bold mr-2">Add New {{ resource.name }}</span>
                         </div>
                         <a-col v-for="item in displayItems" :key="item.id" :xs="24" :sm="12" :md="8">
                             <div class="bg-cardLight p-3 border border-textLighter rounded-lg">

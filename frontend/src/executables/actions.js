@@ -95,6 +95,14 @@ const resourceFunctions = [
           await axios.delete(
             `${import.meta.env.VITE_APP_API_URL}/api/v1/${resource}/${id}`
           );
+
+          // record activity
+          await effects.recordActivity({
+            action: `Deleted ${resource}`,
+            user: localStorage.getItem("userName"),
+            status: "Success",
+          })
+          // Show a success message
           await Swal.fire({
             title: "Success",
             text: `Item deleted from ${resource} successfully`,

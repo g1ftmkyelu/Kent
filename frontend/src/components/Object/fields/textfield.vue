@@ -46,8 +46,9 @@ export default {
           return {
             backgroundColor: this.hexToRgba(option.color, 0.2),
             color: option.color,
-            border: `1px solid ${option.color}`,
-            padding: '4px 8px',
+            border: `1px dashed ${option.color}`,
+            padding: '2px 3px',
+            fontSize: '12px',
             borderRadius: '4px',
             display: 'inline-block',
           };

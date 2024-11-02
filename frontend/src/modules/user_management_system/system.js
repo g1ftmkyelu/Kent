@@ -69,18 +69,24 @@ export const user_management_system = [
       {
         name: "status",
         title: translationKeys.Status,
-        type: "ref",
-        resource: "staff-statuses",
-        isStatus: true,
-        field: "status",
+        type:"status",
+        defaultValue: "active",
+        options:[
+          { label: "Active", value: "active", color:"#008000", icon: "pi pi-check" },
+          { label: "Inactive", value: "inactive", color: "#FF0000", icon: "pi pi-times" },
+          { label: "Suspended", value: "suspended", color: "#FFA500", icon: "pi pi-ban" },
+        ],
         validation: Yup.string().required("Status is required."),
       },
       {
         name: "gender",
         title: translationKeys.Gender || "Gender",
-        type: "ref",
-        resource: "genders",
-        field: "gender",
+        type:"select",
+        defaultValue: "male",
+        options:[
+          { label: "Male", value: "male" },
+          { label: "Female", value: "female" },
+        ],
         validation: Yup.string().required("Gender is required."),
       },
       {
@@ -169,146 +175,7 @@ export const user_management_system = [
       },
     ],
   },
-  {
-    name: "staff-statuses",
-    path: "staff-statuses",
-    icon: "pi pi-check", // Replaced "fa fa-check"
-    label: translationKeys.StaffStatuses,
-    menuGroup: translationKeys.UserManagement,
-    menuGroupIcon: "pi pi-cog", // Replaced "fa fa-user-cog"
-    resourceGroup: translationKeys.UserManagementSystem || "User Management",
-    schema: [
-      {
-        name: "status",
-        title: translationKeys.Status,
-        type: "text",
-        validation: Yup.string().required("Status is required."),
-      },
-      {
-        name: "description",
-        title: translationKeys.Description,
-        type: "richtext",
-        validation: Yup.string().required("Description is required."),
-      },
-    ],
-    renderMode: "crud",
-    actions: [
-      { view: "goToView" },
-      { edit: "goToEdit" },
-      { delete: "deleteResource" },
-    ],
-    layout: {
-      rows: 2,
-      columns: 2,
-      fields: {
-        status: {
-          rowStart: 1,
-          colStart: 1,
-          rowSpan: 1,
-          colSpan: 1,
-          alignment: "top-left",
-        },
-        description: {
-          rowStart: 2,
-          colStart: 1,
-          rowSpan: 1,
-          colSpan: 2,
-          alignment: "top-left",
-        },
-      },
-      actions: [
-        {
-          name: "status_actions",
-          rowStart: 1,
-          rowSpan: 1,
-          colStart: 2,
-          colSpan: 1,
-          alignment: "top-right",
-          actions: [
-            { name: "goToView", icon: "pi pi-key", label: "View" },
-            { name: "goToEdit", icon: "pi pi-eye", label: "Edit" },
-            { name: "deleteResource", icon: "pi pi-trash", label: "Delete" },
-          ],
-          orientation: "dropdown",
-          style: "position: absolute; top: 0.5rem; right: 0.5rem; z-index: 10;",
-        },
-      ],
-    },
-  },
-  {
-    name: "genders",
-    path: "genders",
-    icon: "pi pi-user", // Replaced "fa fa-venus-mars"
-    label: translationKeys.Genders,
-    menuGroup: translationKeys.UserManagement,
-    menuGroupIcon: "pi pi-users", // Replaced "fa fa-user-cog"
-    resourceGroup: translationKeys.UserManagementSystem || "User Management",
-    schema: [
-      {
-        name: "gender",
-        title: translationKeys.Gender,
-        type: "text",
-        validation: Yup.string().required("Gender is required."),
-      },
-      {
-        name: "description",
-        title: translationKeys.Description,
-        type: "richtext",
-        validation: Yup.string().required("Description is required."),
-      },
-    ],
-    renderMode: "crud",
-    crudType: "list",
-    actions: [
-      { view: "goToView" },
-      { edit: "goToEdit" },
-      { delete: "deleteResource" },
-    ],
-    layout: {
-      rows: 2,
-      columns: 1,
-      fields: {
-        gender: {
-          rowStart: 1,
-          colStart: 1,
-          rowSpan: 1,
-          colSpan: 1,
-          alignment: "top-left",
-        },
-        description: {
-          rowStart: 2,
-          colStart: 1,
-          rowSpan: 1,
-          colSpan: 1,
-          alignment: "top-left",
-        },
-        icon: {
-          rowStart: 3,
-          colStart: 1,
-          rowSpan: 1,
-          colSpan: 1,
-          alignment: "top-left",
-        },
-      },
-      actions: [
-        {
-          name: "gender_actions",
-          rowStart: 1,
-          rowSpan: 1,
-          colStart: 1,
-          colSpan: 1,
-          alignment: "top-right",
-          actions: [
-            { name: "goToView", icon: "pi pi-key", label: "View" },
-            { name: "goToEdit", icon: "pi pi-eye", label: "Edit" },
-            { name: "deleteResource", icon: "pi pi-trash", label: "Delete" },
-          ],
-          orientation: "dropdown",
-          style: "position: absolute; top: 0.5rem; right: 0.5rem; z-index: 10;",
-        },
-      ],
-    },
-  },
+
   {
     name: "roles",
     path: "roles",

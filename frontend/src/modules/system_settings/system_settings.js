@@ -38,19 +38,26 @@ export const system_settings = [
         title: translationKeys.Status || "Status",
         type: "status",
         options: [
-          { label: "Success", value: "Success", color: "#28a745" },
-          { label: "Failure", value: "Failure", color: "#dc3545" }
+          { label: "Success", value: "Success", color: "#28a745", icon: "pi pi-check" },
+          { label: "Failure", value: "Failure", color: "#dc3545", icon: "pi pi-times" },
         ],
         validation: Yup.string().required("Status is required"),
-      }
+      },
+      {
+        name: "createdAt",
+        title: translationKeys.CreatedAt || "Created At",
+        type: "datetime",
+        validation: Yup.date().required("Created At is required"),
+      },
     ],
     layout: {
       rows: 1,
-      columns: 3,
+      columns: 4,
       fields: {
         action: { rowStart: 1, colStart: 2, rowSpan: 1, colSpan: 1 },
         user: { rowStart: 1, colStart: 3, rowSpan: 1, colSpan: 1 },
-        status: { rowStart: 1, colStart: 1, rowSpan: 1, colSpan: 2 }
+        status: { rowStart: 1, colStart: 1, rowSpan: 1, colSpan: 2 },
+        createdAt: { rowStart: 1, colStart: 4, rowSpan: 1, colSpan: 1 }
       }
     }
   },

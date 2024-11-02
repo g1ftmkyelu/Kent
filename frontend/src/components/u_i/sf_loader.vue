@@ -1,6 +1,10 @@
 <template>
   <div class="loader-container">
-    <div class="blob"></div>
+    <div class="loader">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
   </div>
 </template>
 
@@ -36,31 +40,34 @@ export default {
   width: 100%;
 }
 
-.blob {
-  background: rgba(var(--primary), 0.7);
-  border-radius: 50%;
-  margin: 10px;
-  height: 60px;
-  width: 60px;
-  box-shadow: 0 0 0 0 rgba(var(--primary), 1);
-  transform: scale(1);
-  animation: pulse 2s infinite;
+.loader {
+  display: flex;
+  justify-content: space-around;
+  width: 80px;
 }
 
-@keyframes pulse {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(var(--primary), 0.7);
+.dot {
+  background-color: rgba(var(--primary), 0.8);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  animation: bounce 0.6s infinite alternate;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+  from {
+    transform: translateY(0);
   }
-  
-  70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 10px rgba(var(--primary), 0);
-  }
-  
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(var(--primary), 0);
+  to {
+    transform: translateY(-15px);
   }
 }
 </style>

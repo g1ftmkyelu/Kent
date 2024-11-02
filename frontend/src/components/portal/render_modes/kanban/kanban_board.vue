@@ -207,6 +207,7 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+import { effects } from '../../../../executables/effects'
 import ResourceRenderer from '../../../Object/objectrenderer.vue'
 import {
   Dialog,
@@ -422,7 +423,7 @@ watch(() => props.resource, (newResource) => {
 const fetchItems = async () => {
   loading.value = true
   try {
-    const response = await axios.get(`http://localhost:4500/api/v1/${props.resource.name}`)
+    const response = await axios.get(`http://localhost:4500/api/v1/${props.resource.name}?limit=100`)
     items.value = response.data.data
   } catch (error) {
     message.error(`Failed to fetch ${props.resource.label}`)
@@ -479,9 +480,21 @@ const onDrop = async (event, newStatus) => {
       `http://localhost:4500/api/v1/${props.resource.name}/${item.id}`,
       { [statusField.value.name]: newStatus }
     )
+    await effects.recordActivity({
+      action: `Update ${props.resource.name}`,
+      user: localStorage.getItem("userName"),
+      status: "Success",
+    })
     message.success(`${props.resource.label.slice(0, -1)} moved to ${newStatus}`)
   } catch (error) {
+
     items.value[itemIndex] = { ...item, [statusField.value.name]: originalStatus }
+
+    await effects.recordActivity({
+      action: `Update ${props.resource.name}`,
+      user: localStorage.getItem("userName"),
+      status: "Failed",
+    })
     message.error(`Failed to update ${props.resource.label.slice(0, -1)} status`)
     console.error(error)
   } finally {

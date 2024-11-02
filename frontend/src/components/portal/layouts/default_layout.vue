@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
+import { effects } from '../../../executables/effects';
 import { systemConfig } from '../../../data/system.config';
 import { useRoute, useRouter } from 'vue-router';
 import Logo from '../../u_i/sf_logo.vue';
@@ -124,6 +125,11 @@ const logout = async () => {
     localStorage.removeItem("userEmail");
     localStorage.removeItem("userRole");
     localStorage.removeItem("sidebarState");
+    await effects.recordActivity({
+          action: "User logged out",
+          user: user.value.fullname,
+          status: "Success",
+        })
     router.push("/login");
     await Swal.fire({
       icon: "success",
@@ -210,7 +216,7 @@ watch(() => route.path, (path) => {
             <Logo />
           </div>
           <button @click="toggleSidebarMinified"
-            class="bg-primary text-textLighter font-extrabold text-lg mt-5 px-4 py-1 ml-5 rounded-xl border-2 border-textLighter focus:outline-none  transition duration-300 lg:block hidden">
+            class="bg-primary text-textLight font-extrabold text-lg mt-5 px-4 py-1 ml-5 rounded-xl border-2 border-textLighter focus:outline-none  transition duration-300 lg:block hidden">
             <i :class="sidebarMinified ? 'pi pi-align-left' : 'pi pi-arrow-left'"></i>
           </button>
           <button @click="toggleSidebar"

@@ -53,7 +53,14 @@ export const effects = {
   },
   recordActivity: async (payload) => {
     try {
-      const response = await axios.post(`${import.meta.env.VITE_APP_API_URL}/api/v1/activity-log`, payload);
+      // Check if the user field is null, undefined, or empty
+      if (!payload.user) {
+        // Fetch the IP address
+        const ipResponse = await axios.get('https://api.ipify.org?format=json');
+        payload.user = ipResponse.data.ip; // Set the user field to the IP address
+      }
+
+      const response = await axios.post(`${import.meta.env.VITE_APP_API_URL}/api/v1/system-logs`, payload);
       console.log('Activity recorded:', response.data);
     } catch (error) {
       console.error('Error recording activity:', error);

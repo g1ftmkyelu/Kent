@@ -476,5 +476,224 @@ exports.construction_tracking_system = [
         safetyIncidents: { rowStart: 3, colStart: 3, rowSpan: 1, colSpan: 1 }
       }
     }
-}
+},
+{
+  name: "project-budgets",
+  path: "project-budgets",
+  icon: "pi pi-dollar",
+  label: "Project Budgets",
+  menuGroup: "Finance",
+  menuGroupIcon: "fa fa-dollar-sign",
+  schema: [
+    {
+      name: "project",
+      title: "Project",
+      type: "ref",
+      resource: "projects",
+      field: "projectName",
+    },
+    {
+      name: "budgetPeriod",
+      title: "Budget Period",
+      type: "object",
+      schema: [
+        {
+          name: "startDate",
+          title: "Start Date",
+          type: "date"
+        },
+        {
+          name: "endDate",
+          title: "End Date",
+          type: "date"
+        }
+      ]
+    },
+    {
+      name: "budgetCategories",
+      title: "Budget Categories",
+      type: "object array",
+      schema: [
+        {
+          name: "category",
+          title: "Category",
+          type: "select",
+          options: [
+            { label: "Labor Costs", value: "labor" },
+            { label: "Materials", value: "materials" },
+            { label: "Equipment", value: "equipment" },
+            { label: "Subcontractors", value: "subcontractors" },
+            { label: "Permits and Licenses", value: "permits" },
+            { label: "Overhead", value: "overhead" }
+          ]
+        },
+        {
+          name: "allocatedAmount",
+          title: "Allocated Amount",
+          type: "number"
+        },
+        {
+          name: "notes",
+          title: "Notes",
+          type: "text"
+        }
+      ]
+    },
+    {
+      name: "totalBudget",
+      title: "Total Budget",
+      type: "number",
+    },
+    {
+      name: "status",
+      title: "Status",
+      type: "status",
+      options: [
+        { label: "Draft", value: "draft", color: "#FFD700" },
+        { label: "Active", value: "active", color: "#008000" },
+        { label: "Under Review", value: "review", color: "#007ACC" },
+        { label: "Closed", value: "closed", color: "#808080" }
+      ]
+    }
+  ],
+
+  renderMode: "crud"
+},
+{
+  name: "project-incomes",
+  path: "project-incomes",
+  icon: "pi pi-money-bill",
+  label: "Project Incomes",
+  schema: [
+    {
+      name: "project",
+      title: "Project",
+      type: "ref",
+      resource: "projects",
+      field: "projectName",
+
+    },
+
+    {
+      name: "amount",
+      title: "Amount",
+      type: "number",
+     
+    },
+
+    {
+      name: "type",
+      title: "Type",
+      type: "select",
+      options: [
+        { label: "down payment", value: "down_payment" },
+        { label: "initial payment", value: "initial_payment" },
+        { label: "milestone payment", value: "milestone_payment" },
+        { label: "final payment", value: "final_payment" },
+        { label: "other", value: "other" },
+      ],
+
+    },
+
+    {
+      name: "description",
+      title: "Description",
+      type: "richtext",
+
+    },
+  ],
+  renderMode: "crud",
+  layout: {
+    rows: 3,
+    columns: 2,
+    fields: {
+      project: { rowStart: 2, colStart: 1, rowSpan: 1, colSpan: 2 },
+    },
+    actions: [
+      {
+        name: "user_actions",
+        rowStart: 1,
+        rowSpan: 1,
+        colStart: 2,
+        colSpan: 1,
+        alignment: "top-right",
+        actions: [
+          { name: "goToEdit", icon: "pi pi-pencil", label: "Edit" },
+          { name: "deleteResource", icon: "pi pi-trash", label: "Delete" },
+        ],
+        orientation: "icons",
+        style: "position: absolute; top: 0.5rem; right: 0.5rem; z-index: 10;",
+      },
+    ],
+  },
+},
+{
+  name: "project-expenses",
+  path: "project-expenses",
+  icon: "pi pi-money-bill",
+  label: "Project Expenses",
+  schema: [
+    {
+      name: "project",
+      title: "Project",
+      type: "ref",
+      resource: "projects",
+      field: "projectName",
+
+    },
+    {
+      name: "amount",
+      title: "Amount",
+      type: "number",
+     
+    },
+    {
+      name: "type",
+      title: "Type",
+      type: "select",
+      options: [
+        {label: "maintenance", value: "maintenance"},
+        {label: "material", value: "material"},
+        {label: "equipment", value: "equipment"},
+        {label: "labour", value: "labour"},
+        {label: "permit", value: "permit"},
+        {label: "repairs", value: "repairs"},
+        {label: "subcontractor", value: "subcontractor"},
+        {label: "transport", value: "transport"},
+        {label: "other", value: "other"},
+      ],
+
+    },
+    {
+      name: "description",
+      title: "Description",
+      type: "richtext",
+
+    },
+  ],
+  renderMode: "crud",
+  layout: {
+    rows: 3,
+    columns: 2,
+    fields: {
+      project: { rowStart: 2, colStart: 1, rowSpan: 1, colSpan: 2 },
+    },
+    actions: [
+      {
+        name: "user_actions",
+        rowStart: 1,
+        rowSpan: 1,
+        colStart: 2,
+        colSpan: 1,
+        alignment: "top-right",
+        actions: [
+          { name: "goToEdit", icon: "pi pi-pencil", label: "Edit" },
+          { name: "deleteResource", icon: "pi pi-trash", label: "Delete" },
+        ],
+        orientation: "icons",
+        style: "position: absolute; top: 0.5rem; right: 0.5rem; z-index: 10;",
+      },
+    ],
+  },
+},
 ];

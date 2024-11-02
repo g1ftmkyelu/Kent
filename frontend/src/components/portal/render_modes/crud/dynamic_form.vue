@@ -11,15 +11,20 @@
             <DynamicForm :resource="{ schema: field.schema }" :initial-data="formData[field.name]" :isAdding="isAdding"
               :showSubmit="false" v-model:form-data="formData[field.name]" />
           </div>
-          <div class="mt-20" v-else-if="field.type === 'object array'">
+          <div v-else-if="field.type === 'object array'">
             <h3 class="text-3xl font-bold mb-4">{{ field.title }}</h3>
-            <div class="flex flex-wrap" :class="{ 'max-w-[calc(100%-2rem)]': formData[field.name].length > 1 }">
-              <div v-for="(item, index) in formData[field.name]" :key="index"
-                class="relative card flex-1">
+            <div class="grid grid-cols-1 gap-4" :class="{ 'max-w-[calc(100%-2rem)]': formData[field.name].length > 1 }">
+              <div v-for="(item, index) in formData[field.name]" :key="index" class="relative card flex-1">
                 <div v-for="subField in field.schema" :key="subField.name" :class="[
                   subField.type === 'object array' ? 'w-full' : 'min-w-full']">
-                  <!-- Handle file type fields within object array -->
-                  <div v-if="['image', 'video', 'audio', 'document'].includes(subField.type)">
+                  <!-- Handle richtext fields -->
+
+
+                  <!-- Within your object array v-for loop -->
+                  <div v-if="subField.type === 'document' ||
+                    subField.type === 'image' ||
+                    subField.type === 'video' ||
+                    subField.type === 'audio'" class="mb-4">
                     <label class="block mb-2">{{ subField.title }}</label>
 
                     <!-- File Preview -->
@@ -27,63 +32,63 @@
                       <!-- Image Preview -->
                       <img v-if="subField.type === 'image'"
                         :src="getFilePreview(subField.name, subField.type, index, field.name)"
-                        class="max-h-32 object-contain mb-2 rounded-md"
-                        :alt="getFileName(subField.name, index, field.name)" />
+                        class="max-h-32 object-contain mb-2" />
 
                       <!-- Video Preview -->
                       <video v-else-if="subField.type === 'video'"
                         :src="getFilePreview(subField.name, subField.type, index, field.name)" controls
-                        class="max-h-32 w-full object-contain mb-2 rounded-md">
-                      </video>
+                        class="max-h-32 w-full object-contain mb-2"></video>
 
                       <!-- Audio Preview -->
                       <audio v-else-if="subField.type === 'audio'"
                         :src="getFilePreview(subField.name, subField.type, index, field.name)" controls
-                        class="w-full mb-2">
-                      </audio>
+                        class="w-full mb-2"></audio>
 
                       <!-- Document Preview -->
-                      <div v-else-if="subField.type === 'document'"
-                        class="flex items-center gap-2 mb-2 p-2 bg-cardDark rounded-md">
+                      <div v-else class="flex items-center gap-2 mb-2">
                         <i class="fas fa-file-alt text-2xl"></i>
                         <span>{{ getFileName(subField.name, index, field.name) }}</span>
-                        <a :href="getFilePreview(subField.name, subField.type, index, field.name)" target="_blank"
-                          class="text-blue-500 hover:text-blue-700">
-                          {{ translationKeys.View }}
-                        </a>
                       </div>
 
-                      <!-- Remove Button for Preview -->
+                      <!-- Remove Button -->
                       <button type="button" @click="removeFile(subField.name, index, field.name)"
-                        class="text-red-500 hover:text-red-700 mb-2">
-                        <i class="fas fa-times"></i> {{ translationKeys.Remove }}
+                        class="text-red-500 hover:text-red-700">
+                        <i class="fas fa-times"></i> Remove
                       </button>
                     </div>
 
                     <!-- File Input -->
-                    <div class="flex items-center">
-                      <label :for="'file-input-' + field.name + '-' + index + '-' + subField.name"
-                        class="cursor-pointer bg-primary px-4 py-2 rounded-md flex items-center">
-                        <i class="fas fa-upload mr-2"></i>
-                        {{ getFilePreview(subField.name, subField.type, index, field.name) ?
-                          translationKeys.Change : translationKeys.Browse }}
-                      </label>
-                      <span class="ml-3 text-sm">
-                        {{ getFileName(subField.name, index, field.name) || translationKeys.NoFileChosen }}
-                      </span>
-                      <input :id="'file-input-' + field.name + '-' + index + '-' + subField.name" type="file"
-                        :accept="getAcceptTypes(subField.type)"
-                        @change="(e) => handleFileUpload(subField, e, index, field.name)" class="hidden" />
-                    </div>
+                    <input :id="'file-input-' + subField.name + '-' + index"
+                      @change="(e) => handleFileUpload(subField, e, index, field.name)" type="file"
+                      :accept="getAcceptTypes(subField.type)" class="w-full" />
                   </div>
-
-                  <!-- Pass through to DynamicForm for other field types -->
+                  <!-- Handle text fields -->
+                  <div v-else-if="subField.type === 'text'" class="flex-1 basis-32 min-w-[8rem]">
+                    <label class="block mb-2">{{ subField.title }}</label>
+                    <input :placeholder="`please enter ${subField.title}`"
+                      v-model="formData[field.name][index][subField.name]" type="text"
+                      class="w-full px-3 py-2 bg-cardDark border border-textLighter rounded-md" />
+                  </div>
+                  <!-- Handle number fields -->
+                  <div v-else-if="subField.type === 'number'" class="flex-1 basis-32 min-w-[8rem]">
+                    <label class="block mb-2">{{ subField.title }}</label>
+                    <input :placeholder="`please enter ${subField.title}`"
+                      v-model="formData[field.name][index][subField.name]" type="number"
+                      class="w-full px-3 py-2 bg-cardDark border border-textLighter rounded-md" />
+                  </div>
+                  <!-- Handle email fields -->
+                  <div v-else-if="subField.type === 'email'" class="flex-1 basis-32 min-w-[8rem]">
+                    <label class="block mb-2">{{ subField.title }}</label>
+                    <input :placeholder="`please enter ${subField.title}`"
+                      v-model="formData[field.name][index][subField.name]" type="email"
+                      class="w-full px-3 py-2 bg-cardDark border border-textLighter rounded-md" />
+                  </div>
+                  <!-- Add other field types as needed -->
                   <div v-else>
                     <DynamicForm :resource="{ schema: [subField] }" :initial-data="item" :isAdding="isAdding"
                       :showSubmit="false" v-model:form-data="formData[field.name][index]" />
                   </div>
                 </div>
-
                 <!-- Remove Object Button -->
                 <button type="button" @click="removeArrayItem(field.name, index)"
                   class="absolute top-2 right-2 text-red-500 hover:text-red-700">
@@ -97,7 +102,6 @@
                 <span class="text-gray-600">{{ translationKeys.Add }} More </span>
               </div>
             </div>
-
           </div>
           <div v-else-if="field.type !== 'object' && field.type !== 'object array'">
             <div class="flex-1 basis-32 min-w-[8rem]" v-if="field.type === 'text' || field.type === 'richtext'">
@@ -143,7 +147,7 @@
               <p v-if="validationErrors[field.name]" class="mt-1 text-sm validation-error">{{
                 validationErrors[field.name] }} <i class="fa fa-warning"></i></p>
             </div>
-            <div class="flex-1 basis-32 min-w-[8rem]" v-else-if="field.type === 'number'">
+            <div class="flex-1 basis-32 min-w-[8rem]" v-else-if="field.type === 'number'|| field.type === 'price'">
               <label class="block mb-2">{{ field.title }}</label>
               <input :placeholder="`please enter ${field.title}`" v-model="formData[field.name]" type="number"
                 class="w-full px-3 py-2 rounded-md bg-cardDark border border-textLighter" />
@@ -433,7 +437,7 @@ import { toast } from "vue3-toastify";
 import icon_input from "./icon_input.vue";
 import * as Yup from "yup";
 import { Item } from "ant-design-vue/es/menu";
-
+import { effects } from "../../../../executables/effects";
 
 
 
@@ -535,19 +539,122 @@ export default {
     }
   },
   watch: {
-    formData: {
+    'formData': {
       handler(newValue) {
         this.$emit('update:form-data', newValue);
-        this.initializeTagLabels();
       },
-      deep: true,
+      deep: true
     },
+    'formData.*': {
+      handler(newValue) {
+        this.$emit('update:form-data', this.formData);
+      },
+      deep: true
+    }
   },
   async mounted() {
     console.log(this.resource.schema);
     this.initializeFirebase();
   },
   methods: {
+
+    handleFileUpload(field, event, arrayIndex = null, arrayField = null) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (arrayIndex !== null && arrayField !== null) {
+        // Create a deep copy of the array to prevent reference issues
+        const updatedArray = [...this.formData[arrayField]];
+
+        // Update the specific array item
+        updatedArray[arrayIndex] = {
+          ...updatedArray[arrayIndex],
+          [field.name]: file
+        };
+
+        // Update the array
+        this.formData[arrayField] = updatedArray;
+      } else {
+        this.formData[field.name] = file;
+      }
+    },
+
+    addArrayItem(fieldName) {
+      const field = this.resource.schema.find(f => f.name === fieldName);
+      const newItem = {};
+
+      field.schema.forEach(subField => {
+        switch (subField.type) {
+          // Handle single file fields
+          case 'image':
+          case 'video':
+          case 'audio':
+          case 'document':
+            newItem[subField.name] = null;
+            break;
+
+          // Handle file array fields  
+          case 'image array':
+          case 'video array':
+          case 'audio array':
+          case 'document array':
+            newItem[subField.name] = [];
+            break;
+
+          // Handle object fields
+          case 'object':
+          case 'object array':
+            newItem[subField.name] = {};
+            break;
+
+          // Handle regular fields
+          default:
+            newItem[subField.name] = '';
+        }
+      });
+
+      // Initialize the array if it doesn't exist
+      if (!Array.isArray(this.formData[fieldName])) {
+        this.formData[fieldName] = [];
+      }
+
+      // Add the new item to the array
+      this.formData[fieldName] = [...this.formData[fieldName], newItem];
+    },
+
+    addArrayItem(fieldName) {
+      const field = this.resource.schema.find(f => f.name === fieldName);
+      const newItem = {};
+      field.schema.forEach(subField => {
+        switch (subField.type) {
+          case 'image':
+          case 'video':
+          case 'audio':
+          case 'document':
+            newItem[subField.name] = null;
+            break;
+          case 'image array':
+          case 'video array':
+          case 'audio array':
+          case 'document array':
+            newItem[subField.name] = [];
+            break;
+          case 'object':
+          case 'object array':
+            newItem[subField.name] = {};
+            break;
+          default:
+            newItem[subField.name] = '';
+        }
+      });
+
+      if (!Array.isArray(this.formData[fieldName])) {
+        this.formData[fieldName] = [];
+      }
+
+      // Simple direct assignment works in Vue 3
+      this.formData[fieldName] = [...this.formData[fieldName], newItem];
+    },
     async initializeFirebase() {
       try {
         // Check if Firebase is already initialized
@@ -773,10 +880,8 @@ export default {
                 }
                 break;
               case "object array":
-                this.formData[field.name] = [{}];
-                for (const subField of field.schema) {
-                  this.formData[field.name][0][subField.name] = "";
-                }
+                this.formData[field.name] = [];  // Initialize as empty array instead of array with empty object
+                break;
                 break;
             }
           }
@@ -851,38 +956,12 @@ export default {
         }
       }
     },
-    addArrayItem(fieldName) {
-      const field = this.resource.schema.find(f => f.name === fieldName);
-      const newItem = {};
-      field.schema.forEach(subField => {
-        newItem[subField.name] = subField.type === 'object' || subField.type === 'object array' ? {} : '';
-      });
-      this.formData[fieldName].push(newItem);
-    },
+
     removeArrayItem(fieldName, index) {
       this.formData[fieldName].splice(index, 1);
     },
 
-    // Generic file preview method
-    getFilePreview(fieldName, fileType, arrayIndex = null, arrayField = null) {
-      let file;
 
-      // Handle files in object arrays
-      if (arrayIndex !== null && arrayField !== null) {
-        file = this.formData[arrayField][arrayIndex][fieldName];
-      } else {
-        file = this.formData[fieldName];
-      }
-
-      // Handle File objects and URLs
-      if (file instanceof File) {
-        return URL.createObjectURL(file);
-      } else if (typeof file === 'string' && file) {
-        return file;  // Return the URL directly
-      }
-
-      return '';
-    },
 
     // Get file name from URL or File object
     getFileName(fieldName, arrayIndex = null, arrayField = null) {
@@ -929,27 +1008,57 @@ export default {
       }
       return '';
     },
+    // Update the handleFileUpload method
     handleFileUpload(field, event, arrayIndex = null, arrayField = null) {
       const file = event.target.files[0];
       if (!file) return;
 
       if (arrayIndex !== null && arrayField !== null) {
-        // Create a new object to trigger reactivity
+        // Create a deep copy of the array
         const updatedArray = [...this.formData[arrayField]];
+
+        // Make sure the object at this index exists
+        if (!updatedArray[arrayIndex]) {
+          updatedArray[arrayIndex] = {};
+        }
+
+        // Update the specific file field in the object
         updatedArray[arrayIndex] = {
           ...updatedArray[arrayIndex],
           [field.name]: file
         };
+
+        // Update the form data with the new array
         this.formData[arrayField] = updatedArray;
       } else {
         this.formData[field.name] = file;
       }
-    }, handleFileUploadArray(field, event) {
-      const newFiles = Array.from(event.target.files);
-      this.formData[field.name] = this.formData[field.name]
-        ? [...this.formData[field.name], ...newFiles]
-        : [...newFiles];
-      this.showFileInput[field.name] = false;
+    },
+
+    // Update the getFilePreview method
+    getFilePreview(fieldName, fileType, arrayIndex = null, arrayField = null) {
+      let file;
+
+      if (arrayIndex !== null && arrayField !== null) {
+        // Handle files in object arrays
+        if (!this.formData[arrayField] ||
+          !this.formData[arrayField][arrayIndex] ||
+          !this.formData[arrayField][arrayIndex][fieldName]) {
+          return '';
+        }
+        file = this.formData[arrayField][arrayIndex][fieldName];
+      } else {
+        file = this.formData[fieldName];
+      }
+
+      // Handle File objects and URLs
+      if (file instanceof File) {
+        return URL.createObjectURL(file);
+      } else if (typeof file === 'string' && file) {
+        return file;  // Return the URL directly
+      }
+
+      return '';
     },
     removeFile(fieldName, index) {
       this.formData[fieldName] = [
@@ -1000,6 +1109,25 @@ export default {
 
         await validationSchema.validate(this.formData, { abortEarly: false });
         this.validationErrors = {};
+        for (const field of this.resource.schema) {
+          if (field.type === 'object array') {
+            if (!Array.isArray(this.formData[field.name]) || this.formData[field.name].length === 0) {
+              this.validationErrors[field.name] = `At least one ${field.title} is required`;
+              return false;
+            }
+
+            // Validate each item in the array
+            for (const item of this.formData[field.name]) {
+              for (const subField of field.schema) {
+                if (subField.validation && !item[subField.name]) {
+                  this.validationErrors[field.name] = `${subField.title} is required for all ${field.title}`;
+                  return false;
+                }
+              }
+            }
+          }
+        }
+
         return true;
       } catch (err) {
         const validationErrors = {};
@@ -1022,6 +1150,14 @@ export default {
 
     ,
     async submitForm() {
+      for (const field of this.resource.schema) {
+        if (field.type === 'object array' && Array.isArray(this.formData[field.name])) {
+          this.formData[field.name] = this.formData[field.name].filter(item => {
+            return Object.values(item).some(value => value !== '' && value !== null && value !== undefined);
+          });
+        }
+      }
+
       const isValid = await this.validateFormData();
       if (!isValid) {
         toast.error("Please fill in all required fields.", {
@@ -1135,7 +1271,7 @@ export default {
           `${import.meta.env.VITE_APP_API_URL}/api/v1/${endpoint}`,
           dataToSend
         )
-        .then((response) => {
+        .then(async (response) => {
           this.$swal.fire("Success!", "item added successfully.", "success");
           if (this.redirectTo === "prev") {
             this.$router.go(-1);
@@ -1150,14 +1286,26 @@ export default {
               `/dashboard/${this.resource.name}`
             );
           }
+          await effects.recordActivity({
+            action: `Added new ${this.resource.name}`,
+            user: localStorage.getItem("userName"),
+            status: "Success",
+
+          })
         })
-        .catch((error) => {
+        .catch(async (error) => {
           console.error(`Error adding  ${this.resource.name}:`, error);
+          await effects.recordActivity({
+            action: "Added new user",
+            user: localStorage.getItem("userName"),
+            status: "Failure",
+          })
           this.$swal.fire(
             "Error!",
             `Error adding  ${this.resource.name}:${error.message}`,
             "error"
           );
+
         })
         .finally(() => {
           this.actionLoading = false;
@@ -1176,8 +1324,13 @@ export default {
           }`,
           dataToSend
         )
-        .then(() => {
+        .then(async () => {
           this.$swal.fire("Success!", "Item updated successfully.", "success");
+          await effects.recordActivity({
+            action: `Update ${this.resource.name}`,
+            user: localStorage.getItem("userName"),
+            status: "Success",
+          })
           if (this.redirectTo === "prev") {
             this.$router.go(-1);
           } else if (this.redirectTo === "current") {
@@ -1192,7 +1345,7 @@ export default {
             );
           }
         })
-        .catch((error) => {
+        .catch(async (error) => {
           console.error(
             `Error updating  ${this.resource.name}:`,
             error.message
@@ -1202,6 +1355,11 @@ export default {
             `Error updating  ${this.resource.name}:`,
             "error"
           );
+          await effects.recordActivity({
+            action: `Updating ${this.resource.name}`,
+            user: localStorage.getItem("userName"),
+            status: "Failure",
+          })
         })
         .finally(() => {
           this.actionLoading = false;

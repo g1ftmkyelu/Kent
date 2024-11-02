@@ -78,6 +78,8 @@ export default {
         email: 'EmailField',
         phone: 'PhoneField',
         date: 'DateField',
+        time: 'DateField',
+        datetime: 'DateField',
         check: 'CheckField',
         password: 'PasswordField',
         action: 'action_dispatcher',

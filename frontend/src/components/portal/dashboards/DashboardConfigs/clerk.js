@@ -1,6 +1,6 @@
 import { translationKeys } from '@/Localization/International/english';
 import * as Yup from 'yup';
-
+import { Resources } from '../../../../data/resources';
 
 const initialProgressData = [
   {
@@ -157,57 +157,7 @@ const quickActionsResource = {
 };
 
 // Site Progress Resource Configuration
-const siteProgressResource = {
-  name: "siteProgress",
-  path: "progress",
-  icon: "pi pi-building",
-  label: translationKeys.SiteProgress || "Site Progress",
-  menuGroup: translationKeys.Construction || "Construction",
-  menuGroupIcon: "pi pi-home",
-  schema: [
-    {
-      name: "taskName",
-      title: translationKeys.TaskName || "Task",
-      type: "text",
-      validation: Yup.string().required("Task name is required"),
-    },
-    {
-      name: "completionPercentage",
-      title: translationKeys.Completion || "Completion",
-      type: "percentage",
-      validation: Yup.number().min(0).max(100).required("Completion percentage is required"),
-    },
-    {
-      name: "status",
-      title: translationKeys.Status || "Status",
-      type: "status",
-      options: [
-        { label: "Not Started", value: "NOT_STARTED", color: "#6c757d" },
-        { label: "In Progress", value: "IN_PROGRESS", color: "#007bff" },
-        { label: "On Hold", value: "ON_HOLD", color: "#ffc107" },
-        { label: "Delayed", value: "DELAYED", color: "#dc3545" },
-        { label: "Completed", value: "COMPLETED", color: "#28a745" }
-      ],
-      validation: Yup.string().required("Status is required"),
-    },
-    {
-      name: "dueDate",
-      title: translationKeys.DueDate || "Due Date",
-      type: "date",
-      validation: Yup.date().required("Due date is required"),
-    }
-  ],
-  layout: {
-    rows: 2,
-    columns: 3,
-    fields: {
-      taskName: { rowStart: 1, colStart: 1, rowSpan: 1, colSpan: 2 },
-      completionPercentage: { rowStart: 1, colStart: 3, rowSpan: 1, colSpan: 1 },
-      status: { rowStart: 2, colStart: 1, rowSpan: 1, colSpan: 1 },
-      dueDate: { rowStart: 2, colStart: 2, rowSpan: 1, colSpan: 2 }
-    }
-  }
-};
+const siteProgressResource = Resources.find(resource => resource.name === "tasks");
 
 // Material Usage Resource
 const materialUsageResource = {
@@ -268,25 +218,45 @@ export const blockConfigs = [
     {
       id: 'quick-actions-block',
       name: 'Quick Actions',
+      title:'Quick Actions',
       config: {
-        type: 'data-group',
+        type: 'action-list',
         props: {
-          resource: quickActionsResource,
-          showHeader: false,
-          displayMode: 'list',
-          layout:quickActionsResource.layout,
-          useApi: false,
-          initialData: [
-            { action: "Report Injury", icon: "pi pi-exclamation-triangle" },
-            { action: "Submit Today's Report", icon: "pi pi-file" },
-            { action: "Request More Materials", icon: "pi pi-truck" }
-          ]
+          items: [
+                {
+              actionName: 'report injury',
+              icon: 'fa-exclamation-triangle',
+              description: 'Report an injury',
+              redirectUrl: '/report-injury'
+            },
+            {
+              actionName:"inquire material",
+              icon: 'fa-info-circle',
+              description: 'make a material inquiry ',
+              redirectUrl: '/material-inquiry'
+            },
+            {
+              actionName:"request material",
+              icon: 'fa-truck',
+              description: 'request materials',
+              redirectUrl: '/request-material'
+            },
+            {
+              actionName:"request safety",
+              icon: 'fa-shield-alt',
+              description: 'request safety',
+              redirectUrl: '/request-safety'
+            }
+          
+          ],
+          layout:"grid"
         }
       }
     },
     {
       id: 'materials-block',
       name: 'Material Usage',
+      title:'Material Usage',
       config: {
         type: 'data-group',
         props: {
@@ -302,8 +272,9 @@ export const blockConfigs = [
     {
       id: 'progress-block',
       name: 'Site Progress',
+      title:'Task Timeline',
       config: {
-        type: 'data-group',
+        type: 'timeline',
         props: {
           resource: siteProgressResource,
           showHeader: false,
@@ -317,6 +288,7 @@ export const blockConfigs = [
     {
       id: 'progress-chart',
       name: 'Progress Chart',
+      title:'Progress Chart',
       config: {
         type: 'chart',
         props: {

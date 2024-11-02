@@ -36,6 +36,7 @@
   <script>
   import axios from 'axios';
   import { translationKeys } from '@/executables/translation';
+  import { effects } from '../../executables/effects';
   
   export default {
     data() {
@@ -64,9 +65,19 @@
           });
           this.successMessage = response.data.message;
           this.clearFields();
+          await effects.recordActivity({
+            action: 'Updated password',
+            user: localStorage.getItem('userName'),
+            status: 'Success'
+          })
         } catch (error) {
           this.errorMessage = error.response.data.message || 'Failed to update password';
           this.clearFields();
+          await effects.recordActivity({
+            action: 'Updated password',
+            user: localStorage.getItem('userName'),
+            status: 'Failure'
+          })
         }
       },
       clearFields() {

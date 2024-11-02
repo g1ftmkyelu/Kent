@@ -90,9 +90,9 @@ export const blockConfigs = [
   {
     id: 'user-management-block',
     name: 'User Management',
-    title: 'Active Users',
+    title: 'User Metrics',
     config: {
-      type: 'data-group',
+      type: 'metric',
       props: {
         resource: userManagementResource,
         showHeader:false,
@@ -101,6 +101,25 @@ export const blockConfigs = [
         layout: userManagementResource.layout,
         useApi: true,
         showMoreLink: true,
+        fieldName:'status'
+      }
+    }
+  },
+  {
+    id: 'active-users-management-block',
+    name: 'Active Users',
+    title: 'Active Users Metrics',
+    config: {
+      type: 'data-group',
+      props: {
+        resource: userManagementResource,
+        showHeader:false,
+        maxDisplayItems: 4,
+        displayMode:'list',
+        layout: userManagementResource.layout,
+        useApi: true,
+        showMoreLink: true,
+        fieldName:'status'
       }
     }
   },
@@ -126,11 +145,12 @@ export const blockConfigs = [
     name: 'System Logs',
     title: 'System Logs',
     config: {
-      type: 'data-group',
+      type: 'timeline',
       props: {
         resource: systemLogsResource,
         showHeader:false,
         layout: systemLogsResource.layout,
+        maxDisplayItems: 9,
         useApi: true,
         showMoreLink: true,
 
@@ -142,9 +162,9 @@ export const blockConfigs = [
 // Layout Configuration
 export const layout = [
   
-  { name: 'User Management', rowStart: 2, colStart: 1, rowSpan: 1, colSpan: 8 }, // User Management
-  { name: 'Module Management',      rowStart: 2, colStart: 9, rowSpan: 1, colSpan: 4},
-  { name: 'System Logs', rowStart: 3, colStart: 1, rowSpan: 1, colSpan: 12 }, // System Logs side by side with User Management
+  { name: 'User Management', rowStart: 1, colStart: 1, rowSpan: 1, colSpan: 12 }, // User Management spanning all columns
+  { name: 'Active Users', rowStart: 2, colStart: 9, rowSpan: 1, colSpan: 4}, // Active Users
+  { name: 'System Logs', rowStart: 2, colStart: 1, rowSpan: 1, colSpan: 8}, // System Logs side by side with Active Users
 ];
 
 // Dashboard Configuration

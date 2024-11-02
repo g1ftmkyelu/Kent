@@ -2,13 +2,13 @@
   <div class="min-h-screen bg-cardDark flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <!-- Main container with flex layout -->
     <div class="w-full max-w-7xl flex flex-col md:flex-row items-center justify-between gap-8">
-      
+
       <!-- Illustration container - hidden on mobile -->
       <div class="hidden  md:block md:w-1/2">
         <!-- Add your illustration here -->
-        <img src="./Construction-cuate.svg" alt="Login illustration" class="w-full max-w-md mx-auto"/>
+        <img src="./Construction-cuate.svg" alt="Login illustration" class="w-full max-w-md mx-auto" />
       </div>
-      
+
       <!-- Form container - full width on mobile, half width on desktop -->
       <div class="w-full md:w-1/2 max-w-md space-y-8">
         <div class="card flex flex-col justify-center">
@@ -16,7 +16,7 @@
           <h2 class="text-xl mt-20 mx-auto text-text">
             Sign in to your account
           </h2>
-          
+
           <form class="mt-8 space-y-6" @submit.prevent="handleLogin">
             <div class="rounded-md shadow-sm -space-y-px">
               <div>
@@ -30,14 +30,15 @@
                     placeholder="Email address" />
                 </div>
               </div>
-              
+
               <div>
                 <label for="password" class="sr-only">Password</label>
                 <div class="relative">
                   <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <LockOutlined class="h-5 w-5 text-gray-400" />
                   </div>
-                  <input id="password" name="password" :type="showPassword ? 'text' : 'password'" v-model="password" required
+                  <input id="password" name="password" :type="showPassword ? 'text' : 'password'" v-model="password"
+                    required
                     class="appearance-none bg-cardLight rounded-none relative block w-full px-3 py-2 pl-10 border border-textLighter placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:z-10 sm:text-sm"
                     placeholder="Password" />
                   <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
@@ -80,7 +81,7 @@
           <p v-if="error" class="mt-2 text-center text-sm text-red-600">
             {{ error }}
           </p>
-          
+
 
         </div>
       </div>
@@ -94,6 +95,7 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { UserOutlined, LockOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons-vue';
 import Logo from "@/components/u_i/sf_logo.vue";
+import { effects } from "../../../executables/effects";
 
 export default {
   components: {
@@ -166,6 +168,12 @@ export default {
         localStorage.setItem("role", response.data.user.role);
         localStorage.setItem("userEmail", response.data.user.email);
 
+
+        await effects.recordActivity({
+          action: "User logged in",
+          user: localStorage.getItem("userName"),
+          status: "Success",
+        })
         this.$swal.fire({
           icon: "success",
           title: "Success!",
@@ -175,14 +183,24 @@ export default {
       } catch (error) {
         console.error("Error logging in:", error);
 
+
         if (error.response && error.response.data && error.response.data.error) {
+          await effects.recordActivity({
+          action: "User log in",
+          status: "Failure",
+        })
           toast.error(error.response.data.error, {
             autoClose: 2000,
           });
         } else {
+          await effects.recordActivity({
+          action: "User log in",
+          status: "Failure",
+        })
           toast.error("An unknown error occurred while logging in.", {
             autoClose: 2000,
           });
+
         }
       } finally {
         this.isLoggingIn = false;

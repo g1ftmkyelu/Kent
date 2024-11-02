@@ -21,6 +21,9 @@ import DataGroup from './Object/DataGroup.vue'
 import DynamicCrud from './Object/DynamicCrud.vue'
 import multi_step_form from './dynamic_form_alt/multi_step_form.vue'
 import flexible_chart from './flexible_chart.vue'
+import ActionList from './ActionList.vue'
+import Timeline from './Timeline.vue'
+import metric from './portal/render_modes/kanban/metric.vue'
 const props = defineProps({
   block: {
     type: Object,
@@ -36,6 +39,9 @@ const COMPONENT_MAP = {
   'dynamic-crud': markRaw(DynamicCrud),
   'multi-step-form': markRaw(multi_step_form),
   'chart': markRaw(flexible_chart),
+  'action-list': markRaw(ActionList),
+  'timeline': markRaw(Timeline),
+  'metric': markRaw(metric)
 }
 
 const getComponent = (type) => {

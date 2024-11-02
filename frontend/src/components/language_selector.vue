@@ -1,5 +1,5 @@
 <template>
-  <div class="relative inline-block mt-3 text-left text-text">
+  <div class="relative inline-block mt-2 text-left text-text">
     <a-dropdown :trigger="['click']" @visibleChange="handleDropdownVisibleChange">
       <a class="ant-dropdown-link" @click.prevent>
         <a-space>
