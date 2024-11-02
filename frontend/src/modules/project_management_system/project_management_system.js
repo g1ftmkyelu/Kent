@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { translationKeys } from "@/executables/translation";
 import * as Yup from "yup";
+import { blockConfigs, layout } from "../../components/portal/dashboards/DashboardConfigs/test";
 
 export const construction_tracking_system = [
   {
@@ -1156,4 +1157,14 @@ export const construction_tracking_system = [
       ],
     },
   },
+  {
+    name: "my-projects",
+    path: "my-projects",
+    icon: "pi pi-building",
+    label: "My projects",
+    renderMode:"blocks",
+    blockConfigs:blockConfigs,
+    layout: layout
+    
+  }
 ];

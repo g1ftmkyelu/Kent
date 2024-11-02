@@ -27,9 +27,9 @@
   <market v-else-if="resource.renderMode === 'market'" :resource="resource" />
   <notifications v-else-if="resource.renderMode === 'notifications'" :resource="resource" />
   <systemSettings v-else-if="resource.renderMode === 'system-config'" :resource="resource" />
+  <BlockGrid v-else-if="resource.renderMode === 'blocks'" :blockConfigs="resource.blockConfigs" :layout="resource.layout" />
   <kanban_board v-else-if="resource.renderMode === 'kanban'" :resource="resource" />
-
-    <h1 v-else>unknown renderMode</h1>
+      <h1 v-else>unknown renderMode</h1>
 
 
 </template>
@@ -48,6 +48,8 @@ import Table_view from "./render_modes/crud/table_view.vue";
 import notifications from "./render_modes/notifications/notifications.vue";
 import dashboard_renderer from "./dashboards/dashboard_renderer.vue";
 import kanban_board from "./render_modes/kanban/kanban_board.vue";
+import BlockGrid from "../BlockGrid.vue";
+
 
 export default {
   components: {
@@ -63,7 +65,8 @@ export default {
     Table_view,
     notifications,
     dashboard_renderer,
-    kanban_board
+    kanban_board,
+    BlockGrid
   },
   mounted() {
     // Scroll to the top when component is mounted

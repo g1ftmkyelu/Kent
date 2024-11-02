@@ -425,58 +425,10 @@ export const layout = [
 ];
 
 // Dashboard Configuration
-export const dashboardConfig = {
-  title: "Client Project Dashboard",
-  refreshInterval: 300000, // 5 minutes
-  allowExport: true,
-  exportFormats: ['pdf', 'excel'],
-  notifications: {
-    enabled: true,
-    position: 'top-right',
-    defaultDuration: 5000,
-    types: {
-      milestone: {
-        icon: 'pi pi-flag',
-        severity: 'info'
-      },
-      status: {
-        icon: 'pi pi-chart-line',
-        severity: 'success'
-      },
-      financial: {
-        icon: 'pi pi-money-bill',
-        severity: 'warning'
-      }
-    }
-  },
-  filters: {
-    enabled: true,
-    defaultFilters: ['date', 'status'],
-    customFilters: [
-      {
-        name: 'project',
-        type: 'select',
-        options: ['Project Alpha', 'Project Beta']
-      },
-      {
-        name: 'milestone',
-        type: 'select',
-        options: ['Project Kickoff', 'Phase 1 Completion', 'Phase 2 Completion']
-      }
-    ]
-  },
-  theme: {
-    primary: '#007bff',
-    secondary: '#6c757d',
-    success: '#28a745',
-    warning: '#ffc107',
-    danger: '#dc3545',
-    info: '#17a2b8'
-  }
-};
+
 
 export default {
   blockConfigs,
   layout,
-  dashboardConfig
+  
 };
