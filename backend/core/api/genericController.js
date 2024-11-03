@@ -845,6 +845,9 @@ exports.sendEmail = async (req, res) => {
   }
 };
 
+
+
+
 exports.addFCMToken = async (req, res) => {
   const Model = req.resourceModel;
   try {
@@ -972,7 +975,44 @@ async function removeExpiredToken(Model, token) {
   } catch (error) {
     console.error(`Error removing expired token ${token}:`, error);
   }
-}
+};
+
+exports.checkAndUpdateFCMToken = async (req, res) => {
+  const Model = req.resourceModel;
+  try {
+    const { userId, currentToken, newToken } = req.body;
+    
+    if (!userId || !currentToken || !newToken) {
+      return res.status(400).json({ error: "Missing required parameters" });
+    }
+    
+    const user = await Model.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    // Check if the current token exists in the user's tokens
+    const tokenIndex = user.fcmTokens.indexOf(currentToken);
+    
+    if (tokenIndex === -1) {
+      // If the current token doesn't exist, add the new token
+      user.fcmTokens.push(newToken);
+    } else {
+      // If the current token exists, replace it with the new token
+      user.fcmTokens[tokenIndex] = newToken;
+    }
+    
+    await user.save();
+    
+    res.status(200).json({ message: "FCM token updated successfully", user });
+  } catch (error) {
+    console.error("Error checking and updating FCM token:", error);
+    res.status(500).json({ error: "An error occurred while updating FCM token" });
+  }
+};
+
+
 
 exports.sendWebPushNotification = async (req, res) => {
   // This registration token comes from the client FCM SDKs.
@@ -1015,40 +1055,18 @@ exports.sendWebPushNotification = async (req, res) => {
     });
 };
 
-exports.checkAndUpdateFCMToken = async (req, res) => {
-  const Model = req.resourceModel;
-  try {
-    const { userId, currentToken, newToken } = req.body;
 
-    if (!userId || !currentToken || !newToken) {
-      return res.status(400).json({ error: "Missing required parameters" });
-    }
 
-    const user = await Model.findById(userId);
 
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
 
-    // Check if the current token exists in the user's tokens
-    const tokenIndex = user.fcmTokens.indexOf(currentToken);
 
-    if (tokenIndex === -1) {
-      // If the current token doesn't exist, add the new token
-      user.fcmTokens.push(newToken);
-    } else {
-      // If the current token exists, replace it with the new token
-      user.fcmTokens[tokenIndex] = newToken;
-    }
 
-    await user.save();
 
-    res.status(200).json({ message: "FCM token updated successfully", user });
-  } catch (error) {
-    console.error("Error checking and updating FCM token:", error);
-    res.status(500).json({ error: "An error occurred while updating FCM token" });
-  }
-};
+
+
+
+
+
 
 
 exports.pay = async (req, res) => {

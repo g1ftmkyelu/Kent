@@ -473,6 +473,9 @@ const resourceFunctions = [
             { status: "Rejected" }
           );
 
+
+
+          
           const claimant = await helpers.getResource({
             resource: "users",
             id: response.data.claimant,
@@ -484,6 +487,11 @@ const resourceFunctions = [
             claimant.data.fcmTokens,
             claimant.data._id
           );
+
+
+
+
+
 
           console.log(claimant.data.fcmTokens);
           // Show success message
