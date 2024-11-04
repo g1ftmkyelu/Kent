@@ -2,20 +2,15 @@
   <div class="p-6 w-full overflow-x-hidden min-h-screen bg-background">
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-2xl font-bold text-text">{{ resource.label }}</h1>
-      
+
       <div class="flex gap-4">
-        <button 
-          @click="showStats = true"
-          class="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary-dark flex items-center gap-2"
-        >
+        <button @click="showStats = true"
+          class="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary-dark flex items-center gap-2">
           <i class="pi pi-chart-bar"></i>
           <span>Statistics</span>
         </button>
-        <button
-          v-if="showAddButton"
-          @click="navigateToAdd"
-          class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark flex items-center gap-2"
-        >
+        <button v-if="showAddButton" @click="navigateToAdd"
+          class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark flex items-center gap-2">
           <i class="pi pi-plus"></i>
           <span>Add {{ resource.label.slice(0, -1) }}</span>
         </button>
@@ -23,11 +18,7 @@
     </div>
 
     <div class="flex gap-6 overflow-x-auto">
-      <div 
-        v-for="column in columns" 
-        :key="column.value"
-        class="flex-1 min-w-[300px]"
-      >
+      <div v-for="column in columns" :key="column.value" class="flex-1 min-w-[300px]">
         <div class="bg-cardLight rounded-lg shadow p-4">
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-semibold text-text">
@@ -37,50 +28,32 @@
               {{ itemsByStatus[column.value]?.length || 0 }}
             </span>
           </div>
-          
+
           <div
             class="min-h-[500px] p-4 rounded-lg bg-background border-2 border-dashed border-textLighter transition-all duration-200"
-            @dragover.prevent="onDragOver($event)"
-            @drop="onDrop($event, column.value)"
-            :class="{
+            @dragover.prevent="onDragOver($event)" @drop="onDrop($event, column.value)" :class="{
               'border-primary border-solid': isDraggingOver && dragOverColumn === column.value
-            }"
-          >
+            }">
             <!-- Empty state -->
-            <div 
-              v-if="itemsByStatus[column.value]?.length === 0"
-              class="flex flex-col items-center justify-center h-full text-textLighter"
-            >
+            <div v-if="itemsByStatus[column.value]?.length === 0"
+              class="flex flex-col items-center justify-center h-full text-textLighter">
               <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
               <p>No items in {{ column.label }}</p>
             </div>
 
             <!-- Items -->
-            <TransitionGroup
-              name="list"
-              tag="div"
-              class="flex flex-col gap-4"
-            >
-              <div
-                v-for="item in itemsByStatus[column.value]"
-                :key="item.id"
-                class="cursor-move card transform transition-transform duration-200 hover:scale-[1.02]"
-                draggable="true"
-                @dragstart="onDragStart($event, item)"
-                @dragend="onDragEnd"
-                :class="{
+            <TransitionGroup name="list" tag="div" class="flex flex-col gap-4">
+              <div v-for="item in itemsByStatus[column.value]" :key="item.id"
+                class="cursor-move card transform transition-transform duration-200 hover:scale-[1.02]" draggable="true"
+                @dragstart="onDragStart($event, item)" @dragend="onDragEnd" :class="{
                   'opacity-50': draggedItem?.id === item.id,
                   'shadow-lg': draggedItem?.id === item.id
-                }"
-              >
-                <ResourceRenderer 
-                  :resource="resource"
-                  :displayData="item"
-                  :layout="resource.layout"
-                  :showHeading="false"
-                />
+                }">
+                <ResourceRenderer :resource="resource" :displayData="item" :layout="resource.layout"
+                  :showHeading="false" />
               </div>
             </TransitionGroup>
           </div>
@@ -89,68 +62,44 @@
     </div>
 
     <!-- Loading overlay -->
-    <div 
-      v-if="loading"
-      class="fixed inset-0 bg-background bg-opacity-50 flex items-center justify-center z-50"
-    >
+    <div v-if="loading" class="fixed inset-0 bg-background bg-opacity-50 flex items-center justify-center z-50">
       <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
     </div>
     <TransitionRoot appear :show="showStats" as="template">
       <Dialog as="div" @close="showStats = false" class="relative z-50">
-        <TransitionChild
-          as="template"
-          enter="duration-300 ease-out"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="duration-200 ease-in"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
-        >
+        <TransitionChild as="template" enter="duration-300 ease-out" enter-from="opacity-0" enter-to="opacity-100"
+          leave="duration-200 ease-in" leave-from="opacity-100" leave-to="opacity-0">
           <DialogOverlay class="fixed inset-0 bg-black bg-opacity-25" />
         </TransitionChild>
 
         <div class="fixed inset-0 overflow-y-auto">
           <div class="flex min-h-full items-center justify-center p-4">
-            <TransitionChild
-              as="template"
-              enter="duration-300 ease-out"
-              enter-from="opacity-0 scale-95"
-              enter-to="opacity-100 scale-100"
-              leave="duration-200 ease-in"
-              leave-from="opacity-100 scale-100"
-              leave-to="opacity-0 scale-95"
-            >
-              <DialogPanel class="w-full max-w-6xl transform overflow-hidden rounded-2xl bg-cardLight p-6 shadow-xl transition-all">
+            <TransitionChild as="template" enter="duration-300 ease-out" enter-from="opacity-0 scale-95"
+              enter-to="opacity-100 scale-100" leave="duration-200 ease-in" leave-from="opacity-100 scale-100"
+              leave-to="opacity-0 scale-95">
+              <DialogPanel
+                class="w-full max-w-6xl transform overflow-hidden rounded-2xl bg-cardLight p-6 shadow-xl transition-all">
                 <div class="flex justify-between items-center mb-6">
                   <DialogTitle as="h3" class="text-xl font-semibold text-text">
                     {{ resource.label }} Statistics
                   </DialogTitle>
-                  <button 
-                    @click="showStats = false"
-                    class="text-gray-500 hover:text-gray-700"
-                  >
+                  <button @click="showStats = false" class="text-gray-500 hover:text-gray-700">
                     <i class="pi pi-times text-xl"></i>
                   </button>
                 </div>
 
                 <!-- Metric Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                  <div 
-                    v-for="metric in metrics" 
-                    :key="metric.label"
-                    class="card"
-                  >
+                  <div v-for="metric in metrics" :key="metric.label" class="card">
                     <div class="flex justify-between items-start">
                       <div>
                         <p class="text-sm text-text">{{ metric.label }}</p>
                         <p class="text-2xl font-bold text-text">{{ metric.value }}</p>
                       </div>
-                      <span 
-                        :class="[
-                          'px-2 py-1 rounded-full text-xs',
-                          metric.trend > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        ]"
-                      >
+                      <span :class="[
+                        'px-2 py-1 rounded-full text-xs',
+                        metric.trend > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      ]">
                         {{ metric.trend > 0 ? '+' : '' }}{{ metric.trend }}%
                       </span>
                     </div>
@@ -163,34 +112,19 @@
                   <!-- Status Distribution (Pie Chart) -->
                   <div class="bg-cardLight rounded-lg p-4 shadow">
                     <h4 class="text-lg font-semibold mb-4">Status Distribution</h4>
-                    <apexchart
-                      type="pie"
-                      height="300"
-                      :options="pieChartOptions"
-                      :series="pieChartSeries"
-                    />
+                    <apexchart type="pie" height="300" :options="pieChartOptions" :series="pieChartSeries" />
                   </div>
 
                   <!-- Status Trends (Line Chart) -->
                   <div class="bg-cardLight rounded-lg p-4 shadow">
                     <h4 class="text-lg font-semibold mb-4">Status Trends</h4>
-                    <apexchart
-                      type="line"
-                      height="300"
-                      :options="lineChartOptions"
-                      :series="lineChartSeries"
-                    />
+                    <apexchart type="line" height="300" :options="lineChartOptions" :series="lineChartSeries" />
                   </div>
 
                   <!-- Monthly Activity (Bar Chart) -->
                   <div class="bg-cardLight rounded-lg p-4 shadow col-span-2">
                     <h4 class="text-lg font-semibold mb-4">Monthly Activity</h4>
-                    <apexchart
-                      type="bar"
-                      height="300"
-                      :options="barChartOptions"
-                      :series="barChartSeries"
-                    />
+                    <apexchart type="bar" height="300" :options="barChartOptions" :series="barChartSeries" />
                   </div>
                 </div>
               </DialogPanel>
@@ -243,8 +177,8 @@ const metrics = computed(() => {
   const total = items.value.length
   const lastMonth = subMonths(new Date(), 1)
   const thisMonth = new Date()
-  
-  const itemsThisMonth = items.value.filter(item => 
+
+  const itemsThisMonth = items.value.filter(item =>
     isWithinInterval(parseISO(item.createdAt), { start: lastMonth, end: thisMonth })
   ).length
 
@@ -283,7 +217,7 @@ const metrics = computed(() => {
 
 // Pie Chart Data
 const pieChartSeries = computed(() => {
-  return columns.value.map(column => 
+  return columns.value.map(column =>
     itemsByStatus.value[column.value]?.length || 0
   )
 })
@@ -310,11 +244,11 @@ const pieChartOptions = computed(() => ({
 // Line Chart Data
 const lineChartSeries = computed(() => {
   const last6Months = Array.from({ length: 6 }, (_, i) => subMonths(new Date(), i))
-  
+
   return columns.value.map(column => ({
     name: column.label,
     data: last6Months.map(month => {
-      return items.value.filter(item => 
+      return items.value.filter(item =>
         item[statusField.value.name] === column.value &&
         isWithinInterval(parseISO(item.createdAt), {
           start: month,
@@ -333,7 +267,7 @@ const lineChartOptions = {
     }
   },
   xaxis: {
-    categories: Array.from({ length: 6 }, (_, i) => 
+    categories: Array.from({ length: 6 }, (_, i) =>
       format(subMonths(new Date(), 5 - i), 'MMM yyyy')
     )
   },
@@ -380,7 +314,7 @@ const barChartOptions = {
     },
   },
   xaxis: {
-    categories: Array.from({ length: 12 }, (_, i) => 
+    categories: Array.from({ length: 12 }, (_, i) =>
       format(subMonths(new Date(), 11 - i), 'MMM yyyy')
     )
   },
@@ -407,7 +341,7 @@ const columns = computed(() => {
 const itemsByStatus = computed(() => {
   const result = {}
   columns.value.forEach(column => {
-    result[column.value] = items.value.filter(item => 
+    result[column.value] = items.value.filter(item =>
       item[statusField.value.name] === column.value
     )
   })
@@ -462,7 +396,7 @@ const onDrop = async (event, newStatus) => {
   event.preventDefault()
   isDraggingOver.value = false
   dragOverColumn.value = null
-  
+
   if (!draggedItem.value) return
 
   const item = draggedItem.value
@@ -470,12 +404,13 @@ const onDrop = async (event, newStatus) => {
   if (originalStatus === newStatus) return
 
   const itemIndex = items.value.findIndex(t => t.id === item.id)
-  items.value[itemIndex] = { 
-    ...item, 
-    [statusField.value.name]: newStatus 
+  items.value[itemIndex] = {
+    ...item,
+    [statusField.value.name]: newStatus
   }
 
   try {
+
     await axios.put(
       `${import.meta.env.VITE_APP_API_URL}/api/v1/${props.resource.name}/${item.id}`,
       { [statusField.value.name]: newStatus }
@@ -487,22 +422,28 @@ const onDrop = async (event, newStatus) => {
     })
 
 
-    const emails = [
-  "gftmkyelu@gmail.com",
-  "transtaxis@yahoo.com",
-  "fphiri418@gmail.com",
-  "mkyelugift@gmail.com",
-];
+    if (props.resource.name === "projects") {
+      const project = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/v1/${props.resource.name}/${item.id}`)
+      const emails = [
+        "gftmkyelu@gmail.com",
+        "transtaxis@yahoo.com",
+        "fphiri418@gmail.com",
+        "mkyelugift@gmail.com",
+      ];
 
-// Iterate through each email and send an email
-for (const email of emails) {
-  await effects.sendEmail({
-    Logo: "https://firebasestorage.googleapis.com/v0/b/server-services-50a49.appspot.com/o/logo%2F%5Bremoval.ai%5D_abd4a3d0-84f8-4c0a-9c3a-8d1f3cedddcd-bbb.png?alt=media&token=0fd681c0-6d3e-4268-9410-f0e38ff2e316",
-    subject: `${props.resource.label} moved to ${newStatus}`,
-    recipientEmail: email, // Send to each email in the array
-    message: message,
-  });
-}
+      // Iterate through each email and send an email
+      for (const email of emails) {
+        await effects.sendEmail({
+          Logo: "https://firebasestorage.googleapis.com/v0/b/server-services-50a49.appspot.com/o/logo%2F%5Bremoval.ai%5D_abd4a3d0-84f8-4c0a-9c3a-8d1f3cedddcd-bbb.png?alt=media&token=0fd681c0-6d3e-4268-9410-f0e38ff2e316",
+          subject: `Project moved to ${newStatus}`,
+          recipientEmail: email, // Send to each email in the array
+          message: `you are recieving this email to inform you that ${props.resource.label} with the title ${project.data.projectName} has been moved to another milestone`,
+        });
+      }
+    }
+
+
+
 
     message.success(`${props.resource.label.slice(0, -1)} moved to ${newStatus}`)
   } catch (error) {
@@ -527,8 +468,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-
-
 /* Transition animations */
 .list-move,
 .list-enter-active,
