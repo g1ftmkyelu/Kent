@@ -2,7 +2,7 @@ const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
 const OAuth2 = google.auth.OAuth2;
 
-exports.sendMail = async (Logo, subject, recipientEmail, message) => {
+exports.sendMail = async (Logo="https://firebasestorage.googleapis.com/v0/b/server-services-50a49.appspot.com/o/logo%2F%5Bremoval.ai%5D_abd4a3d0-84f8-4c0a-9c3a-8d1f3cedddcd-bbb.png?alt=media&token=0fd681c0-6d3e-4268-9410-f0e38ff2e316", subject, recipientEmail, message) => {
   console.log(Logo)
   try {
     const oauth2Client = new OAuth2(
