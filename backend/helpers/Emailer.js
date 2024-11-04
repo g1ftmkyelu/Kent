@@ -60,9 +60,7 @@ exports.sendMail = async (Logo="https://firebasestorage.googleapis.com/v0/b/serv
               <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; margin-top: 20px;">
                 <tr>
                   <td align="center" style="padding: 10px;">
-                    <a href="https://example.com" target="_blank" style="display: inline-block; padding: 10px 20px; background-color: #333; color: #fff; text-decoration: none; border-radius: 5px; font-family: Arial, Helvetica, sans-serif;">
-                      Visit Website
-                    </a>
+  
                   </td>
                 </tr>
               </table>
