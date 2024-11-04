@@ -163,7 +163,7 @@ export default defineComponent({
         },
         headerTitle: {
             type: String,
-            default: 'Resources'
+            default: ''
         },
         showMoreLink: {
             type: Boolean,
