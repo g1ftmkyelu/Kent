@@ -89,7 +89,7 @@
     loading.value = true
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_APP_API_URL}/api/api/v1/${props.resource.name}?limit=100`
+        `${import.meta.env.VITE_APP_API_URL}/api/v1/${props.resource.name}?limit=100`
       )
       items.value = response.data.data
     } catch (error) {
