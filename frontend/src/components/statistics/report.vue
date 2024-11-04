@@ -1,241 +1,276 @@
 <template>
-    <div class="report-generator p-10">   
-      <div class="mb-4">
-        <select 
-          id="resourceSelect" 
-          v-model="selectedResource" 
-          @change="generateReport" 
-          class="w-full p-2 border rounded"
-        >
-          <option value="">-- Select a resource --</option>
-          <option v-for="resource in resourcesWithStatus" :key="resource.name" :value="resource.name">
-            {{ resource.label }}
-          </option>
-        </select>
-      </div>
-  
-      <div v-if="loading" class="text-center">
-        Loading report...
-      </div>
-      <div v-else-if="error" class="text-center text-red-500">
-        {{ error }}
-      </div>
-      <div v-else-if="selectedResource">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div class="bg-cardLight border-t-4 border-secondary rounded-lg shadow-md p-4">
-            <h3 class="text-lg font-semibold mb-2">{{ selectedResourceLabel }} Summary</h3>
-            <p class="text-3xl font-bold mb-2">Total: {{ totalCount }}</p>
+  <div class="progress-tracker">
+    <div class="filters">
+      <label>Date Range:</label>
+      <a-range-picker v-model="selectedDateRange" @change="updateReportData" />
+      <button class="generate-btn" @click="generateReport">Generate Report</button>
+    </div>
 
-          </div>
-          <div v-for="(distribution, index) in distributions" :key="index" class="bg-cardLight border-t-4 border-secondary rounded-lg shadow-md p-4">
-            <h3 class="text-lg font-semibold mb-2">{{ distribution.title }}</h3>
-            <ul>
-              <li v-for="(value, key) in distribution.data" :key="key" class="flex justify-between">
-                <span>{{ key }}:</span>
-                <span class="font-bold">{{ value }}</span>
-              </li>
-            </ul>
-          </div>
+    <div class="report-container" :class="{ 'with-border': showReport }">
+      <div v-if="showReport" class="chart-and-table">
+        <div class="chart-container">
+          <apexchart
+            type="area"
+            height="350"
+            :options="chartOptions"
+            :series="chartSeries"
+          ></apexchart>
         </div>
-  
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div v-for="(chart, index) in charts" :key="index" class="bg-white rounded-lg shadow-md p-4">
-            <highcharts :options="chart.options"></highcharts>
-          </div>
+        <div class="table-container">
+          <h2>Financial Report</h2>
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Amount (MWK)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Revenue</td>
+                <td>{{ formatCurrency(revenue) }}</td>
+              </tr>
+              <tr>
+                <td>Expenses</td>
+                <td>{{ formatCurrency(expenses) }}</td>
+              </tr>
+              <tr>
+                <td>Profit/Loss</td>
+                <td
+                  :class="{ 'text-success': profit >= 0, 'text-danger': profit < 0 }"
+                >
+                  {{ formatCurrency(profit) }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <button class="download-btn" @click="downloadReport">Download Report</button>
         </div>
+      </div>
+      <div class="border-dashed border-2 h-72 border-textLighter flex justify-center place-items-center" v-else>
+        <a-empty description="Generate a report to see the financial information." />
       </div>
     </div>
-  </template>
-  
-  <script>
-  import { defineComponent, ref, onMounted, computed } from 'vue';
-  import axios from 'axios';
-  import Highcharts from 'highcharts';
-  import HighchartsVue from 'highcharts-vue';
-  
-  import { getFilteredResources } from "../../utils/accessControl";
-  
-  export default defineComponent({
-    name: 'ReportGenerator',
-    components: {
-      highcharts: HighchartsVue.Chart
-    },
-    setup() {
-      const resources = ref([]);
-      const selectedResource = ref('');
-      const selectedResourceLabel = ref('');
-      const charts = ref([]);
-      const distributions = ref([]);
-      const totalCount = ref(0);
-      const associatedModules = ref({});
-      const loading = ref(false);
-      const error = ref(null);
-  
-      const resourcesWithStatus = computed(() => {
-        return resources.value.filter(resource => 
-          findStatusFields(resource.schema).length > 0
-        );
+  </div>
+</template>
+
+<script>
+import { ref } from 'vue';
+import { DatePicker, Empty } from 'ant-design-vue';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import VueApexCharts from 'vue3-apexcharts';
+
+export default {
+  components: {
+    'a-range-picker': DatePicker.RangePicker,
+    'a-empty': Empty,
+    apexchart: VueApexCharts,
+  },
+  setup() {
+    const selectedDateRange = ref([]);
+    const showReport = ref(false);
+    const revenue = ref(0);
+    const expenses = ref(0);
+    const profit = ref(0);
+
+    const updateReportData = () => {
+      // Check if both dates are selected
+      if (selectedDateRange.value.length === 2) {
+        const [start, end] = selectedDateRange.value;
+
+        // Simulating data based on selected date range
+        const daysBetween = Math.abs((new Date(end) - new Date(start)) / (1000 * 60 * 60 * 24));
+        revenue.value = 10000 + daysBetween * 50; // Example dummy formula for revenue
+        expenses.value = 8000 + daysBetween * 30; // Example dummy formula for expenses
+        profit.value = revenue.value - expenses.value;
+      }
+    };
+
+    const generateReport = () => {
+      if (selectedDateRange.value.length === 2) {
+        updateReportData();
+        showReport.value = true; // Display the report
+      } else {
+        showReport.value = false; // Hide the report if date range is not complete
+      }
+    };
+
+    const downloadReport = () => {
+      const doc = new jsPDF();
+      doc.text('Construction Progress Financial Report', 14, 20);
+      doc.autoTable({
+        startY: 30,
+        head: [['Item', 'Amount (MWK)']],
+        body: [
+          ['Revenue', formatCurrency(revenue.value)],
+          ['Expenses', formatCurrency(expenses.value)],
+          ['Profit/Loss', formatCurrency(profit.value)],
+        ],
       });
-  
-      const fetchData = async (resource) => {
-        try {
-          const response = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/v1/${resource}`);
-          return response.data.data;
-        } catch (error) {
-          console.error(`Error fetching data for ${resource}:`, error);
-          throw error;
-        }
-      };
-  
-      const createChart = (title, data, type) => {
-        return {
-          options: {
-            chart: { type },
-            title: { text: title },
-            series: [{ data }],
-            colors: ['#313133', '#9E7B13', '#1F1F20', '#001f3f'],
-            plotOptions: {
-              pie: {
-                allowPointSelect: true,
-                cursor: 'pointer',
-                dataLabels: {
-                  enabled: true,
-                  format: '<b>{point.name}</b>: {point.percentage:.1f} %'
-                }
-              },
-              bar: {
-                dataLabels: { enabled: true },
-                showInLegend: true,
-                colorByPoint: true,
-                colors: ['#313133', '#9E7B13', '#1F1F20', '#001f3f'],
-              }
-            }
-          }
-        };
-      };
-  
-      const findStatusFields = (schema, prefix = '') => {
-        let statusFields = [];
-        for (const field of schema) {
-          const fullFieldName = prefix ? `${prefix}.${field.name}` : field.name;
-  
-          if (field.isStatus && field.type === 'ref') {
-            statusFields.push({ ...field, fullName: fullFieldName });
-          }
-          if (field.type === 'object' && field.schema) {
-            statusFields = statusFields.concat(findStatusFields(field.schema, fullFieldName));
-          }
-          if (field.type === 'object array' && field.schema) {
-            statusFields = statusFields.concat(findStatusFields(field.schema, fullFieldName));
-          }
-          if (field.type === 'array' && field.items && field.items.schema) {
-            statusFields = statusFields.concat(findStatusFields(field.items.schema, `${fullFieldName}[]`));
-          }
-        }
-        return statusFields;
-      };
-  
-      const getNestedValue = (obj, path) => {
-        const parts = path.split('.');
-        let current = obj;
-        for (const part of parts) {
-          if (part.endsWith('[]') && Array.isArray(current)) {
-            const arrayProp = part.slice(0, -2);
-            return current.map(item => item[arrayProp]).flat();
-          }
-          if (current == null) return undefined;
-          current = current[part];
-        }
-        return current;
-      };
-  
-      const generateReport = async () => {
-        if (!selectedResource.value) return;
-  
-        loading.value = true;
-        error.value = null;
-        charts.value = [];
-        distributions.value = [];
-        associatedModules.value = {};
-  
-        try {
-          const resource = resources.value.find(r => r.name === selectedResource.value);
-          selectedResourceLabel.value = resource.label;
-          const statusFields = findStatusFields(resource.schema);
-          const mainData = await fetchData(resource.name);
-          totalCount.value = mainData.length;
-  
-          // Count associated modules
-          mainData.forEach(item => {
-            if (item.module) {
-              associatedModules.value[item.module] = (associatedModules.value[item.module] || 0) + 1;
-            }
-          });
-  
-          for (const statusField of statusFields) {
-            const refData = await fetchData(statusField.resource);
-            const refMap = new Map(refData.map(item => [item.id, item[statusField.field]]));
-  
-            const statusCounts = mainData.reduce((acc, item) => {
-              const statusId = getNestedValue(item, statusField.fullName);
-              if (Array.isArray(statusId)) {
-                statusId.forEach(id => {
-                  const status = refMap.get(id) || 'Unknown';
-                  acc[status] = (acc[status] || 0) + 1;
-                });
-              } else {
-                const status = refMap.get(statusId) || 'Unknown';
-                acc[status] = (acc[status] || 0) + 1;
-              }
-              return acc;
-            }, {});
-  
-            const chartData = Object.entries(statusCounts).map(([name, y]) => ({ name, y }));
-            
-            if (chartData.length > 0) {
-              charts.value.push(createChart(`${resource.label} by ${statusField.title}`, chartData, 'pie'));
-              charts.value.push(createChart(`${resource.label} Distribution by ${statusField.title}`, chartData, 'bar'));
-              distributions.value.push({
-                title: `${statusField.title} Distribution`,
-                data: statusCounts
-              });
-            }
-          }
-  
-          if (charts.value.length === 0) {
-            error.value = "No chart data available for this resource.";
-          }
-        } catch (err) {
-          error.value = "An error occurred while generating the report.";
-          console.error("Error in generateReport:", err);
-        } finally {
-          loading.value = false;
-        }
-      };
-  
-      onMounted(async () => {
-        try {
-          const roleId = localStorage.getItem("role");
-          resources.value = await getFilteredResources(roleId);
-        } catch (err) {
-          error.value = "An error occurred while loading resources.";
-          console.error("Error in onMounted:", err);
-        }
-      });
-  
-      return { 
-        resources, 
-        resourcesWithStatus,
-        selectedResource,
-        selectedResourceLabel, 
-        charts, 
-        distributions,
-        totalCount,
-        associatedModules,
-        loading, 
-        error, 
-        generateReport 
-      };
-    }
-  });
-  </script>
+      doc.save(`construction-progress-report.pdf`);
+    };
+
+    const formatCurrency = (amount) => {
+      return `MK ${amount.toLocaleString()}`;
+    };
+
+    const chartOptions = {
+      chart: {
+        id: 'financial-chart',
+        toolbar: {
+          show: true,
+        },
+        zoom: {
+          enabled: true,
+        },
+      },
+      dataLabels: {
+        enabled: false,
+      },
+      stroke: {
+        curve: 'smooth',
+      },
+      xaxis: {
+        type: 'datetime',
+        categories: [
+          '2023-01-01',
+          '2023-02-01',
+          '2023-03-01',
+          '2023-04-01',
+          '2023-05-01',
+          '2023-06-01',
+          '2023-07-01',
+          '2023-08-01',
+          '2023-09-01',
+          '2023-10-01',
+          '2023-11-01',
+          '2023-12-01',
+        ],
+      },
+      fill: {
+        type: 'gradient',
+        gradient: {
+          shadeIntensity: 1,
+          opacityFrom: 0.4,
+          opacityTo: 0.8,
+          stops: [0, 100],
+        },
+      },
+      colors: ['#00b894'],
+    };
+
+    const chartSeries = [
+      {
+        name: 'Profit',
+        data: [
+          2000, 3000, 4000, 3500, 4500, 5000, 4800, 5200, 5000, 6000, 5800, 6500,
+        ],
+      },
+    ];
+
+    return {
+      selectedDateRange,
+      showReport,
+      revenue,
+      expenses,
+      profit,
+      chartOptions,
+      chartSeries,
+      generateReport,
+      downloadReport,
+      formatCurrency,
+    };
+  },
+};
+</script>
+
+<style scoped>
+.progress-tracker {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #2d3436;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.filters {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.filters label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.generate-btn,
+.download-btn {
+  background-color: #00b894;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  padding: 8px 12px;
+  transition: background-color 0.3s;
+}
+
+.generate-btn:hover,
+.download-btn:hover {
+  background-color: #019473;
+}
+
+.report-container {
+  margin-top: 20px;
+  padding: 20px;
+}
+
+.with-border {
+  border: 2px dashed #dfe6e9;
+  border-radius: 8px;
+}
+
+.chart-and-table {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.chart-container,
+.table-container {
+  flex: 1;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.styled-table th,
+.styled-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.styled-table th {
+  background-color: #00b894;
+  color: white;
+}
+
+.text-success {
+  color: green;
+  font-weight: bold;
+}
+
+.text-danger {
+  color: red;
+  font-weight: bold;
+}
+</style>

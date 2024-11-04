@@ -32,6 +32,9 @@
   <div  v-else-if="resource.renderMode === 'data-group'" class="mx-5">
     <DataGroup :resource="resource" />
   </div>
+  <div v-else-if="resource.renderMode === 'report'" class="mx-5">
+    <report :resource="resource" />
+  </div>
       <h1 v-else>unknown renderMode</h1>
 
 
@@ -53,6 +56,7 @@ import dashboard_renderer from "./dashboards/dashboard_renderer.vue";
 import kanban_board from "./render_modes/kanban/kanban_board.vue";
 import BlockGrid from "../BlockGrid.vue";
 import DataGroup from "../Object/DataGroup.vue";
+import report from "../statistics/report.vue";
 
 
 export default {
@@ -71,7 +75,8 @@ export default {
     dashboard_renderer,
     kanban_board,
     BlockGrid,
-    DataGroup
+    DataGroup,
+    report
   },
   mounted() {
     // Scroll to the top when component is mounted

@@ -1991,5 +1991,11 @@ export const construction_tracking_system = [
       ],
     },
   },
-
+  {
+    name: "financial-report",
+    path: "financial-report",
+    icon: "pi pi-chart-line",
+    label: "Financial Report",
+    renderMode:"report"
+  }
 ];
