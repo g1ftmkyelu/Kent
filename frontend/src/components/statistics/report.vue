@@ -1,119 +1,77 @@
 <template>
-  <div class="progress-tracker">
+  <div class="progress-tracker card text-text">
     <div class="filters">
-      <label>Date Range:</label>
-      <a-range-picker v-model="selectedDateRange" @change="updateReportData" />
-      <button class="generate-btn" @click="generateReport">Generate Report</button>
+      <label class="text-text" for="startDate">From</label>
+      <input class="bg-cardDark border-textLighter border text-text" type="date" id="startDate" v-model="startDate" />
+      <label class="text-text" for="endDate">To:</label>
+      <input class="bg-cardDark border-textLighter border text-text" type="date" id="endDate" v-model="endDate" />
+      <button  class="generate-btn" @click="generateReport">Generate Report</button>
     </div>
 
-    <div class="report-container" :class="{ 'with-border': showReport }">
-      <div v-if="showReport" class="chart-and-table">
-        <div class="chart-container">
-          <apexchart
-            type="area"
-            height="350"
-            :options="chartOptions"
-            :series="chartSeries"
-          ></apexchart>
-        </div>
-        <div class="table-container">
-          <h2>Financial Report</h2>
-          <table class="styled-table">
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th>Amount (MWK)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Revenue</td>
-                <td>{{ formatCurrency(revenue) }}</td>
-              </tr>
-              <tr>
-                <td>Expenses</td>
-                <td>{{ formatCurrency(expenses) }}</td>
-              </tr>
-              <tr>
-                <td>Profit/Loss</td>
-                <td
-                  :class="{ 'text-success': profit >= 0, 'text-danger': profit < 0 }"
-                >
-                  {{ formatCurrency(profit) }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <button class="download-btn" @click="downloadReport">Download Report</button>
-        </div>
+    <div class="report-container text-text" v-if="showReport">
+      <div class="chart-container text-text">
+        <apexchart
+          type="area"
+          height="350"
+          :options="chartOptions"
+          :series="chartSeries"
+        ></apexchart>
       </div>
-      <div class="border-dashed border-2 h-72 border-textLighter flex justify-center place-items-center" v-else>
-        <a-empty description="Generate a report to see the financial information." />
+      <div class="table-container card">
+        <h2>Financial Report</h2>
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Amount (MWK)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Revenue</td>
+              <td>{{ formatCurrency(revenue) }}</td>
+            </tr>
+            <tr>
+              <td>Expenses</td>
+              <td>{{ formatCurrency(expenses) }}</td>
+            </tr>
+            <tr>
+              <td>Profit/Loss</td>
+              <td
+                :class="{ 'text-success': profit >= 0, 'text-danger': profit < 0 }"
+              >
+                {{ formatCurrency(profit) }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <button class="download-btn" @click="downloadReport">Download Report</button>
       </div>
+    </div>
+    <div  v-else class="flex flex-col justify-center items-center p-12 border-dashed border-2 border-textLighter">
+      <a-empty></a-empty>
+      <p>Generate a report to see the financial information.</p>
     </div>
   </div>
 </template>
 
 <script>
 import { ref } from 'vue';
-import { DatePicker, Empty } from 'ant-design-vue';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import VueApexCharts from 'vue3-apexcharts';
 
 export default {
   components: {
-    'a-range-picker': DatePicker.RangePicker,
-    'a-empty': Empty,
     apexchart: VueApexCharts,
   },
   setup() {
-    const selectedDateRange = ref([]);
+    const startDate = ref('');
+    const endDate = ref('');
     const showReport = ref(false);
-    const revenue = ref(0);
-    const expenses = ref(0);
-    const profit = ref(0);
-
-    const updateReportData = () => {
-      // Check if both dates are selected
-      if (selectedDateRange.value.length === 2) {
-        const [start, end] = selectedDateRange.value;
-
-        // Simulating data based on selected date range
-        const daysBetween = Math.abs((new Date(end) - new Date(start)) / (1000 * 60 * 60 * 24));
-        revenue.value = 10000 + daysBetween * 50; // Example dummy formula for revenue
-        expenses.value = 8000 + daysBetween * 30; // Example dummy formula for expenses
-        profit.value = revenue.value - expenses.value;
-      }
-    };
-
-    const generateReport = () => {
-      if (selectedDateRange.value.length === 2) {
-        updateReportData();
-        showReport.value = true; // Display the report
-      } else {
-        showReport.value = false; // Hide the report if date range is not complete
-      }
-    };
-
-    const downloadReport = () => {
-      const doc = new jsPDF();
-      doc.text('Construction Progress Financial Report', 14, 20);
-      doc.autoTable({
-        startY: 30,
-        head: [['Item', 'Amount (MWK)']],
-        body: [
-          ['Revenue', formatCurrency(revenue.value)],
-          ['Expenses', formatCurrency(expenses.value)],
-          ['Profit/Loss', formatCurrency(profit.value)],
-        ],
-      });
-      doc.save(`construction-progress-report.pdf`);
-    };
-
-    const formatCurrency = (amount) => {
-      return `MK ${amount.toLocaleString()}`;
-    };
+    const revenue = ref(10000);
+    const expenses = ref(8000);
+    const profit = ref(revenue.value - expenses.value);
 
     const chartOptions = {
       chart: {
@@ -169,8 +127,33 @@ export default {
       },
     ];
 
+    const generateReport = () => {
+      profit.value = revenue.value - expenses.value;
+      showReport.value = true;
+    };
+
+    const downloadReport = () => {
+      const doc = new jsPDF();
+      doc.text('Construction Progress Financial Report', 14, 20);
+      doc.autoTable({
+        startY: 30,
+        head: [['Item', 'Amount (MWK)']],
+        body: [
+          ['Revenue', formatCurrency(revenue.value)],
+          ['Expenses', formatCurrency(expenses.value)],
+          ['Profit/Loss', formatCurrency(profit.value)],
+        ],
+      });
+      doc.save(`construction-progress-report-${startDate.value}-${endDate.value}.pdf`);
+    };
+
+    const formatCurrency = (amount) => {
+      return `MK ${amount.toLocaleString()}`;
+    };
+
     return {
-      selectedDateRange,
+      startDate,
+      endDate,
       showReport,
       revenue,
       expenses,
@@ -198,12 +181,12 @@ export default {
   justify-content: center;
   gap: 15px;
   margin-bottom: 20px;
-  align-items: center;
 }
 
-.filters label {
+.filters input,
+.filters button {
+  padding: 8px 12px;
   font-size: 14px;
-  font-weight: 500;
 }
 
 .generate-btn,
@@ -213,29 +196,19 @@ export default {
   border: none;
   cursor: pointer;
   border-radius: 5px;
-  padding: 8px 12px;
   transition: background-color 0.3s;
 }
 
 .generate-btn:hover,
 .download-btn:hover {
-  background-color: #019473;
+  background-color: var(--primary);
 }
 
 .report-container {
-  margin-top: 20px;
-  padding: 20px;
-}
-
-.with-border {
-  border: 2px dashed #dfe6e9;
-  border-radius: 8px;
-}
-
-.chart-and-table {
   display: flex;
   justify-content: space-between;
   gap: 20px;
+  margin-top: 20px;
 }
 
 .chart-container,
@@ -243,7 +216,6 @@ export default {
   flex: 1;
   padding: 20px;
   border-radius: 8px;
-  background-color: #f9f9f9;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -260,7 +232,7 @@ export default {
 }
 
 .styled-table th {
-  background-color: #00b894;
+  background-color: var(--primary);
   color: white;
 }
 
@@ -272,5 +244,14 @@ export default {
 .text-danger {
   color: red;
   font-weight: bold;
+}
+
+.empty-report {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  border-radius: 8px;
+  font-size: 16px;
 }
 </style>

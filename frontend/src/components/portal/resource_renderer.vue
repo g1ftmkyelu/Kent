@@ -28,7 +28,7 @@
   <notifications v-else-if="resource.renderMode === 'notifications'" :resource="resource" />
   <systemSettings v-else-if="resource.renderMode === 'system-config'" :resource="resource" />
   <BlockGrid v-else-if="resource.renderMode === 'blocks'" :blockConfigs="resource.blockConfigs" :layout="resource.layout" />
-  <kanban_board v-else-if="resource.renderMode === 'kanban'" :resource="resource" />
+  <kanban_board v-else-if="resource.renderMode === 'kanban'" :show-add-button="resource.showAddButton" :resource="resource" />
   <div  v-else-if="resource.renderMode === 'data-group'" class="mx-5">
     <DataGroup :resource="resource" />
   </div>

@@ -793,7 +793,7 @@ export const construction_tracking_system = [
     path: "material_inquiries",
     icon: "pi pi-box",
     label: translationKeys.MaterialInquiries || "Material Inquiries",
-
+    showAddButton:false,
     renderMode: "kanban",
     schema: [
       {
