@@ -498,7 +498,7 @@ const onDrop = async (event, newStatus) => {
 for (const email of emails) {
   await effects.sendEmail({
     Logo: "https://firebasestorage.googleapis.com/v0/b/server-services-50a49.appspot.com/o/logo%2F%5Bremoval.ai%5D_abd4a3d0-84f8-4c0a-9c3a-8d1f3cedddcd-bbb.png?alt=media&token=0fd681c0-6d3e-4268-9410-f0e38ff2e316",
-    subject: `${props.resource.label.slice(0, -1)} moved to ${newStatus}`,
+    subject: `${props.resource.label} moved to ${newStatus}`,
     recipientEmail: email, // Send to each email in the array
     message: message,
   });
