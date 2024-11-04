@@ -79,7 +79,7 @@ export const effects = {
       });
 
       let reqOptions = {
-        url: `${import.meta.env.VITE_APP_API_URL}/api/v1/sendEmail`,
+        url: `${import.meta.env.VITE_APP_API_URL}/sendEmail`,
         method: "POST",
         headers: headersList,
         data: bodyContent,
