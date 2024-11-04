@@ -11,6 +11,7 @@ import privacy_policy from "../pages/legal_pages/privacy_policy.vue";
 import terms_and_conditions from "../pages/legal_pages/terms_and_conditions.vue";
 import forgot_password from "../pages/auth_pages/password_reset/forgot_password.vue";
 import password_reset from "../pages/auth_pages/password_reset/password_reset.vue";
+import BlockGrid from "../components/BlockGrid.vue";
 
 //system configuration
 import { systemConfig } from "../data/system.config";
@@ -78,7 +79,8 @@ const routes = [
         name: `${portal.name}-${resource.path}Detail`,
         component: ResourceDetails,
       })),
-      // Dynamically generate routes for resources
+
+      // Dynamically generate routes for resources>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
       ...portal.resources.map((resource) => ({
         path: `${portal.url}/${resource.path}`,
         name: `${portal.name}-${resource.path}`,
@@ -94,6 +96,17 @@ const routes = [
           showbreadcrumbs: true,
         }),
       })),
+
+      ...portal.blocks.map((block) => ({
+        path: `${portal.url}/${block.id}`,
+        name: `${portal.name}-${block.id}`,
+        component: BlockGrid,
+        props: (route) => ({
+          blockConfigs: block.blockConfigs,
+          layout: block.layout,
+        })
+      })),
+
       {
         path: `${portal.url}/profile`,
         name: `${portal.name}-profile-settings`,

@@ -144,7 +144,7 @@ export const blockConfigs = [
 export const layout = [
   // Top Row - Split
   {
-    name: 'Injuries',
+    name: 'Projects',
     rowStart: 1,
     colStart: 1,
     rowSpan: 1,
@@ -168,13 +168,7 @@ export const layout = [
   },
  
 
-  {
-    name: 'Projects',
-    rowStart: 3,
-    colStart: 7,
-    rowSpan: 1,
-    colSpan: 6
-  }
+
  ];
 
 // Dashboard Configuration

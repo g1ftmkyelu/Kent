@@ -29,6 +29,9 @@
   <systemSettings v-else-if="resource.renderMode === 'system-config'" :resource="resource" />
   <BlockGrid v-else-if="resource.renderMode === 'blocks'" :blockConfigs="resource.blockConfigs" :layout="resource.layout" />
   <kanban_board v-else-if="resource.renderMode === 'kanban'" :resource="resource" />
+  <div  v-else-if="resource.renderMode === 'data-group'" class="mx-5">
+    <DataGroup :resource="resource" />
+  </div>
       <h1 v-else>unknown renderMode</h1>
 
 
@@ -49,6 +52,7 @@ import notifications from "./render_modes/notifications/notifications.vue";
 import dashboard_renderer from "./dashboards/dashboard_renderer.vue";
 import kanban_board from "./render_modes/kanban/kanban_board.vue";
 import BlockGrid from "../BlockGrid.vue";
+import DataGroup from "../Object/DataGroup.vue";
 
 
 export default {
@@ -66,7 +70,8 @@ export default {
     notifications,
     dashboard_renderer,
     kanban_board,
-    BlockGrid
+    BlockGrid,
+    DataGroup
   },
   mounted() {
     // Scroll to the top when component is mounted

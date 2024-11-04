@@ -53,6 +53,11 @@
                 <a-row class="mb-4 flex justify-between">
                     <a-row class="mb-4">
                         <a-col :span="24">
+                            <button @click="addNewItem()"
+                            class=" bg-primary mr-2 px-4 py-2 rounded-md text-text">
+                            <i class="pi pi-plus mr-2 text-gray-600"></i>
+                            <span class="  font-bold mr-2">Add New {{ resource.name }}</span>
+                        </button>
                             <a-space>
                                      <a-input-search v-model:value="searchQuery" placeholder="Search..."
                                     @search="performSearch" style="width: 200px;" />
@@ -95,18 +100,13 @@
                         </template>
                     </a-list>
                     <a-row v-else :gutter="[16, 16]">
-                        <div @click="addNewItem()"
-                            class="flex items-center justify-center border-dashed border-2 border-text rounded-md  mx-3 my-0.5 cursor-pointer hover:bg-gray-200 transition duration-300 ease-in-out flex-1">
-                            <i class="pi pi-plus mr-2 text-gray-600"></i>
-                            <span class=" text-xl font-bold mr-2">Add New {{ resource.name }}</span>
-                        </div>
+                  
                         <a-col v-for="item in displayItems" :key="item.id" :xs="24" :sm="12" :md="8">
                             <div class="bg-cardLight p-3 border border-textLighter rounded-lg">
                                 <objectrenderer :resource="resource" :display-data="item" :layout="finalLayout"
                                     default-orientation="icons" :show-heading="false" />
                             </div>
                         </a-col>
-
                     </a-row>
                 </template>
 

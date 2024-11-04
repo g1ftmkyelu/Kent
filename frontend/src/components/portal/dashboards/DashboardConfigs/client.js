@@ -54,11 +54,6 @@ const initialKeyMetricsData = [
     icon: "pi pi-money-bill"
   },
   {
-    metricName: "Total Revenue",
-    value: "MWK300,000",
-    icon: "pi pi-shopping-cart"
-  },
-  {
     metricName: "Remaining Budget",
     value: "MWK300,000",
     icon: "pi pi-dollar"

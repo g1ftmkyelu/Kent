@@ -10,7 +10,7 @@
             'sm:col-span-2 lg:col-span-3': ['image', 'object', 'richtext', 'image array', 'object array'].includes(field.type)
           }">
             <div class="p-4">
-              <h3 class="mb-2 font-bold">{{ field.title }}</h3>
+              <h3 v-if="field.type !== 'me'" class="mb-2 font-bold">{{ field.title }}</h3>
               <!-- Text, Email, Phone, Number, Decimal -->
               <div v-if="['text', 'email', 'phone', 'number', 'decimal'].includes(field.type)">
                 <p>{{ formData[field.name] }}</p>
@@ -55,6 +55,10 @@
                 <p>
                   {{ getRadioLabel(field.options, formData[field.name]) }}
                 </p>
+              </div>
+
+              <div v-else-if="field.type === 'me'">
+              
               </div>
               <!-- Image, Video, Audio, Document -->
               <div v-else-if="['image', 'video', 'audio', 'document'].includes(field.type)" class="w-full">
@@ -120,7 +124,7 @@
                 <div v-for="(item, index) in formData[field.name]" :key="index"
                   class=" card ">
                   <div class="flex">
-                    <div v-for="subField in field.schema" :key="subField.name">
+                    <div class="mx-10" v-for="subField in field.schema" :key="subField.name">
                       <h4 class="mb-1">
                         {{ subField.title }}
                       </h4>
@@ -129,6 +133,7 @@
                           Download {{ subField.title }}
                         </a>
                       </p>
+                      <img v-else-if="subField.type === 'image'" class="w-28" :src="item[subField.name]" alt="">
                       <p v-else-if="subField.type !== 'ref'">
                         {{ item[subField.name] }}
                       </p>
@@ -221,6 +226,7 @@ import print from "vue3-print-nb";
 import { Carousel as ACarousel } from 'ant-design-vue';
 import ResourceRenderer from "../../../../portal/resource_renderer.vue"
 import resource_tabs from "./resource_tabs.vue";
+import { Resources } from "../../../../../data/resources";
 export default {
 directives: { print },
 name: "app",
@@ -250,7 +256,7 @@ data() {
 },
 async created() {
   const roleId = localStorage.getItem("role");
-  this.resources = await getFilteredResources(roleId);
+  this.resources = Resources;
   this.formData = this.initialData;
   this.fetchRefOptions();
   this.initializeTagLabels();

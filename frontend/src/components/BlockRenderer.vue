@@ -24,6 +24,16 @@ import flexible_chart from './flexible_chart.vue'
 import ActionList from './ActionList.vue'
 import Timeline from './Timeline.vue'
 import metric from './portal/render_modes/kanban/metric.vue'
+import BlockTabs from './BlockTabs.vue'
+import BlockCarousel from './BlockCarousel.vue'
+import BlockAccordion from './BlockAccordion.vue'
+import BlockModal from './BlockModal.vue'
+import BlockTimeline from './BlockTimeline.vue'
+import VerticalBlockTabs from './VerticalBlockTabs.vue'
+import DistributionChart from './DistributionChart.vue'
+import kanban_board from './portal/render_modes/kanban/kanban_board.vue'
+
+
 const props = defineProps({
   block: {
     type: Object,
@@ -41,7 +51,15 @@ const COMPONENT_MAP = {
   'chart': markRaw(flexible_chart),
   'action-list': markRaw(ActionList),
   'timeline': markRaw(Timeline),
-  'metric': markRaw(metric)
+  'metric': markRaw(metric),
+  'block-tabs': markRaw(BlockTabs),
+  'block-carousel': markRaw(BlockCarousel),
+  'block-accordion': markRaw(BlockAccordion),
+  'block-modal': markRaw(BlockModal),
+  'block-timeline': markRaw(BlockTimeline),
+  'vertical-block-tabs': markRaw(VerticalBlockTabs),
+  'distribution-chart': markRaw(DistributionChart),
+  'kanban': markRaw(kanban_board),
 }
 
 const getComponent = (type) => {

@@ -16,7 +16,7 @@
             <div class="grid grid-cols-1 gap-4" :class="{ 'max-w-[calc(100%-2rem)]': formData[field.name].length > 1 }">
               <div v-for="(item, index) in formData[field.name]" :key="index" class="relative card flex-1">
                 <div v-for="subField in field.schema" :key="subField.name" :class="[
-                  subField.type === 'object array' ? 'w-full' : 'min-w-full']">
+                  subField.type === 'object array' ? 'w-full' : 'min-w-full mx']">
                   <!-- Handle richtext fields -->
 
 
@@ -128,7 +128,7 @@
               <p v-if="validationErrors[field.name]" class="mt-1 text-sm validation-error">{{
                 validationErrors[field.name] }} <i class="fa fa-warning"></i></p>
             </div>
-            <div class="flex-1 basis-32 min-w-[8rem]" v-else-if="field.type === 'me'">
+            <div class="flex-1 basis-32 m-0 p-0" v-else-if="field.type === 'me'">
               <input :placeholder="`please enter ${field.title}`" :value="getMeValue(field.name)" type="text" class="me"
                 readonly />
             </div>
@@ -766,7 +766,8 @@ export default {
         if (field.type === "ref" || field.type === "tags") {
           this.refOptions[field.name] = await refOptionsService.getRefOptions(
             field.resource,
-            field.field
+            field.field,
+            field.idFilters
           );
         }
       }
@@ -1377,7 +1378,8 @@ export default {
 .me {
   width: 0px;
   height: 0px;
-  visibility: hidden;
+  outline: none;
+  visibility: visible;
 }
 
 .file-preview {
