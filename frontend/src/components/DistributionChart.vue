@@ -176,7 +176,7 @@
     loading.value = true
     try {
       const response = await axios.get(
-        `http://localhost:4500/api/v1/${props.resource.name}?limit=100`
+        `${import.meta.env.VITE_APP_API_URL}/api/v1/${props.resource.name}?limit=100`
       )
       items.value = response.data.data
       // Force chart re-render after data update

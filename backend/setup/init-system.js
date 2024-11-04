@@ -1,7 +1,7 @@
 require('dotenv').config();
 const axios = require('axios');
 
-const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:4500/api/v1';
+const API_BASE_URL = process.env.API_BASE_URL || `${import.meta.env.VITE_APP_API_URL}/api/v1`;
 const api = axios.create({ baseURL: API_BASE_URL });
 
 let store = {};
