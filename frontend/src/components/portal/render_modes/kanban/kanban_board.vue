@@ -71,7 +71,72 @@
 
     <!-- Statistics Dialog -->
     <TransitionRoot appear :show="showStats" as="template">
-      <!-- [Rest of the statistics dialog code remains unchanged] -->
+      <Dialog as="div" @close="showStats = false" class="relative z-50">
+        <TransitionChild as="template" enter="duration-300 ease-out" enter-from="opacity-0" enter-to="opacity-100"
+          leave="duration-200 ease-in" leave-from="opacity-100" leave-to="opacity-0">
+          <DialogOverlay class="fixed inset-0 bg-black bg-opacity-25" />
+        </TransitionChild>
+
+        <div class="fixed inset-0 overflow-y-auto">
+          <div class="flex min-h-full items-center justify-center p-4">
+            <TransitionChild as="template" enter="duration-300 ease-out" enter-from="opacity-0 scale-95"
+              enter-to="opacity-100 scale-100" leave="duration-200 ease-in" leave-from="opacity-100 scale-100"
+              leave-to="opacity-0 scale-95">
+              <DialogPanel
+                class="w-full max-w-6xl transform overflow-hidden rounded-2xl bg-cardLight p-6 shadow-xl transition-all">
+                <div class="flex justify-between items-center mb-6">
+                  <DialogTitle as="h3" class="text-xl font-semibold text-text">
+                    {{ resource.label }} Statistics
+                  </DialogTitle>
+                  <button @click="showStats = false" class="text-gray-500 hover:text-gray-700">
+                    <i class="pi pi-times text-xl"></i>
+                  </button>
+                </div>
+
+                <!-- Metric Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                  <div v-for="metric in metrics" :key="metric.label" class="card">
+                    <div class="flex justify-between items-start">
+                      <div>
+                        <p class="text-sm text-text">{{ metric.label }}</p>
+                        <p class="text-2xl font-bold text-text">{{ metric.value }}</p>
+                      </div>
+                      <span :class="[
+                        'px-2 py-1 rounded-full text-xs',
+                        metric.trend > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      ]">
+                        {{ metric.trend > 0 ? '+' : '' }}{{ metric.trend }}%
+                      </span>
+                    </div>
+                    <p class="text-sm text-text mt-2">vs last month</p>
+                  </div>
+                </div>
+
+                <!-- Charts Grid -->
+                <div class="grid grid-cols-2 gap-6">
+                  <!-- Status Distribution (Pie Chart) -->
+                  <div class="bg-cardLight rounded-lg p-4 shadow">
+                    <h4 class="text-lg font-semibold mb-4">Status Distribution</h4>
+                    <apexchart type="pie" height="300" :options="pieChartOptions" :series="pieChartSeries" />
+                  </div>
+
+                  <!-- Status Trends (Line Chart) -->
+                  <div class="bg-cardLight rounded-lg p-4 shadow">
+                    <h4 class="text-lg font-semibold mb-4">Status Trends</h4>
+                    <apexchart type="line" height="300" :options="lineChartOptions" :series="lineChartSeries" />
+                  </div>
+
+                  <!-- Monthly Activity (Bar Chart) -->
+                  <div class="bg-cardLight rounded-lg p-4 shadow col-span-2">
+                    <h4 class="text-lg font-semibold mb-4">Monthly Activity</h4>
+                    <apexchart type="bar" height="300" :options="barChartOptions" :series="barChartSeries" />
+                  </div>
+                </div>
+              </DialogPanel>
+            </TransitionChild>
+          </div>
+        </div>
+      </Dialog>
     </TransitionRoot>
   </div>
 </template>
