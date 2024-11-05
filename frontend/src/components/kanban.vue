@@ -117,6 +117,7 @@
   const router = useRouter()
   const items = ref([])
   const loading = ref(false)
+  const MyRole= ref(localStorage.getItem('role'))
   
   // Get date field from resource schema
   const dateField = computed(() => {

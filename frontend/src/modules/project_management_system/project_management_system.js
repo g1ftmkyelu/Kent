@@ -321,9 +321,9 @@ export const construction_tracking_system = [
         },
       ],
     },
-    pivot:{
-      field:"client",
-      value:'current_user_id',
+    pivot: {
+      field: "client",
+      value: "current_user_id",
     },
   },
   {
@@ -437,7 +437,7 @@ export const construction_tracking_system = [
             name: "role",
             value: "6720b539688d5f7fe0e8a7c5",
           },
-        ]
+        ],
       },
       {
         name: "members",
@@ -451,7 +451,7 @@ export const construction_tracking_system = [
             name: "role",
             value: "6720b539688d5f7fe0e8a7c5",
           },
-        ]
+        ],
       },
       {
         name: "description",
@@ -575,7 +575,7 @@ export const construction_tracking_system = [
     path: "my-tasks",
     icon: "pi pi-list",
     label: "Assigned Tasks",
-
+showAddButton:false,
     schema: [
       {
         name: "taskName",
@@ -611,6 +611,9 @@ export const construction_tracking_system = [
           { label: "Pending", value: "pending", color: "#FFD700" },
           { label: "In Progress", value: "inProgress", color: "#007ACC" },
           { label: "Completed", value: "completed", color: "#008000" },
+          { label: "Under Review", value: "underReview", color: "#FFD700" },
+          { label: "Rejected", value: "rejected", color: "#FF6347" },
+          { label: "Approved", value: "approved", color: "#008000" },
         ],
         validation: Yup.string().required("Status is required"),
       },
@@ -797,7 +800,7 @@ export const construction_tracking_system = [
     path: "material_inquiries",
     icon: "pi pi-box",
     label: translationKeys.MaterialInquiries || "Material Inquiries",
-    showAddButton:false,
+    showAddButton: false,
     renderMode: "kanban",
     schema: [
       {
@@ -944,7 +947,6 @@ export const construction_tracking_system = [
             type: "ref",
             resource: "equipment",
             field: "equipmentName",
-            
           },
           {
             name: "hours",
@@ -1106,7 +1108,7 @@ export const construction_tracking_system = [
       fields: {
         reportDate: { rowStart: 3, colStart: 1, rowSpan: 1, colSpan: 3 },
         project: { rowStart: 2, colStart: 1, rowSpan: 1, colSpan: 3 },
-      }
+      },
     },
     renderMode: "data-group",
   },
@@ -1194,7 +1196,6 @@ export const construction_tracking_system = [
             type: "ref",
             resource: "equipment",
             field: "equipmentName",
-            
           },
           {
             name: "hours",
@@ -1428,7 +1429,7 @@ export const construction_tracking_system = [
         name: "image",
         title: "Image",
         type: "image",
-      }
+      },
     ],
     layout: {
       rows: 2,
@@ -1509,7 +1510,7 @@ export const construction_tracking_system = [
         name: "image",
         title: "Image",
         type: "image",
-      }
+      },
     ],
     layout: {
       rows: 2,
@@ -1520,7 +1521,6 @@ export const construction_tracking_system = [
         unit: { rowStart: 2, colStart: 1, rowSpan: 1, colSpan: 1 },
         status: { rowStart: 2, colStart: 2, rowSpan: 1, colSpan: 1 },
       },
-
     },
     renderMode: "data-group",
   },
@@ -1567,7 +1567,6 @@ export const construction_tracking_system = [
           { label: "Square Millimeter", value: "square millimeter" },
           { label: "Other", value: "other" },
         ],
-
       },
       {
         name: "status",
@@ -1651,7 +1650,6 @@ export const construction_tracking_system = [
           { label: "Square Millimeter", value: "square millimeter" },
           { label: "Other", value: "other" },
         ],
-
       },
       {
         name: "status",
@@ -1672,7 +1670,6 @@ export const construction_tracking_system = [
         unit: { rowStart: 2, colStart: 1, rowSpan: 1, colSpan: 1 },
         status: { rowStart: 2, colStart: 2, rowSpan: 1, colSpan: 1 },
       },
-
     },
     renderMode: "crud",
   },
@@ -1830,7 +1827,7 @@ export const construction_tracking_system = [
         title: "Date",
         type: "date",
         validation: Yup.date().required("Date is required"),
-      }
+      },
     ],
     renderMode: "crud",
     layout: {
@@ -1908,7 +1905,7 @@ export const construction_tracking_system = [
         title: "Date",
         type: "date",
         validation: Yup.date().required("Date is required"),
-      }
+      },
     ],
     renderMode: "crud",
     layout: {
@@ -2013,6 +2010,6 @@ export const construction_tracking_system = [
     path: "financial-report",
     icon: "pi pi-chart-line",
     label: "Financial Report",
-    renderMode:"report"
-  }
+    renderMode: "report",
+  },
 ];
