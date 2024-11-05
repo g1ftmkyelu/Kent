@@ -233,13 +233,13 @@ export const blockConfigs = [
             {
               actionName:"Add Today's Report",
               icon: 'fa-info-circle',
-              description: 'make a material inquiry ',
+              description: 'create and submit today\'s work summary report',
               redirectUrl: '/my-reports/item/add'
             },      
             {
               actionName:"manage equipment",
               icon: 'fa-shield-alt',
-              description: 'request safety',
+              description: ' manage all your equipment',
               redirectUrl: '/equipment'
             }
           
