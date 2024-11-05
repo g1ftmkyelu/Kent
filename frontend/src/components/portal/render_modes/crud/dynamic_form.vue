@@ -1284,7 +1284,7 @@ export default {
           } else {
             console.log(this.redirectTo);
             this.$router.push(
-              `/dashboard/${this.resource.name}`
+              `/dashboard/${this.resource.path}`
             );
           }
           await effects.recordActivity({
@@ -1342,7 +1342,7 @@ export default {
           } else {
             console.log(this.redirectTo);
             this.$router.push(
-              `/dashboard/${this.resource.name}`
+              `/dashboard/${this.resource.path}`
             );
           }
         })
