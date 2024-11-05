@@ -223,29 +223,24 @@ export const blockConfigs = [
         type: 'action-list',
         props: {
           items: [
-                {
-              actionName: 'report injury',
-              icon: 'fa-exclamation-triangle',
-              description: 'Report an injury',
-              redirectUrl: '/report-injury'
-            },
+
             {
-              actionName:"inquire material",
+              actionName:"request materials",
               icon: 'fa-info-circle',
               description: 'make a material inquiry ',
-              redirectUrl: '/material-inquiry'
+              redirectUrl: '/my-material_inquiries/item/add'
             },
             {
-              actionName:"request material",
-              icon: 'fa-truck',
-              description: 'request materials',
-              redirectUrl: '/request-material'
-            },
+              actionName:"Add Today's Report",
+              icon: 'fa-info-circle',
+              description: 'make a material inquiry ',
+              redirectUrl: '/my-reports/item/add'
+            },      
             {
-              actionName:"request safety",
+              actionName:"manage equipment",
               icon: 'fa-shield-alt',
               description: 'request safety',
-              redirectUrl: '/request-safety'
+              redirectUrl: '/equipment'
             }
           
           ],
