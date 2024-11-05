@@ -228,19 +228,19 @@ export const blockConfigs = [
               actionName:"request materials",
               icon: 'fa-info-circle',
               description: 'make a material inquiry ',
-              redirectUrl: '/my-material_inquiries/item/add'
+              redirectUrl: '/dashboard/my-material_inquiries/item/add'
             },
             {
               actionName:"Add Today's Report",
               icon: 'fa-info-circle',
               description: 'create and submit today\'s work summary report',
-              redirectUrl: '/my-reports/item/add'
+              redirectUrl: '/dashboard/my-reports/item/add'
             },      
             {
               actionName:"manage equipment",
               icon: 'fa-shield-alt',
               description: ' manage all your equipment',
-              redirectUrl: '/equipment'
+              redirectUrl: '/dashboard/equipment'
             }
           
           ],
