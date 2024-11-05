@@ -476,6 +476,7 @@ const onDrop = async (event, newStatus) => {
         "chikwatipheona@gmail.com",
         "lasmonkapota201@gmail.com",
         "ngwirabless@gmail.com",
+        "jkumwenda033@gmail.com"
       ];
 
       for (const email of emails) {
