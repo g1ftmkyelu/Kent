@@ -1821,6 +1821,12 @@ export const construction_tracking_system = [
         type: "richtext",
         validation: Yup.string().required("Description is required"),
       },
+      {
+        name: "date",
+        title: "Date",
+        type: "date",
+        validation: Yup.date().required("Date is required"),
+      }
     ],
     renderMode: "crud",
     layout: {
@@ -1892,6 +1898,13 @@ export const construction_tracking_system = [
         type: "richtext",
         validation: Yup.string().required("Description is required"),
       },
+
+      {
+        name: "date",
+        title: "Date",
+        type: "date",
+        validation: Yup.date().required("Date is required"),
+      }
     ],
     renderMode: "crud",
     layout: {

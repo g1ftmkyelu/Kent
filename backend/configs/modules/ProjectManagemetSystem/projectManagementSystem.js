@@ -985,6 +985,11 @@ exports.construction_tracking_system = [
         title: "Description",
         type: "richtext",
       },
+      {
+        name:"date",
+        title:"Date",
+        type:"date"
+      }
     ],
     renderMode: "crud",
     layout: {
@@ -1050,6 +1055,11 @@ exports.construction_tracking_system = [
         title: "Description",
         type: "richtext",
       },
+      {
+        name:"date",
+        title:"Date",
+        type:"date"
+      }
     ],
     renderMode: "crud",
     layout: {

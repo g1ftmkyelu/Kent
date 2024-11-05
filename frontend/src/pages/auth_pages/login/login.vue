@@ -19,14 +19,14 @@
 
           <form class="mt-8 space-y-6" @submit.prevent="handleLogin">
             <div class="rounded-md shadow-sm -space-y-px">
-              <div>
+              <div class="pb-4">
                 <label for="email-address" class="sr-only">Email address</label>
                 <div class="relative">
                   <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <UserOutlined class="h-5 w-5 text-gray-400" />
                   </div>
                   <input id="email-address" name="email" type="email" v-model="email" required
-                    class="appearance-none bg-cardLight rounded-none relative block w-full px-3 py-2 pl-10 border border-textLighter placeholder-gray-500 text-textLighter rounded-t-md focus:outline-none focus:z-10 sm:text-sm"
+                    class="appearance-none bg-cardLight rounded-none  relative block w-full px-3 py-2 pl-10 border border-textLighter placeholder-gray-500 text-textLighter  focus:outline-none focus:z-10 sm:text-sm"
                     placeholder="Email address" />
                 </div>
               </div>
@@ -39,7 +39,7 @@
                   </div>
                   <input id="password" name="password" :type="showPassword ? 'text' : 'password'" v-model="password"
                     required
-                    class="appearance-none bg-cardLight rounded-none relative block w-full px-3 py-2 pl-10 border border-textLighter placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:z-10 sm:text-sm"
+                    class="appearance-none bg-cardLight rounded-none relative block w-full px-3 py-2 pl-10 border border-textLighter placeholder-gray-500 text-gray-900  focus:outline-none focus:z-10 sm:text-sm"
                     placeholder="Password" />
                   <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
                     <button type="button" @click="togglePassword"

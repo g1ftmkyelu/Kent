@@ -1,257 +1,564 @@
 <template>
-  <div class="progress-tracker card text-text">
-    <div class="filters">
-      <label class="text-text" for="startDate">From</label>
-      <input class="bg-cardDark border-textLighter border text-text" type="date" id="startDate" v-model="startDate" />
-      <label class="text-text" for="endDate">To:</label>
-      <input class="bg-cardDark border-textLighter border text-text" type="date" id="endDate" v-model="endDate" />
-      <button  class="generate-btn" @click="generateReport">Generate Report</button>
+  <div class="progress-tracker card text-text p-6">
+    <div class="filters bg-cardDark p-4 rounded-lg mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="filter-group">
+          <label class="text-text mb-2 block" for="project">Project:</label>
+          <select 
+            class="w-full bg-cardDark border-textLighter border rounded-md p-2 text-text" 
+            v-model="selectedProject"
+            id="project"
+          >
+            <option value="all">All Projects</option>
+            <option v-for="project in projects" :key="project.id" :value="project.id">
+              {{ project.projectName }}
+            </option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label class="text-text mb-2 block" for="startDate">From:</label>
+          <input 
+            class="w-full bg-cardDark border-textLighter border rounded-md p-2 text-text" 
+            type="date" 
+            id="startDate" 
+            v-model="startDate" 
+          />
+        </div>
+
+        <div class="filter-group">
+          <label class="text-text mb-2 block" for="endDate">To:</label>
+          <input 
+            class="w-full bg-cardDark border-textLighter border rounded-md p-2 text-text" 
+            type="date" 
+            id="endDate" 
+            v-model="endDate" 
+          />
+        </div>
+
+        <div class="filter-group flex items-end">
+          <button 
+            class="w-full bg-primary hover:bg-primary/80 text-white rounded-md p-2 transition-colors"
+            @click="generateReport" 
+            :disabled="loading"
+          >
+            <span v-if="loading" class="flex items-center justify-center">
+              <a-spin class="mr-2" />
+              Generating...
+            </span>
+            <span v-else>Generate Report</span>
+          </button>
+        </div>
+      </div>
     </div>
 
-    <div class="report-container text-text" v-if="showReport">
-      <div class="chart-container text-text">
-        <apexchart
-          type="area"
-          height="350"
-          :options="chartOptions"
-          :series="chartSeries"
-        ></apexchart>
+    <div v-if="loading" class="flex justify-center items-center min-h-[400px]">
+      <a-spin size="large" />
+    </div>
+
+    <div class="report-container" v-else-if="showReport">
+      <!-- Financial Overview Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="stat-card bg-cardDark p-4 rounded-lg">
+          <h3 class="text-lg mb-2">Total Revenue</h3>
+          <p class="text-2xl font-bold text-primary">{{ formatCurrency(totalRevenue) }}</p>
+        </div>
+        <div class="stat-card bg-cardDark p-4 rounded-lg">
+          <h3 class="text-lg mb-2">Total Expenses</h3>
+          <p class="text-2xl font-bold text-red-500">{{ formatCurrency(totalExpenses) }}</p>
+        </div>
+        <div class="stat-card bg-cardDark p-4 rounded-lg">
+          <h3 class="text-lg mb-2">Net Profit/Loss</h3>
+          <p class="text-2xl font-bold" :class="netProfit >= 0 ? 'text-green-500' : 'text-red-500'">
+            {{ formatCurrency(netProfit) }}
+          </p>
+        </div>
+        <div class="stat-card bg-cardDark p-4 rounded-lg">
+          <h3 class="text-lg mb-2">Profit Margin</h3>
+          <p class="text-2xl font-bold" :class="profitMargin >= 0 ? 'text-green-500' : 'text-red-500'">
+            {{ profitMargin }}%
+          </p>
+        </div>
       </div>
-      <div class="table-container card">
-        <h2>Financial Report</h2>
-        <table class="styled-table">
-          <thead>
-            <tr>
-              <th>Item</th>
-              <th>Amount (MWK)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Revenue</td>
-              <td>{{ formatCurrency(revenue) }}</td>
-            </tr>
-            <tr>
-              <td>Expenses</td>
-              <td>{{ formatCurrency(expenses) }}</td>
-            </tr>
-            <tr>
-              <td>Profit/Loss</td>
-              <td
-                :class="{ 'text-success': profit >= 0, 'text-danger': profit < 0 }"
-              >
-                {{ formatCurrency(profit) }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <button class="download-btn" @click="downloadReport">Download Report</button>
+
+      <!-- Charts Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Revenue vs Expenses Timeline -->
+        <div class="chart-card bg-cardDark p-4 rounded-lg">
+          <h3 class="text-lg mb-4">Revenue vs Expenses Timeline</h3>
+          <apexchart
+            type="area"
+            height="350"
+            :options="timelineChartOptions"
+            :series="timelineSeries"
+          ></apexchart>
+        </div>
+
+        <!-- Monthly Profit Trend -->
+        <div class="chart-card bg-cardDark p-4 rounded-lg">
+          <h3 class="text-lg mb-4">Monthly Profit Trend</h3>
+          <apexchart
+            type="bar"
+            height="350"
+            :options="trendChartOptions"
+            :series="trendSeries"
+          ></apexchart>
+        </div>
+
+        <!-- Expense Distribution -->
+        <div class="chart-card bg-cardDark p-4 rounded-lg">
+          <h3 class="text-lg mb-4">Expense Distribution</h3>
+          <apexchart
+            type="pie"
+            height="350"
+            :options="expenseChartOptions"
+            :series="expenseSeries"
+          ></apexchart>
+        </div>
+
+        <!-- Income Distribution -->
+        <div class="chart-card bg-cardDark p-4 rounded-lg">
+          <h3 class="text-lg mb-4">Income Distribution</h3>
+          <apexchart
+            type="pie"
+            height="350"
+            :options="incomeChartOptions"
+            :series="incomeSeries"
+          ></apexchart>
+        </div>
+      </div>
+
+      <!-- Detailed Tables -->
+      <div class="grid grid-cols-1 gap-6 mb-6">
+        <div class="table-card bg-cardDark p-4 rounded-lg">
+          <h3 class="text-lg mb-4">Income Details</h3>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-700">
+              <thead>
+                <tr>
+                  <th class="px-4 py-3 text-left">Date</th>
+                  <th class="px-4 py-3 text-left">Project</th>
+                  <th class="px-4 py-3 text-left">Type</th>
+                  <th class="px-4 py-3 text-left">Description</th>
+                  <th class="px-4 py-3 text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-700">
+                <tr v-for="income in incomes" :key="income.id">
+                  <td class="px-4 py-3">{{ formatDate(income.date) }}</td>
+                  <td class="px-4 py-3">{{ getProjectName(income.project) }}</td>
+                  <td class="px-4 py-3">{{ formatType(income.type) }}</td>
+                  <td class="px-4 py-3" v-html="income.description"></td>
+                  <td class="px-4 py-3 text-right">{{ formatCurrency(income.amount) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="table-card bg-cardDark p-4 rounded-lg">
+          <h3 class="text-lg mb-4">Expense Details</h3>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-700">
+              <thead>
+                <tr>
+                  <th class="px-4 py-3 text-left">Date</th>
+                  <th class="px-4 py-3 text-left">Project</th>
+                  <th class="px-4 py-3 text-left">Type</th>
+                  <th class="px-4 py-3 text-left">Description</th>
+                  <th class="px-4 py-3 text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-700">
+                <tr v-for="expense in expenses" :key="expense.id">
+                  <td class="px-4 py-3">{{ formatDate(expense.date) }}</td>
+                  <td class="px-4 py-3">{{ getProjectName(expense.project) }}</td>
+                  <td class="px-4 py-3">{{ formatType(expense.type) }}</td>
+                  <td class="px-4 py-3" v-html="expense.description"></td>
+                  <td class="px-4 py-3 text-right">{{ formatCurrency(expense.amount) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-center">
+        <button 
+          class="bg-primary hover:bg-primary/80 text-white rounded-md px-6 py-3 transition-colors"
+          @click="downloadReport"
+        >
+          Download Detailed Report
+        </button>
       </div>
     </div>
-    <div  v-else class="flex flex-col justify-center items-center p-12 border-dashed border-2 border-textLighter">
-      <a-empty></a-empty>
-      <p>Generate a report to see the financial information.</p>
+
+    <div v-else class="flex flex-col justify-center items-center p-12 border-dashed border-2 border-textLighter rounded-lg">
+      <a-empty />
+      <p class="mt-4 text-textLight">Generate a report to see the financial information.</p>
     </div>
   </div>
 </template>
 
+
 <script>
-import { ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import VueApexCharts from 'vue3-apexcharts';
+import axios from 'axios';
+import autoTable from 'jspdf-autotable';
 
 export default {
   components: {
     apexchart: VueApexCharts,
   },
+
   setup() {
     const startDate = ref('');
     const endDate = ref('');
+    const selectedProject = ref('all');
     const showReport = ref(false);
-    const revenue = ref(10000);
-    const expenses = ref(8000);
-    const profit = ref(revenue.value - expenses.value);
+    const loading = ref(false);
+    const incomes = ref([]);
+    const expenses = ref([]);
+    const projects = ref([]);
 
-    const chartOptions = {
+    // Fetch projects on mount
+    onMounted(async () => {
+      try {
+        const response = await axios.get('http://localhost:4500/api/v1/projects');
+        projects.value = response.data.data;
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+      }
+    });
+
+    // Computed values
+    const totalRevenue = computed(() => {
+      return incomes.value.reduce((sum, income) => sum + income.amount, 0);
+    });
+
+    const totalExpenses = computed(() => {
+      return expenses.value.reduce((sum, expense) => sum + expense.amount, 0);
+    });
+
+    const netProfit = computed(() => {
+      return totalRevenue.value - totalExpenses.value;
+    });
+
+    const profitMargin = computed(() => {
+      if (totalRevenue.value === 0) return 0;
+      return ((netProfit.value / totalRevenue.value) * 100).toFixed(2);
+    });
+
+    // Chart configurations
+    const timelineChartOptions = {
       chart: {
-        id: 'financial-chart',
-        toolbar: {
-          show: true,
-        },
-        zoom: {
-          enabled: true,
-        },
+        height: 350,
+        type: 'area',
+        stacked: false,
+        toolbar: { show: true },
+        zoom: { enabled: true }
       },
-      dataLabels: {
-        enabled: false,
-      },
-      stroke: {
-        curve: 'smooth',
-      },
+      dataLabels: { enabled: false },
+      stroke: { curve: 'smooth', width: 2 },
       xaxis: {
         type: 'datetime',
-        categories: [
-          '2023-01-01',
-          '2023-02-01',
-          '2023-03-01',
-          '2023-04-01',
-          '2023-05-01',
-          '2023-06-01',
-          '2023-07-01',
-          '2023-08-01',
-          '2023-09-01',
-          '2023-10-01',
-          '2023-11-01',
-          '2023-12-01',
-        ],
+        labels: { format: 'dd MMM yyyy' }
       },
+      yaxis: {
+        title: { text: 'Amount (MWK)' },
+        labels: {
+          formatter: (value) => `MK ${value.toLocaleString()}`
+        }
+      },
+      tooltip: {
+        x: {
+          format: 'dd MMM yyyy'
+        },
+        y: {
+          formatter: (value) => `MK ${value.toLocaleString()}`
+        }
+      },
+      colors: ['#00b894', '#ff7675'],
       fill: {
         type: 'gradient',
         gradient: {
           shadeIntensity: 1,
-          opacityFrom: 0.4,
-          opacityTo: 0.8,
-          stops: [0, 100],
-        },
+          opacityFrom: 0.7,
+          opacityTo: 0.3,
+          stops: [0, 100]
+        }
+      }
+    };
+
+    const timelineSeries = computed(() => {
+      const sortedDates = [...new Set([
+        ...incomes.value.map(i => i.date.split('T')[0]),
+        ...expenses.value.map(e => e.date.split('T')[0])
+      ])].sort();
+
+      const revenueData = sortedDates.map(date => {
+        const dayTotal = incomes.value
+          .filter(i => i.date.startsWith(date))
+          .reduce((sum, i) => sum + i.amount, 0);
+        return [new Date(date).getTime(), dayTotal];
+      });
+
+      const expenseData = sortedDates.map(date => {
+        const dayTotal = expenses.value
+          .filter(e => e.date.startsWith(date))
+          .reduce((sum, e) => sum + e.amount, 0);
+        return [new Date(date).getTime(), dayTotal];
+      });
+
+      return [
+        { name: 'Revenue', data: revenueData },
+        { name: 'Expenses', data: expenseData }
+      ];
+    });
+
+    const expenseChartOptions = {
+      chart: { type: 'pie' },
+      labels: ['Material', 'Labor', 'Equipment', 'Transport', 'Maintenance', 'Permit', 'Other'],
+      colors: ['#00b894', '#00cec9', '#0984e3', '#6c5ce7', '#fd79a8', '#fdcb6e', '#636e72'],
+      tooltip: {
+        y: {
+          formatter: (value) => `MK ${value.toLocaleString()}`
+        }
+      }
+    };
+
+    const expenseSeries = computed(() => {
+      const types = ['material', 'labour', 'equipment', 'transport', 'maintenance', 'permit', 'other'];
+      return types.map(type => 
+        expenses.value
+          .filter(e => e.type === type)
+          .reduce((sum, e) => sum + e.amount, 0)
+      );
+    });
+
+    const incomeChartOptions = {
+      chart: { type: 'pie' },
+      labels: ['Down Payment', 'Initial Payment', 'Milestone Payment', 'Final Payment', 'Other'],
+      colors: ['#00b894', '#00cec9', '#0984e3', '#6c5ce7', '#636e72'],
+      tooltip: {
+        y: {
+          formatter: (value) => `MK ${value.toLocaleString()}`
+        }
+      }
+    };
+
+    const incomeSeries = computed(() => {
+      const types = ['down_payment', 'initial_payment', 'milestone_payment', 'final_payment', 'other'];
+      return types.map(type => 
+        incomes.value
+          .filter(i => i.type === type)
+          .reduce((sum, i) => sum + i.amount, 0)
+      );
+    });
+
+    const trendChartOptions = {
+      chart: {
+        type: 'bar',
+        height: 350,
+        toolbar: { show: true }
+      },
+      plotOptions: {
+        bar: {
+          borderRadius: 4,
+          horizontal: false,
+        }
+      },
+      xaxis: {
+        type: 'category'
+      },
+      yaxis: {
+        title: { text: 'Amount (MWK)' },
+        labels: {
+          formatter: (value) => `MK ${value.toLocaleString()}`
+        }
       },
       colors: ['#00b894'],
+      tooltip: {
+        y: {
+          formatter: (value) => `MK ${value.toLocaleString()}`
+        }
+      }
     };
 
-    const chartSeries = [
-      {
-        name: 'Profit',
-        data: [
-          2000, 3000, 4000, 3500, 4500, 5000, 4800, 5200, 5000, 6000, 5800, 6500,
-        ],
-      },
-    ];
+    const trendSeries = computed(() => {
+      const monthlyData = {};
+      
+      incomes.value.forEach(income => {
+        const monthYear = new Date(income.date).toLocaleString('en-US', { month: 'short', year: 'numeric' });
+        monthlyData[monthYear] = monthlyData[monthYear] || { profit: 0 };
+        monthlyData[monthYear].profit += income.amount;
+      });
 
-    const generateReport = () => {
-      profit.value = revenue.value - expenses.value;
-      showReport.value = true;
+      expenses.value.forEach(expense => {
+        const monthYear = new Date(expense.date).toLocaleString('en-US', { month: 'short', year: 'numeric' });
+        monthlyData[monthYear] = monthlyData[monthYear] || { profit: 0 };
+        monthlyData[monthYear].profit -= expense.amount;
+      });
+
+      const sortedData = Object.entries(monthlyData)
+        .sort(([dateA], [dateB]) => new Date(dateA) - new Date(dateB))
+        .map(([month, data]) => ({
+          x: month,
+          y: data.profit
+        }));
+
+      return [{
+        name: 'Monthly Profit',
+        data: sortedData
+      }];
+    });
+
+    // Generate report
+    const generateReport = async () => {
+      try {
+        loading.value = true;
+        const params = {
+          startDate: startDate.value,
+          endDate: endDate.value,
+          ...(selectedProject.value !== 'all' && { project: selectedProject.value })
+        };
+
+        const [incomesRes, expensesRes] = await Promise.all([
+          axios.get('http://localhost:4500/api/v1/project-incomes', { params }),
+          axios.get('http://localhost:4500/api/v1/project-expenses', { params })
+        ]);
+
+        incomes.value = incomesRes.data.data;
+        expenses.value = expensesRes.data.data;
+        showReport.value = true;
+      } catch (error) {
+        console.error('Error generating report:', error);
+      } finally {
+        loading.value = false;
+      }
     };
 
+    // Download PDF report
     const downloadReport = () => {
       const doc = new jsPDF();
-      doc.text('Construction Progress Financial Report', 14, 20);
-      doc.autoTable({
-        startY: 30,
+      const pageWidth = doc.internal.pageSize.width;
+
+      // Title and Date Range
+      doc.setFontSize(20);
+      doc.text('Financial Report', pageWidth / 2, 15, { align: 'center' });
+      doc.setFontSize(12);
+      doc.text(`Period: ${formatDate(startDate.value)} to ${formatDate(endDate.value)}`, pageWidth / 2, 25, { align: 'center' });
+
+      // Project Info
+      const projectName = selectedProject.value === 'all' 
+        ? 'All Projects' 
+        : projects.value.find(p => p.id === selectedProject.value)?.projectName || 'Unknown Project';
+      doc.text(`Project: ${projectName}`, pageWidth / 2, 35, { align: 'center' });
+
+      // Financial Summary
+      doc.setFontSize(16);
+      doc.text('Financial Summary', 14, 50);
+      autoTable(doc, {
+        startY: 55,
         head: [['Item', 'Amount (MWK)']],
         body: [
-          ['Revenue', formatCurrency(revenue.value)],
-          ['Expenses', formatCurrency(expenses.value)],
-          ['Profit/Loss', formatCurrency(profit.value)],
+          ['Total Revenue', formatCurrency(totalRevenue.value)],
+          ['Total Expenses', formatCurrency(totalExpenses.value)],
+          ['Net Profit/Loss', formatCurrency(netProfit.value)],
+          ['Profit Margin', `${profitMargin.value}%`]
         ],
       });
-      doc.save(`construction-progress-report-${startDate.value}-${endDate.value}.pdf`);
+
+      // Income Details
+      doc.addPage();
+      doc.setFontSize(16);
+      doc.text('Income Details', 14, 15);
+      autoTable(doc, {
+        startY: 20,
+        head: [['Date', 'Project', 'Type', 'Description', 'Amount']],
+        body: incomes.value.map(income => [
+          formatDate(income.date),
+          getProjectName(income.project),
+          formatType(income.type),
+          income.description.replace(/<[^>]*>/g, ''),
+          formatCurrency(income.amount)
+        ]),
+      });
+
+      // Expense Details
+      doc.addPage();
+      doc.setFontSize(16);
+      doc.text('Expense Details', 14, 15);
+      autoTable(doc, {
+        startY: 20,
+        head: [['Date', 'Project', 'Type', 'Description', 'Amount']],
+        body: expenses.value.map(expense => [
+          formatDate(expense.date),
+          getProjectName(expense.project),
+          formatType(expense.type),
+          expense.description.replace(/<[^>]*>/g, ''),
+          formatCurrency(expense.amount)
+        ]),
+      });
+
+      // Save the PDF
+      doc.save(`financial-report-${startDate.value}-to-${endDate.value}.pdf`);
     };
 
+    // Utility functions
     const formatCurrency = (amount) => {
       return `MK ${amount.toLocaleString()}`;
+    };
+
+    const formatDate = (dateString) => {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    };
+
+    const formatType = (type) => {
+      return type.split('_').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+      ).join(' ');
+    };
+
+    const getProjectName = (projectId) => {
+      return projects.value.find(p => p.id === projectId)?.projectName || 'Unknown Project';
     };
 
     return {
       startDate,
       endDate,
+      selectedProject,
       showReport,
-      revenue,
+      loading,
+      incomes,
       expenses,
-      profit,
-      chartOptions,
-      chartSeries,
+      projects,
+      totalRevenue,
+      totalExpenses,
+      netProfit,
+      profitMargin,
+      timelineChartOptions,
+      timelineSeries,
+      expenseChartOptions,
+      expenseSeries,
+      incomeChartOptions,
+      incomeSeries,
+      trendChartOptions,
+      trendSeries,
       generateReport,
       downloadReport,
       formatCurrency,
+      formatDate,
+      formatType,
+      getProjectName,
     };
   },
 };
 </script>
-
-<style scoped>
-.progress-tracker {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #2d3436;
-  max-width: 1200px;
-  margin: auto;
-}
-
-.filters {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-bottom: 20px;
-}
-
-.filters input,
-.filters button {
-  padding: 8px 12px;
-  font-size: 14px;
-}
-
-.generate-btn,
-.download-btn {
-  background-color: #00b894;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s;
-}
-
-.generate-btn:hover,
-.download-btn:hover {
-  background-color: var(--primary);
-}
-
-.report-container {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  margin-top: 20px;
-}
-
-.chart-container,
-.table-container {
-  flex: 1;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.styled-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-}
-
-.styled-table th,
-.styled-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-
-.styled-table th {
-  background-color: var(--primary);
-  color: white;
-}
-
-.text-success {
-  color: green;
-  font-weight: bold;
-}
-
-.text-danger {
-  color: red;
-  font-weight: bold;
-}
-
-.empty-report {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 300px;
-  border-radius: 8px;
-  font-size: 16px;
-}
-</style>
