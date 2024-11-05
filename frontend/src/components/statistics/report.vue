@@ -1,3 +1,4 @@
+
 <template>
   <div class="progress-tracker card text-text p-6">
     <div class="filters bg-cardDark p-4 rounded-lg mb-6">
@@ -61,22 +62,22 @@
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div class="stat-card bg-cardDark p-4 rounded-lg">
           <h3 class="text-lg mb-2">Total Revenue</h3>
-          <p class="text-2xl font-bold text-primary">{{ formatCurrency(totalRevenue) }}</p>
+          <p class="text-2xl font-bold text-primary">{{ formatCurrency(filteredTotalRevenue) }}</p>
         </div>
         <div class="stat-card bg-cardDark p-4 rounded-lg">
           <h3 class="text-lg mb-2">Total Expenses</h3>
-          <p class="text-2xl font-bold text-red-500">{{ formatCurrency(totalExpenses) }}</p>
+          <p class="text-2xl font-bold text-red-500">{{ formatCurrency(filteredTotalExpenses) }}</p>
         </div>
         <div class="stat-card bg-cardDark p-4 rounded-lg">
           <h3 class="text-lg mb-2">Net Profit/Loss</h3>
-          <p class="text-2xl font-bold" :class="netProfit >= 0 ? 'text-green-500' : 'text-red-500'">
-            {{ formatCurrency(netProfit) }}
+          <p class="text-2xl font-bold" :class="filteredNetProfit >= 0 ? 'text-green-500' : 'text-red-500'">
+            {{ formatCurrency(filteredNetProfit) }}
           </p>
         </div>
         <div class="stat-card bg-cardDark p-4 rounded-lg">
           <h3 class="text-lg mb-2">Profit Margin</h3>
-          <p class="text-2xl font-bold" :class="profitMargin >= 0 ? 'text-green-500' : 'text-red-500'">
-            {{ profitMargin }}%
+          <p class="text-2xl font-bold" :class="filteredProfitMargin >= 0 ? 'text-green-500' : 'text-red-500'">
+            {{ filteredProfitMargin }}%
           </p>
         </div>
       </div>
@@ -90,7 +91,7 @@
             type="area"
             height="350"
             :options="timelineChartOptions"
-            :series="timelineSeries"
+            :series="filteredTimelineSeries"
           ></apexchart>
         </div>
 
@@ -101,7 +102,7 @@
             type="bar"
             height="350"
             :options="trendChartOptions"
-            :series="trendSeries"
+            :series="filteredTrendSeries"
           ></apexchart>
         </div>
 
@@ -112,7 +113,7 @@
             type="pie"
             height="350"
             :options="expenseChartOptions"
-            :series="expenseSeries"
+            :series="filteredExpenseSeries"
           ></apexchart>
         </div>
 
@@ -123,7 +124,7 @@
             type="pie"
             height="350"
             :options="incomeChartOptions"
-            :series="incomeSeries"
+            :series="filteredIncomeSeries"
           ></apexchart>
         </div>
       </div>
@@ -144,7 +145,7 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-700">
-                <tr v-for="income in incomes" :key="income.id">
+                <tr v-for="income in filteredIncomes" :key="income.id">
                   <td class="px-4 py-3">{{ formatDate(income.date) }}</td>
                   <td class="px-4 py-3">{{ getProjectName(income.project) }}</td>
                   <td class="px-4 py-3">{{ formatType(income.type) }}</td>
@@ -170,7 +171,7 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-700">
-                <tr v-for="expense in expenses" :key="expense.id">
+                <tr v-for="expense in filteredExpenses" :key="expense.id">
                   <td class="px-4 py-3">{{ formatDate(expense.date) }}</td>
                   <td class="px-4 py-3">{{ getProjectName(expense.project) }}</td>
                   <td class="px-4 py-3">{{ formatType(expense.type) }}</td>
@@ -200,7 +201,6 @@
   </div>
 </template>
 
-
 <script>
 import { ref, computed, onMounted } from 'vue';
 import jsPDF from 'jspdf';
@@ -224,32 +224,41 @@ export default {
     const expenses = ref([]);
     const projects = ref([]);
 
-    // Fetch projects on mount
-    onMounted(async () => {
-      try {
-        const response = await axios.get('http://localhost:4500/api/v1/projects');
-        projects.value = response.data.data;
-      } catch (error) {
-        console.error('Error fetching projects:', error);
-      }
+    // Filtered data computeds
+    const filteredIncomes = computed(() => {
+      return incomes.value.filter(income => {
+        const dateMatch = (!startDate.value || income.date >= startDate.value) &&
+                         (!endDate.value || income.date <= endDate.value);
+        const projectMatch = selectedProject.value === 'all' || income.project === selectedProject.value;
+        return dateMatch && projectMatch;
+      });
     });
 
-    // Computed values
-    const totalRevenue = computed(() => {
-      return incomes.value.reduce((sum, income) => sum + income.amount, 0);
+    const filteredExpenses = computed(() => {
+      return expenses.value.filter(expense => {
+        const dateMatch = (!startDate.value || expense.date >= startDate.value) &&
+                         (!endDate.value || expense.date <= endDate.value);
+        const projectMatch = selectedProject.value === 'all' || expense.project === selectedProject.value;
+        return dateMatch && projectMatch;
+      });
     });
 
-    const totalExpenses = computed(() => {
-      return expenses.value.reduce((sum, expense) => sum + expense.amount, 0);
+    // Computed metrics based on filtered data
+    const filteredTotalRevenue = computed(() => {
+      return filteredIncomes.value.reduce((sum, income) => sum + income.amount, 0);
     });
 
-    const netProfit = computed(() => {
-      return totalRevenue.value - totalExpenses.value;
+    const filteredTotalExpenses = computed(() => {
+      return filteredExpenses.value.reduce((sum, expense) => sum + expense.amount, 0);
     });
 
-    const profitMargin = computed(() => {
-      if (totalRevenue.value === 0) return 0;
-      return ((netProfit.value / totalRevenue.value) * 100).toFixed(2);
+    const filteredNetProfit = computed(() => {
+      return filteredTotalRevenue.value - filteredTotalExpenses.value;
+    });
+
+    const filteredProfitMargin = computed(() => {
+      if (filteredTotalRevenue.value === 0) return 0;
+      return ((filteredNetProfit.value / filteredTotalRevenue.value) * 100).toFixed(2);
     });
 
     // Chart configurations
@@ -293,21 +302,22 @@ export default {
       }
     };
 
-    const timelineSeries = computed(() => {
+    // Filtered timeline series
+    const filteredTimelineSeries = computed(() => {
       const sortedDates = [...new Set([
-        ...incomes.value.map(i => i.date.split('T')[0]),
-        ...expenses.value.map(e => e.date.split('T')[0])
+        ...filteredIncomes.value.map(i => i.date.split('T')[0]),
+        ...filteredExpenses.value.map(e => e.date.split('T')[0])
       ])].sort();
 
       const revenueData = sortedDates.map(date => {
-        const dayTotal = incomes.value
+        const dayTotal = filteredIncomes.value
           .filter(i => i.date.startsWith(date))
           .reduce((sum, i) => sum + i.amount, 0);
         return [new Date(date).getTime(), dayTotal];
       });
 
       const expenseData = sortedDates.map(date => {
-        const dayTotal = expenses.value
+        const dayTotal = filteredExpenses.value
           .filter(e => e.date.startsWith(date))
           .reduce((sum, e) => sum + e.amount, 0);
         return [new Date(date).getTime(), dayTotal];
@@ -330,10 +340,10 @@ export default {
       }
     };
 
-    const expenseSeries = computed(() => {
+    const filteredExpenseSeries = computed(() => {
       const types = ['material', 'labour', 'equipment', 'transport', 'maintenance', 'permit', 'other'];
       return types.map(type => 
-        expenses.value
+        filteredExpenses.value
           .filter(e => e.type === type)
           .reduce((sum, e) => sum + e.amount, 0)
       );
@@ -350,10 +360,10 @@ export default {
       }
     };
 
-    const incomeSeries = computed(() => {
+    const filteredIncomeSeries = computed(() => {
       const types = ['down_payment', 'initial_payment', 'milestone_payment', 'final_payment', 'other'];
       return types.map(type => 
-        incomes.value
+        filteredIncomes.value
           .filter(i => i.type === type)
           .reduce((sum, i) => sum + i.amount, 0)
       );
@@ -388,16 +398,16 @@ export default {
       }
     };
 
-    const trendSeries = computed(() => {
+    const filteredTrendSeries = computed(() => {
       const monthlyData = {};
       
-      incomes.value.forEach(income => {
+      filteredIncomes.value.forEach(income => {
         const monthYear = new Date(income.date).toLocaleString('en-US', { month: 'short', year: 'numeric' });
         monthlyData[monthYear] = monthlyData[monthYear] || { profit: 0 };
         monthlyData[monthYear].profit += income.amount;
       });
 
-      expenses.value.forEach(expense => {
+      filteredExpenses.value.forEach(expense => {
         const monthYear = new Date(expense.date).toLocaleString('en-US', { month: 'short', year: 'numeric' });
         monthlyData[monthYear] = monthlyData[monthYear] || { profit: 0 };
         monthlyData[monthYear].profit -= expense.amount;
@@ -416,6 +426,16 @@ export default {
       }];
     });
 
+    // Fetch projects on mount
+    onMounted(async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/v1/projects`);
+        projects.value = response.data.data;
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+      }
+    });
+
     // Generate report
     const generateReport = async () => {
       try {
@@ -427,8 +447,8 @@ export default {
         };
 
         const [incomesRes, expensesRes] = await Promise.all([
-          axios.get('http://localhost:4500/api/v1/project-incomes', { params }),
-          axios.get('http://localhost:4500/api/v1/project-expenses', { params })
+          axios.get(`${import.meta.env.VITE_APP_API_URL}/api/v1/project-incomes`, { params }),
+          axios.get(`${import.meta.env.VITE_APP_API_URL}/api/v1/project-expenses`, { params })
         ]);
 
         incomes.value = incomesRes.data.data;
@@ -465,10 +485,10 @@ export default {
         startY: 55,
         head: [['Item', 'Amount (MWK)']],
         body: [
-          ['Total Revenue', formatCurrency(totalRevenue.value)],
-          ['Total Expenses', formatCurrency(totalExpenses.value)],
-          ['Net Profit/Loss', formatCurrency(netProfit.value)],
-          ['Profit Margin', `${profitMargin.value}%`]
+          ['Total Revenue', formatCurrency(filteredTotalRevenue.value)],
+          ['Total Expenses', formatCurrency(filteredTotalExpenses.value)],
+          ['Net Profit/Loss', formatCurrency(filteredNetProfit.value)],
+          ['Profit Margin', `${filteredProfitMargin.value}%`]
         ],
       });
 
@@ -479,7 +499,7 @@ export default {
       autoTable(doc, {
         startY: 20,
         head: [['Date', 'Project', 'Type', 'Description', 'Amount']],
-        body: incomes.value.map(income => [
+        body: filteredIncomes.value.map(income => [
           formatDate(income.date),
           getProjectName(income.project),
           formatType(income.type),
@@ -495,7 +515,7 @@ export default {
       autoTable(doc, {
         startY: 20,
         head: [['Date', 'Project', 'Type', 'Description', 'Amount']],
-        body: expenses.value.map(expense => [
+        body: filteredExpenses.value.map(expense => [
           formatDate(expense.date),
           getProjectName(expense.project),
           formatType(expense.type),
@@ -537,21 +557,21 @@ export default {
       selectedProject,
       showReport,
       loading,
-      incomes,
-      expenses,
       projects,
-      totalRevenue,
-      totalExpenses,
-      netProfit,
-      profitMargin,
+      filteredTotalRevenue,
+      filteredTotalExpenses,
+      filteredNetProfit,
+      filteredProfitMargin,
       timelineChartOptions,
-      timelineSeries,
+      filteredTimelineSeries,
       expenseChartOptions,
-      expenseSeries,
+      filteredExpenseSeries,
       incomeChartOptions,
-      incomeSeries,
+      filteredIncomeSeries,
       trendChartOptions,
-      trendSeries,
+      filteredTrendSeries,
+      filteredIncomes,
+      filteredExpenses,
       generateReport,
       downloadReport,
       formatCurrency,
