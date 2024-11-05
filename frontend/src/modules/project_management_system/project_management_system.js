@@ -152,7 +152,7 @@ export const construction_tracking_system = [
           rowStart: 1,
           rowSpan: 1,
           colStart: 5,
-          colSpan: 1,
+          colSpan: 2,
           alignment: "top-right",
           actions: [
             { name: "goToView", icon: "pi pi-eye", label: "View" },
@@ -320,6 +320,10 @@ export const construction_tracking_system = [
           style: "position: absolute; top: 0.5rem; right: 0.5rem; z-index: 10;",
         },
       ],
+    },
+    pivot:{
+      field:"client",
+      value:'current_user_id',
     },
   },
   {

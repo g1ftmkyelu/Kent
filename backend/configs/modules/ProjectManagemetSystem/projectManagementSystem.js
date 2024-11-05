@@ -132,7 +132,6 @@ exports.construction_tracking_system = [
       columns: 8,
       fields: {
         projectName: { rowStart: 1, colStart: 1, rowSpan: 1, colSpan: 1 },
-        projectCode: { rowStart: 1, colStart: 2, rowSpan: 1, colSpan: 1 },
         startDate: { rowStart: 1, colStart: 3, rowSpan: 1, colSpan: 1 },
         expectedEndDate: { rowStart: 1, colStart: 4, rowSpan: 1, colSpan: 1 },
         location: { rowStart: 1, colStart: 5, rowSpan: 1, colSpan: 1 },

@@ -1372,7 +1372,7 @@ export default {
 
 <style scoped>
 .validation-error {
-  color: red;
+  color: red!important;
 }
 
 .me {
